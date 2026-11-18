@@ -1,0 +1,4 @@
+[submodule "mem-plugin"]
+	path = mem-plugin
+	url = https://github.com/Eternally72/mem-plugin.git
+	branch = main
