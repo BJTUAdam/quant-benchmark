@@ -1,0 +1,805 @@
+[
+  {
+    "schema_version": "finance_task_spec.v1",
+    "id": "HT01",
+    "title": "45股短周期趋势追踪",
+    "family_id": "F01",
+    "source_ids": [
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "short_horizon_trend",
+    "decision_object": "stock_trend_portfolio",
+    "required_decisions": [
+      "range_detection",
+      "entry_confirmation",
+      "exit_policy",
+      "reentry_policy",
+      "capital_allocation"
+    ],
+    "decision_dependencies": [
+      [
+        "range_detection",
+        "entry_confirmation"
+      ],
+      [
+        "entry_confirmation",
+        "exit_policy"
+      ],
+      [
+        "exit_policy",
+        "reentry_policy"
+      ],
+      [
+        "reentry_policy",
+        "capital_allocation"
+      ]
+    ],
+    "maintenance_targets": [
+      "structure_validity",
+      "signal_execution_gap",
+      "state_compatibility"
+    ],
+    "research_question": "从突破和趋势入手管理数日持仓并持续维护。",
+    "research_modules": [
+      {
+        "decision_id": "range_detection",
+        "description": "仅用已完成数据界定区间边界、有效期和更新规则",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "entry_confirmation",
+        "description": "选择确认依据、等待时机与可成交入场",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "exit_policy",
+        "description": "止盈、止损、持有时限和跟踪退出",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "reentry_policy",
+        "description": "失败或退出后的冷却、恢复与再入场",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "capital_allocation",
+        "description": "多个机会间分配资金和现金预算",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      }
+    ],
+    "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+    "environment_id": "stock_minute_v1",
+    "data_requirements": {
+      "profile_id": "stock_minute",
+      "symbols": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11",
+        "S12",
+        "S13",
+        "S14",
+        "S15",
+        "S16",
+        "S17",
+        "S18",
+        "S19",
+        "S20",
+        "S21",
+        "S22",
+        "S23",
+        "S24",
+        "S25",
+        "S26",
+        "S27",
+        "S28",
+        "S29",
+        "S30",
+        "S31",
+        "S32",
+        "S33",
+        "S34",
+        "S35",
+        "S36",
+        "S37",
+        "S38",
+        "S39",
+        "S40",
+        "S41",
+        "S42",
+        "S43",
+        "S44",
+        "S45"
+      ],
+      "date_start": null,
+      "date_end": null,
+      "minimum_years": 2,
+      "extra_fields": [],
+      "notes": [
+        "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+      ]
+    },
+    "parameter_space": [
+      {
+        "name": "historical_open_research_scope",
+        "type": "structured",
+        "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。"
+      }
+    ],
+    "novelty_claim": "历史对照，不能作为本次新生成数。",
+    "lineage": {
+      "derived_from": [],
+      "kind": "historical_reference"
+    },
+    "status": "historical_package_unrevalidated",
+    "source_path": "demo_packages/t01_short_trend_v1/TASK.md",
+    "review_notes": [
+      "原题已有突破、均线方向、量价/波动过滤、冷却、排序及仓位；不能把S01的细化直接宣称全新。",
+      "原题479交易日，研发144日，七段；匿名t不反推真实日期。"
+    ]
+  },
+  {
+    "schema_version": "finance_task_spec.v1",
+    "id": "HT02",
+    "title": "45股短周期超跌反转",
+    "family_id": "F02",
+    "source_ids": [
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "oversold_rebound",
+    "decision_object": "oversold_stock_portfolio",
+    "required_decisions": [
+      "reference_estimation",
+      "deviation_measurement",
+      "entry_confirmation",
+      "staged_inventory",
+      "exit_policy",
+      "capital_allocation"
+    ],
+    "decision_dependencies": [
+      [
+        "reference_estimation",
+        "deviation_measurement"
+      ],
+      [
+        "deviation_measurement",
+        "entry_confirmation"
+      ],
+      [
+        "entry_confirmation",
+        "staged_inventory"
+      ],
+      [
+        "staged_inventory",
+        "exit_policy"
+      ],
+      [
+        "exit_policy",
+        "capital_allocation"
+      ]
+    ],
+    "maintenance_targets": [
+      "reference_drift",
+      "reversion_failure",
+      "signal_execution_gap"
+    ],
+    "research_question": "研究短期超跌后的反弹机会及T+1退出。",
+    "research_modules": [
+      {
+        "decision_id": "reference_estimation",
+        "description": "估计当时可见的参考水平与更新方法",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "deviation_measurement",
+        "description": "偏离尺度、方向及波动标准化",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "entry_confirmation",
+        "description": "选择确认依据、等待时机与可成交入场",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "staged_inventory",
+        "description": "分批入场/退出及T+1库存管理",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "exit_policy",
+        "description": "止盈、止损、持有时限和跟踪退出",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "capital_allocation",
+        "description": "多个机会间分配资金和现金预算",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      }
+    ],
+    "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+    "environment_id": "stock_minute_v1",
+    "data_requirements": {
+      "profile_id": "stock_minute",
+      "symbols": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11",
+        "S12",
+        "S13",
+        "S14",
+        "S15",
+        "S16",
+        "S17",
+        "S18",
+        "S19",
+        "S20",
+        "S21",
+        "S22",
+        "S23",
+        "S24",
+        "S25",
+        "S26",
+        "S27",
+        "S28",
+        "S29",
+        "S30",
+        "S31",
+        "S32",
+        "S33",
+        "S34",
+        "S35",
+        "S36",
+        "S37",
+        "S38",
+        "S39",
+        "S40",
+        "S41",
+        "S42",
+        "S43",
+        "S44",
+        "S45"
+      ],
+      "date_start": null,
+      "date_end": null,
+      "minimum_years": 2,
+      "extra_fields": [],
+      "notes": [
+        "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+      ]
+    },
+    "parameter_space": [
+      {
+        "name": "historical_open_research_scope",
+        "type": "structured",
+        "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。"
+      }
+    ],
+    "novelty_claim": "历史对照，不能作为本次新生成数。",
+    "lineage": {
+      "derived_from": [],
+      "kind": "historical_reference"
+    },
+    "status": "historical_package_unrevalidated",
+    "source_path": "demo_packages/t02_short_reversal_v1/TASK.md",
+    "review_notes": [
+      "原题分离偏离与止跌确认，含量价/趋势筛选、分批、冷却和仓位；S03/S04需与此比较。",
+      "原题匿名日/分钟479日，真实日期未知。"
+    ]
+  },
+  {
+    "schema_version": "finance_task_spec.v1",
+    "id": "HT03",
+    "title": "国内B/M/Y大豆压榨价差",
+    "family_id": "F05",
+    "source_ids": [
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "crush_component_aggregation",
+    "decision_object": "crush_leg_portfolio",
+    "required_decisions": [
+      "hedge_estimation",
+      "signal_aggregation",
+      "month_selection",
+      "entry_exit",
+      "margin_budget",
+      "roll_policy",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "hedge_estimation",
+        "signal_aggregation"
+      ],
+      [
+        "signal_aggregation",
+        "month_selection"
+      ],
+      [
+        "month_selection",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "margin_budget"
+      ],
+      [
+        "margin_budget",
+        "roll_policy"
+      ],
+      [
+        "roll_policy",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "hedge_drift",
+      "margin_exposure",
+      "expiry_roll",
+      "state_compatibility"
+    ],
+    "research_question": "研究整体压榨关系、分项信号、实际多腿与资金占用。",
+    "research_modules": [
+      {
+        "decision_id": "hedge_estimation",
+        "description": "估计或设定对冲关系，处理计价单位和整数手数",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "signal_aggregation",
+        "description": "整体价差与分项信号的一致性及组合决策",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "month_selection",
+        "description": "按当时已知条件选择实际合约月份",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "entry_exit",
+        "description": "价差/残差参与、退出与持有时限",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "margin_budget",
+        "description": "按真实腿风险、费用与保证金分配手数",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "roll_policy",
+        "description": "到期前平旧开新、迁移旧仓并核算移仓成本",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "state_migration",
+        "description": "更新逻辑时迁移旧持仓和持久化状态",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      }
+    ],
+    "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+    "environment_id": "futures_daily_v1",
+    "data_requirements": {
+      "profile_id": "futures_daily",
+      "symbols": [
+        "B",
+        "M",
+        "Y"
+      ],
+      "date_start": null,
+      "date_end": null,
+      "minimum_years": 2,
+      "extra_fields": [],
+      "notes": [
+        "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+      ]
+    },
+    "parameter_space": [
+      {
+        "name": "historical_open_research_scope",
+        "type": "structured",
+        "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。"
+      }
+    ],
+    "novelty_claim": "历史对照，不能作为本次新生成数。",
+    "lineage": {
+      "derived_from": [],
+      "kind": "historical_reference"
+    },
+    "status": "historical_package_quality_pending",
+    "source_path": "demo_packages/a01_soy_crush_v1/TASK.md",
+    "review_notes": [
+      "真实合约及固定生产假设不可作为可调参数；S10与本题高度相邻。",
+      "结算、规则生效及历史到期等口径仍待复核。"
+    ]
+  },
+  {
+    "schema_version": "finance_task_spec.v1",
+    "id": "HT04",
+    "title": "国内SC/FU/LU原油燃料油相对价值",
+    "family_id": "F05",
+    "source_ids": [
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "multi_product_oil_relative_value",
+    "decision_object": "oil_leg_portfolio",
+    "required_decisions": [
+      "month_selection",
+      "hedge_estimation",
+      "signal_aggregation",
+      "entry_exit",
+      "relationship_monitoring",
+      "margin_budget",
+      "roll_policy",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "month_selection",
+        "hedge_estimation"
+      ],
+      [
+        "hedge_estimation",
+        "signal_aggregation"
+      ],
+      [
+        "signal_aggregation",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "relationship_monitoring"
+      ],
+      [
+        "relationship_monitoring",
+        "margin_budget"
+      ],
+      [
+        "margin_budget",
+        "roll_policy"
+      ],
+      [
+        "roll_policy",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "hedge_drift",
+      "margin_exposure",
+      "expiry_roll",
+      "state_compatibility"
+    ],
+    "research_question": "研究国内油品相对价格关系、真实合约腿和对冲模型。",
+    "research_modules": [
+      {
+        "decision_id": "month_selection",
+        "description": "按当时已知条件选择实际合约月份",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "hedge_estimation",
+        "description": "估计或设定对冲关系，处理计价单位和整数手数",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "signal_aggregation",
+        "description": "整体价差与分项信号的一致性及组合决策",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "entry_exit",
+        "description": "价差/残差参与、退出与持有时限",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "relationship_monitoring",
+        "description": "监控对冲关系失效，暂停与重新估计",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "margin_budget",
+        "description": "按真实腿风险、费用与保证金分配手数",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "roll_policy",
+        "description": "到期前平旧开新、迁移旧仓并核算移仓成本",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "state_migration",
+        "description": "更新逻辑时迁移旧持仓和持久化状态",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      }
+    ],
+    "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+    "environment_id": "futures_daily_v1",
+    "data_requirements": {
+      "profile_id": "futures_daily",
+      "symbols": [
+        "SC",
+        "FU",
+        "LU"
+      ],
+      "date_start": null,
+      "date_end": null,
+      "minimum_years": 2,
+      "extra_fields": [],
+      "notes": [
+        "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+      ]
+    },
+    "parameter_space": [
+      {
+        "name": "historical_open_research_scope",
+        "type": "structured",
+        "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。"
+      }
+    ],
+    "novelty_claim": "历史对照，不能作为本次新生成数。",
+    "lineage": {
+      "derived_from": [],
+      "kind": "historical_reference"
+    },
+    "status": "historical_package_quality_pending",
+    "source_path": "demo_packages/a03_domestic_oil_spread_v1/TASK.md",
+    "review_notes": [
+      "原题明确允许SC/FU、SC/LU、FU/LU、双腿或三腿、滚动对冲与状态切换；S09不能仅因少一条SC腿算新。",
+      "SC桶与FU/LU吨不可直接相减称炼化利润。"
+    ]
+  },
+  {
+    "schema_version": "finance_task_spec.v1",
+    "id": "HT05",
+    "title": "FG/SA玻璃纯碱统计价差",
+    "family_id": "F05",
+    "source_ids": [
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "glass_soda_residual",
+    "decision_object": "glass_soda_leg_portfolio",
+    "required_decisions": [
+      "month_selection",
+      "hedge_estimation",
+      "entry_exit",
+      "relationship_monitoring",
+      "margin_budget",
+      "roll_policy",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "month_selection",
+        "hedge_estimation"
+      ],
+      [
+        "hedge_estimation",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "relationship_monitoring"
+      ],
+      [
+        "relationship_monitoring",
+        "margin_budget"
+      ],
+      [
+        "margin_budget",
+        "roll_policy"
+      ],
+      [
+        "roll_policy",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "hedge_drift",
+      "margin_exposure",
+      "expiry_roll",
+      "state_compatibility"
+    ],
+    "research_question": "在允许关系失效前提下研究FG/SA统计对冲与头寸维护。",
+    "research_modules": [
+      {
+        "decision_id": "month_selection",
+        "description": "按当时已知条件选择实际合约月份",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "hedge_estimation",
+        "description": "估计或设定对冲关系，处理计价单位和整数手数",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "entry_exit",
+        "description": "价差/残差参与、退出与持有时限",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "relationship_monitoring",
+        "description": "监控对冲关系失效，暂停与重新估计",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "margin_budget",
+        "description": "按真实腿风险、费用与保证金分配手数",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "roll_policy",
+        "description": "到期前平旧开新、迁移旧仓并核算移仓成本",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "state_migration",
+        "description": "更新逻辑时迁移旧持仓和持久化状态",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      }
+    ],
+    "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+    "environment_id": "futures_daily_v1",
+    "data_requirements": {
+      "profile_id": "futures_daily",
+      "symbols": [
+        "FG",
+        "SA"
+      ],
+      "date_start": null,
+      "date_end": null,
+      "minimum_years": 2,
+      "extra_fields": [],
+      "notes": [
+        "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+      ]
+    },
+    "parameter_space": [
+      {
+        "name": "historical_open_research_scope",
+        "type": "structured",
+        "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。"
+      }
+    ],
+    "novelty_claim": "历史对照，不能作为本次新生成数。",
+    "lineage": {
+      "derived_from": [],
+      "kind": "historical_reference"
+    },
+    "status": "historical_package_quality_pending",
+    "source_path": "demo_packages/a04_glass_soda_v1/TASK.md",
+    "review_notes": [
+      "跨品种统计对冲，包含暂停/重估/恢复；不将生产用量强行当唯一手数。",
+      "S11的同品种跨期需要额外确认多月份重叠和生命周期字段。"
+    ]
+  },
+  {
+    "schema_version": "finance_task_spec.v1",
+    "id": "HT06",
+    "title": "中证500动态成分多因子组合草稿",
+    "family_id": "F03",
+    "source_ids": [
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "dynamic_constituent_multifactor",
+    "decision_object": "constituent_stock_portfolio",
+    "required_decisions": [
+      "constituent_eligibility",
+      "feature_definition",
+      "rank_aggregation",
+      "holding_buffer",
+      "turnover_budget",
+      "capital_allocation"
+    ],
+    "decision_dependencies": [
+      [
+        "constituent_eligibility",
+        "feature_definition"
+      ],
+      [
+        "feature_definition",
+        "rank_aggregation"
+      ],
+      [
+        "rank_aggregation",
+        "holding_buffer"
+      ],
+      [
+        "holding_buffer",
+        "turnover_budget"
+      ],
+      [
+        "turnover_budget",
+        "capital_allocation"
+      ]
+    ],
+    "maintenance_targets": [
+      "ranking_stability",
+      "cost_sensitivity",
+      "constituent_change",
+      "state_compatibility"
+    ],
+    "research_question": "从各时点有效中证500成分中选股并控制换手、风险和基准超额。",
+    "research_modules": [
+      {
+        "decision_id": "constituent_eligibility",
+        "description": "使用当时有效成分并处置调出持仓",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "feature_definition",
+        "description": "量价特征定义、方向与标准化",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "rank_aggregation",
+        "description": "跨股票得分合成、排名和候选排序",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "holding_buffer",
+        "description": "买入与继续持有门槛、排名缓冲和换仓条件",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "turnover_budget",
+        "description": "换手、成本及单次换仓预算",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      },
+      {
+        "decision_id": "capital_allocation",
+        "description": "多个机会间分配资金和现金预算",
+        "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+      }
+    ],
+    "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+    "environment_id": "stock_minute_v1",
+    "data_requirements": {
+      "profile_id": "stock_minute",
+      "symbols": [
+        "CSI500_PIT_UNIVERSE_REQUIRED"
+      ],
+      "date_start": null,
+      "date_end": null,
+      "minimum_years": 2,
+      "extra_fields": [
+        "historical_index_membership",
+        "benchmark_total_return"
+      ],
+      "notes": [
+        "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+      ]
+    },
+    "parameter_space": [
+      {
+        "name": "historical_open_research_scope",
+        "type": "structured",
+        "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。"
+      }
+    ],
+    "novelty_claim": "历史对照，不能作为本次新生成数。",
+    "lineage": {
+      "derived_from": [],
+      "kind": "historical_reference"
+    },
+    "status": "draft_data_missing",
+    "source_path": "demo_packages/c01_csi500_v1/TASK.md",
+    "review_notes": [
+      "动态历史成分与可比指数缺失，不可用当前45股冒充。",
+      "原稿日线接口；此catalog的stock_minute_v1仅代表可讨论收盘调用承载，未适配验收。",
+      "本草稿已包含量价因子、排名缓冲、状态调整和换手；S05即使换股票池也不自动独立。"
+    ]
+  }
+]

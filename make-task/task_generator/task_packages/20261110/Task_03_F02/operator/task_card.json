@@ -1,0 +1,313 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "区间参考漂移下的回归目标：目标更新、趋势否决与隔日退出的联动",
+  "family_id": "F02",
+  "source_ids": [
+    "SRC_STOCK_TRENDS",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "range_boundary_reversion",
+  "decision_object": "range_position_lifecycle",
+  "required_decisions": [
+    "range_detection",
+    "reference_estimation",
+    "deviation_measurement",
+    "trend_veto",
+    "overnight_inventory",
+    "exit_policy",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "range_detection",
+      "reference_estimation"
+    ],
+    [
+      "range_detection",
+      "trend_veto"
+    ],
+    [
+      "reference_estimation",
+      "deviation_measurement"
+    ],
+    [
+      "deviation_measurement",
+      "trend_veto"
+    ],
+    [
+      "trend_veto",
+      "reference_estimation"
+    ],
+    [
+      "trend_veto",
+      "overnight_inventory"
+    ],
+    [
+      "overnight_inventory",
+      "exit_policy"
+    ],
+    [
+      "deviation_measurement",
+      "exit_policy"
+    ],
+    [
+      "range_detection",
+      "state_migration"
+    ],
+    [
+      "reference_estimation",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "exit_policy"
+    ]
+  ],
+  "maintenance_targets": [
+    "reference_drift",
+    "reversion_failure",
+    "signal_execution_gap",
+    "state_compatibility"
+  ],
+  "research_question": "在区间回归策略中，持仓期间的中心和边界可能自行漂移。如何分辨价格真的回归与目标被动追价，并使目标更新、趋势否决、T+1隔日库存和持有期限共同决定旧仓退出？",
+  "research_modules": [
+    {
+      "decision_id": "range_detection",
+      "description": "研究区间有效期和边界重建，区分区间整体平移、区间宽度变化与真正突破；保存每次持仓建立时的区间版本，不能在持仓后重画历史边缘。",
+      "interaction": "区间输出影响reference_estimation与trend_veto；区间版本失效须先传state_migration处理旧仓，不能直接按新区间把旧仓视作新的入场机会。"
+    },
+    {
+      "decision_id": "reference_estimation",
+      "description": "研究回归目标在持仓期间固定、滚动更新或受限移动的方式，并区分价格向目标收敛与目标向价格移动；目标更新只使用已完成数据并保留前后版本。",
+      "interaction": "参考目标和更新幅度传deviation_measurement及state_migration；旧目标是否继续约束退出由明确迁移规则决定，不能通过追随价格移动目标而无限延长持有期。"
+    },
+    {
+      "decision_id": "deviation_measurement",
+      "description": "在每个参考版本中度量偏离和已实现收敛，分别记录相对创建目标与当前目标的距离，研究何种尺度足以区分真实回归与参考漂移。初次参与资格由当前区间边缘、可见偏离与趋势否决共同形成，研究相应阈值与确认口径；不得根据后续是否回归筛选入场事件。",
+      "interaction": "接收range_detection及reference_estimation，输出给trend_veto与exit_policy；两种距离不能混用不同信息窗口，迁移后仍保留原始观测和已发生的持有时长。"
+    },
+    {
+      "decision_id": "trend_veto",
+      "description": "研究偏离持续扩大时的趋势否决条件，并明确否决是否禁止新建仓、冻结目标更新或要求旧仓退出；不能仅通过把中心移向价格消除趋势证据。",
+      "interaction": "接收偏离和区间有效性，约束下一期reference_estimation及overnight_inventory；本事件的目标估计先完成、再判否决，否决对目标更新的限制从下一事件生效，避免同刻循环。"
+    },
+    {
+      "decision_id": "overnight_inventory",
+      "description": "研究T+1及下一开盘撮合下的隔日库存：当回归目标在不可卖期间被触及或趋势否决出现时，如何选择仍有效的退出指令及风险等待状态。",
+      "interaction": "接收trend_veto和目标版本；实际可卖数量及未完成退出传exit_policy，不能用日线high/low追溯假设盘中已成交，也不能将被锁定部分从风险统计中移除。"
+    },
+    {
+      "decision_id": "exit_policy",
+      "description": "研究收益实现、偏离回归、目标漂移上限和持有期限之间的退出决策；将价格回归与目标漂移分开报告，研究目标反复移动时是否继续等待。",
+      "interaction": "使用deviation_measurement、overnight_inventory和state_migration的一致版本输出退出；真实成交后才减少库存。未完成退出保持跨段待办，不因新参数生效而重新计时。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "在新阶段改变区间或参考估计时，研究旧仓采用何种目标版本、如何保留持有期限和未完成退出；给出不可换算时的保守处置及对账要求。",
+      "interaction": "接收range_detection和reference_estimation的版本变化，将旧目标与新目标的对应关系交给exit_policy；迁移不能覆盖创建时偏离、过去的否决或真实成交。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能出现中心缓慢漂移、区间平移、单边拖行或目标已触达但不可卖的情形。维护需要判断修改参考更新约束、否决边界或隔日退出逻辑，并保持创建目标、持有时钟和待退出库存连续；不能靠更换目标口径把历史未回归的仓位重新标为成功。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内股票，具体固定股票池和真实连续范围在数据绑定时明确；不依据未来成分筛选股票。",
+      "市场数据通过已绑定的Tushare桥接接口获得，不提供行情文件包。默认日线环境，不能由日线推断盘中委托排队位置。",
+      "daily成交价使用原始报价；adj_factor只可使用当前已可见版本，公司行为由平台处理，不能重复计算分红或使用最终复权因子回填过去。",
+      "至少连续两年并满足研发期加七段的有效交易日要求；实际分段、数据版本和公开虚拟范围在冻结后确定。",
+      "名称和代码保留真实值；公开日期只是虚拟顺序标签，不能据年份套用真实事件。"
+    ]
+  },
+  "parameter_space": [
+    "区间检测和重新建模条件",
+    "目标固定、滚动或受限移动的规则族",
+    "参考更新速度与每次移动上限的表达",
+    "相对创建目标和当前目标的偏离尺度",
+    "初次参与的偏离门槛、区间边缘条件与确认口径",
+    "真实收敛与参考漂移的分解方法",
+    "趋势否决证据及其生效顺序",
+    "隔日不可卖期间目标触达后的等待策略",
+    "持有期限和目标漂移上限的联动方式",
+    "多种退出触发的优先级及去重",
+    "跨段参考迁移和旧退出待办保留方法"
+  ],
+  "novelty_claim": "相邻题S03及TG-20261105-041404-75e2f7已有区间、参考、偏离、否决和退出。本候选要求显式区分创建目标与当前目标，并把目标移动、T+1隔日可卖性和不可重置的持有时钟共同作为研究取舍；state_migration承担目标版本承接而非装饰性记录。该聚焦与旧题仍有概念覆盖关系，未完成独立语义API复核，不声称已证明独立新母题。",
+  "lineage": {
+    "derived_from": [
+      "S03",
+      "HT02",
+      "TG-20261105-041404-75e2f7"
+    ],
+    "kind": "assistant_authored_research_candidate_not_claimed_independent"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-03",
+    "task_id": "TASK12-20261110-03",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

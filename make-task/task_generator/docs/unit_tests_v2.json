@@ -1,0 +1,243 @@
+{
+  "schema_version": "finlab.unit_tests.v2",
+  "release": "v2-integrated-task12-20261110",
+  "checked_at": "2026-11-10T11:13:46.286313+00:00",
+  "status": "passed",
+  "passed": true,
+  "tests": 308,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 156.797,
+  "failing_tests": [],
+  "execution": "all_shipped_modules_in_four_isolated_python_processes",
+  "module_results": [
+    {
+      "module": "test_api.py",
+      "tests": 27,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_approved_reuse.py",
+      "tests": 16,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_automatic_acceptance.py",
+      "tests": 13,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_batch_snapshot.py",
+      "tests": 13,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_core.py",
+      "tests": 12,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_delivery.py",
+      "tests": 8,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_delivery_integrity.py",
+      "tests": 11,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_delivery_roundtrip.py",
+      "tests": 6,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_disclosure.py",
+      "tests": 27,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_disclosure_regressions.py",
+      "tests": 8,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_engine_reference.py",
+      "tests": 6,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_finlab_v2.py",
+      "tests": 45,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_future_temporal.py",
+      "tests": 15,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_generation_context.py",
+      "tests": 9,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_machine_delivery.py",
+      "tests": 3,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_native_v2_tasks.py",
+      "tests": 8,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_preparation.py",
+      "tests": 18,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_public_task_handoff.py",
+      "tests": 7,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_runtime_resources.py",
+      "tests": 5,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_setup.py",
+      "tests": 12,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_strategy_docs.py",
+      "tests": 5,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_strategy_skill.py",
+      "tests": 16,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_symbol_scope.py",
+      "tests": 6,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_task_packages.py",
+      "tests": 3,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    },
+    {
+      "module": "test_workflow_api.py",
+      "tests": 9,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failing_tests": []
+    }
+  ],
+  "real_upstream_tested": false,
+  "docker_acceptance": "separate_actual_synthetic_runtime_reports"
+}

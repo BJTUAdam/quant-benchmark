@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "errors": [],
+  "warnings": [
+    "数据需求起止日期待确定，未绑定实际数据",
+    "仅完成规格检查：数据可得性、长程实际难度及管线执行均未验证"
+  ],
+  "spec_hash": "937347b6d4aa1cdbaaa5a221f41795374e46fe331794ca89116879749885c647",
+  "scope": "specification_only"
+}

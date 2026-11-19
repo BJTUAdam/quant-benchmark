@@ -1,0 +1,134 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "HT03",
+  "spec_hash": "22cdf9774d5b9d4f05e4a46b8a7a81ec2376f5c6cd3164ed5ddb1e265882d9f8",
+  "reviewed_at": "2026-11-05T04:21:00+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "核心问题与HT03重复：同为crush_component_aggregation/crush_leg_portfolio，决策与维护目标等价，仅重排依赖边、细化冲突裁决与迁移不沿用描述，未形成实质新的研究决策。",
+    "research_question中“豆油/豆粕相对豆粕等分项偏离”的表述含混（以豆粕相对自身），分项信号定义不清，需在批准前明确各分项的具体比较口径。"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "79ebf8730d7787c4e30d2d8e25da480ce6341fec8d090be88dc7ce89e175a91c",
+  "content_hash": "9e3ec7d403189bb5450a5a08c7d90128f1c9965ba2fafc42dc9f95cfa2354968",
+  "rationale": "候选的核心机制crush_component_aggregation与决策对象crush_leg_portfolio与HT03完全一致；两者均覆盖B/M/Y真实三腿、加工关系系数与整数手数估计、整体/分项信号聚合、逐腿撮合与部分成交、保证金预算及状态迁移，维护目标相同。候选的实质改动是把month_selection前置并让state_migration回指month_selection、显式要求整体/分项信号冲突裁决与降级规则、将roll_policy并入expiry_roll/state_migration。这些属于对旧题已宽泛允许的决策链的重排、依赖边细化与描述粒度调整：HT03的研究问题已允许分项信号与整体压榨关系联合管理，信号聚合的冲突处理落在其既有signal_aggregation职责范围内，迁移时旧腿与系数版本的对应也属于其state_migration维护对象，未引入新的研究决策对象或触发机制。故按duplicate处理，closest_task_id取HT03。其他F05任务机制与对象不同（油品相对价值、跨品种残差、FG/SA残差），F06任务为同品种期限结构，均不构成更近语义。",
+  "pending_bindings": [
+    "数据未绑定：虚拟起止与dataset_id为null，binding_status=not_bound，B/M/Y同时月份覆盖、合约乘数、保证金率、到期规则待绑定时确认。",
+    "运行资源未配置：resources=null、resource_status=requires_human_setup，需本人运行finlab setup选择CPU/内存/时限；草案中的CPU/内存建议不生效。",
+    "评分配置、正式分段边界与实际数据冻结需在管线接入阶段绑定，不构成本轮规格缺陷。"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "核心机制同为crush_component_aggregation，决策对象同为crush_leg_portfolio（B/M/Y加工链条的真实多腿）",
+        "必需决策覆盖month_selection、hedge_estimation、signal_aggregation、entry_exit、margin_budget、state_migration，且维护目标hedge_drift/margin_exposure/expiry_roll/state_compatibility一致",
+        "均要求真实分合约、整数手数、逐腿撮合、部分成交与残余敞口，并使用已完成收盘后可见信息"
+      ],
+      "task_id": "HT03",
+      "differences": [
+        "HT03依赖链为hedge_estimation→signal_aggregation→month_selection→entry_exit→margin_budget→roll_policy→state_migration，候选把month_selection前置并把state_migration回指month_selection、signal_aggregation放在hedge_estimation之后",
+        "候选将signal_aggregation的整体/分项冲突裁决与降级规则写成显式必需规则，并取消roll_policy、改由expiry_roll+state_migration承接到期迁移",
+        "候选强调迁移时系数版本与候选腿不得自动沿用"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05跨品种真实多腿组合，必需决策与维护目标大体覆盖月份选择、对冲估计、参与退出、保证金与状态迁移",
+        "均要求逐腿撮合与部分成交处置"
+      ],
+      "task_id": "HT04",
+      "differences": [
+        "机制为multi_product_oil_relative_value，对象为oil_leg_portfolio，标的与关系为SC/FU/LU油品相对价值，不是B/M/Y加工压榨关系与分项信号",
+        "不涉及大豆加工系数、豆油/豆粕分项信号冲突裁决；HT04含relationship_monitoring与roll_policy的独立决策链"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05真实多腿、逐腿撮合、保证金预算与状态迁移，维护目标一致",
+        "都关注关系漂移、到期移仓与残余敞口"
+      ],
+      "task_id": "TG-20261029-172301-36425d",
+      "differences": [
+        "机制为cross_product_residual、对象为cross_product_leg_portfolio，聚焦FU/LU两品种统计残差与暂停重估",
+        "候选为三品种B/M/Y加工关系与分项信号冲突裁决，不使用跨品种残差对冲的两腿框架；候选信号合成涉及整体/分项一致性，而该题以关系失效监控为核心"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05真实多腿、月份选择、对冲估计、保证金预算、状态迁移与state_migration回指month_selection",
+        "都要求逐腿撮合、部分成交与残余敞口处置"
+      ],
+      "task_id": "TG-20261105-041820-c67182",
+      "differences": [
+        "机制为cross_product_residual、对象为cross_product_leg_portfolio，研究两品种滚动对冲残差与关系失效重估闭环",
+        "候选为crush_component_aggregation三腿加工关系，核心是整体加工价差与分项信号冲突裁决；不设relationship_monitoring→hedge_estimation的重估闭环，而以系数版本更新与分项可比性复核替代"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05真实多腿、月份选择、对冲估计、参与退出、保证金与状态迁移",
+        "都含关系/系数漂移与到期移仓维护"
+      ],
+      "task_id": "HT05",
+      "differences": [
+        "机制glass_soda_residual、对象glass_soda_leg_portfolio，指定FG/SA两品种统计对冲",
+        "候选为B/M/Y加工压榨关系与分项信号聚合，非FG/SA跨品种残差对冲"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05/F06真实分合约、整数手数、保证金预算、状态迁移与到期换腿",
+        "均要求逐腿撮合与残余敞口"
+      ],
+      "task_id": "TG-20261029-185356-d4e28b",
+      "differences": [
+        "机制calendar_spread_pairing、对象calendar_pair_inventory，研究同品种两个到期月份的期限配对与移仓",
+        "候选为跨品种B/M/Y加工关系与分项信号冲突裁决，决策对象为crush_leg_portfolio而非日历价差配对库存"
+      ]
+    },
+    {
+      "similarities": [
+        "同为真实分合约、整数手数、保证金预算与到期迁移",
+        "均涉及候选合约集合的选择"
+      ],
+      "task_id": "TG-20261029-172301-684a8d",
+      "differences": [
+        "机制calendar_spread_pairing、对象calendar_pair_inventory，核心是同品种近远月价差配对与移仓",
+        "候选核心为跨品种加工关系估计与整体/分项信号冲突裁决，不涉及同品种月份价差配对"
+      ]
+    },
+    {
+      "similarities": [
+        "同为真实分合约、整数手数配对、保证金预算与到期状态迁移"
+      ],
+      "task_id": "TG-20261029-185226-a83ad1",
+      "differences": [
+        "机制calendar_spread_pairing，核心是期限单位归一与同品种两腿配对",
+        "候选为加工关系下B/M/Y三腿系数估计与分项信号聚合，非同品种期限可比价差"
+      ]
+    },
+    {
+      "similarities": [
+        "同为真实多腿、预算与整数手数、到期迁移与状态连续"
+      ],
+      "task_id": "TG-20261029-185538-ab9792",
+      "differences": [
+        "机制calendar_spread_pairing，核心为近腿流动性衰减下的配对重选与规模自适应",
+        "候选为加工压榨关系与分项信号冲突裁决，不涉及同品种跨期价差的可信度衰减监控"
+      ]
+    },
+    {
+      "similarities": [
+        "同为真实分合约、多月份选择、整数手数与到期迁移、状态回指"
+      ],
+      "task_id": "TG-20261105-041844-918b61",
+      "differences": [
+        "机制term_curve_rotation，核心为多月份期限曲线斜率生成信号并动态配对",
+        "候选为B/M/Y加工压榨关系与整体/分项信号裁决，不涉及期限曲线斜率信号"
+      ]
+    }
+  ]
+}

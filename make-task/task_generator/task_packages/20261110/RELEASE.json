@@ -1,0 +1,8 @@
+{
+  "release": "v2-integrated-task12-20261110",
+  "packages": 12,
+  "fixes_merged": true,
+  "patch_application_required": false,
+  "images_rebuilt": false,
+  "images_pinned": true
+}

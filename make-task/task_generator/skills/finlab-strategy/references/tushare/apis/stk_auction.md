@@ -1,0 +1,69 @@
+# stk_auction · 当日集合竞价
+
+来源：https://tushare.pro/document/2?doc_id=369
+
+> 来源为官方公开文档的离线正文；表格、限额、权限说明与示例保留。
+> 官方示例中的行情值、日期和输出仅为接口说明，不是本任务数据、答案或平台实测。
+> 本系统策略应使用 `from finlab import tushare as ts` 或 `ctx.query`。不要直接调用官方上游、设置真实Tushare令牌或照搬示例日期。
+> 文档列出接口不表示当前任务已授权、已冻结或具备历史可见性；以当前任务契约为准。
+
+## 官方正文
+
+## 当日集合竞价
+
+接口：stk_auction
+描述：获取当日个股和ETF的集合竞价成交情况，每天9点26~29分之间可以获取当日的集合竞价成交数据。本接口历史数据开始于2025年1月16日。
+限量：单次最大返回8000行数据，可根据日期或代码循环获取历史
+权限：本接口数据需单独开通权限，请参考[权限列表](https://tushare.pro/document/1?doc_id=290)，前往[权限中心](https://tushare.pro/weborder/#/permission)申请（需勾选“集合竞价成交”）。
+
+注：stk_limit中的etf数据已拆分到新的接口etf_limit ../apis/etf_limit.md
+stk_auction中的etf数据已拆分到新的接口 etf_auction ../apis/etf_auction.md
+
+输入参数
+
+| 名称 | 类型 | 必选 | 描述 |
+| --- | --- | --- | --- |
+| ts_code | str | N | 股票代码 |
+| trade_date | str | N | 交易日期（YYYYMMDD格式，下同) |
+| start_date | str | N | 开始日期 |
+| end_date | str | N | 结束日期 |
+
+输出参数
+
+| 名称 | 类型 | 默认显示 | 描述 |
+| --- | --- | --- | --- |
+| ts_code | str | Y | 股票代码 |
+| trade_date | str | Y | 数据日期 |
+| vol | int | Y | 成交量（股） |
+| price | int | Y | 成交均价（元） |
+| amount | float | Y | 成交金额（元） |
+| pre_close | float | Y | 昨收价（元） |
+| turnover_rate | float | Y | 换手率（%） |
+| volume_ratio | float | Y | 量比 |
+| float_share | float | Y | 流通股本（万股） |
+
+接口示例
+
+```text
+#获取2025年2月18日开盘集合竞价成交情况
+df = pro.stk_auction(trade_date='20250218',fields='ts_code, trade_date,vol,price,amount,turnover_rate,volume_ratio')
+
+```
+
+数据示例
+
+```text
+        ts_code trade_date     vol    price      amount  turnover_rate  volume_ratio
+0     600071.SH   20250218    8700   23.240   202188.00       0.003090      0.150628
+1     300053.SZ   20250218   53300   13.750   732875.00       0.008388      0.230996
+2     159558.SZ   20250218   18700    1.211    22645.70            NaN           NaN
+3     600879.SH   20250218  195900    9.190  1800320.00       0.005938      0.373839
+4     159707.SZ   20250218  160800    0.628   100982.00            NaN           NaN
+...         ...        ...     ...      ...         ...            ...           ...
+6507  300616.SZ   20250218  142700   14.370  2050600.00       0.091494      1.184760
+6508  836957.BJ   20250218     300   12.310     3693.00       0.000702      0.012952
+6509  123039.SZ   20250218      20  119.777     2395.54            NaN           NaN
+6510  603655.SH   20250218    1400   23.390    32746.00       0.001321      0.107119
+6511  300949.SZ   20250218   25600   41.210  1054980.00       0.042667      0.830128
+
+```

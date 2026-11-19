@@ -1,0 +1,320 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "趋势回撤的参考版本与库存层：口径更新后的退出归因和持仓承接",
+  "family_id": "F01",
+  "source_ids": [
+    "SRC_STOCK_TRENDS",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "trend_pullback",
+  "decision_object": "trend_pullback_inventory",
+  "required_decisions": [
+    "reference_estimation",
+    "trend_qualification",
+    "pullback_location",
+    "staged_inventory",
+    "exit_policy",
+    "state_migration",
+    "capital_allocation"
+  ],
+  "decision_dependencies": [
+    [
+      "reference_estimation",
+      "trend_qualification"
+    ],
+    [
+      "reference_estimation",
+      "pullback_location"
+    ],
+    [
+      "trend_qualification",
+      "pullback_location"
+    ],
+    [
+      "pullback_location",
+      "staged_inventory"
+    ],
+    [
+      "reference_estimation",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "trend_qualification"
+    ],
+    [
+      "state_migration",
+      "staged_inventory"
+    ],
+    [
+      "state_migration",
+      "exit_policy"
+    ],
+    [
+      "trend_qualification",
+      "exit_policy"
+    ],
+    [
+      "staged_inventory",
+      "exit_policy"
+    ],
+    [
+      "staged_inventory",
+      "capital_allocation"
+    ],
+    [
+      "exit_policy",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "staged_inventory"
+    ]
+  ],
+  "maintenance_targets": [
+    "reference_drift",
+    "structure_validity",
+    "state_compatibility",
+    "signal_execution_gap"
+  ],
+  "research_question": "当趋势参考与波动尺度在长程运行中更新时，如何使回撤机会识别、旧库存的建仓理由及新旧参考下的退出判定保持一致，避免仅因重新标度产生重复建仓或伪造失效？",
+  "research_modules": [
+    {
+      "decision_id": "reference_estimation",
+      "description": "研究趋势参考水平和风险尺度如何随已完成数据更新，并为每次参考更新分配版本；比较旧持仓沿用创建时参考、统一切换新参考或分阶段迁移的研究方案。",
+      "interaction": "参考版本传给trend_qualification、pullback_location和state_migration。不同版本须使用共同的当时信息约束；不得用后来的参考值回写过去的趋势资格或建仓理由。"
+    },
+    {
+      "decision_id": "trend_qualification",
+      "description": "在当前参考版本下判定趋势是否继续适用，并区分价格结构被否定与仅参考尺度改变；研究参考更新造成资格变化时是否对已有库存与新机会采用一致口径。",
+      "interaction": "接收reference_estimation，输出给pullback_location和exit_policy；旧层是否失效须结合state_migration的映射结果，不把参考重标度自动当成市场趋势反转。"
+    },
+    {
+      "decision_id": "pullback_location",
+      "description": "研究回撤深度、持续时间和结束证据在参考尺度变化前后的可比表达；同一价格路径不能只因更换标准化窗口被重复识别为新的独立回撤。",
+      "interaction": "趋势资格和参考版本决定回撤坐标；输出候选批次给staged_inventory。新旧回撤是否属于同一事件由state_migration持有的历史归属约束。"
+    },
+    {
+      "decision_id": "staged_inventory",
+      "description": "按实际建仓批次记录创建时参考版本、成本、可卖状态及建仓理由，研究新回撤能否增加库存、如何限制旧层与新层的重叠；总量必须与平台真实持仓和成交回报一致。",
+      "interaction": "接收pullback_location与state_migration，输出当前可处置层给exit_policy；剩余旧层占用约束capital_allocation，不能通过修改memory把旧仓归零或让锁定库存立即可卖。"
+    },
+    {
+      "decision_id": "exit_policy",
+      "description": "研究退出触发应来自创建时假设失效、当前趋势否定还是预先定义的持有期限，并明确多原因同时触发时的优先级、去重和批次清退选择。",
+      "interaction": "接收trend_qualification、staged_inventory和state_migration；退出结果只在真实成交确认后改变capital_allocation的可用现金及下一期库存，不根据模型层记账假设已经卖出。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "研究跨段修改参考估计方式时，如何将旧参考和旧库存映射到新口径，同时保留不可重算的创建时事实和退出待办；若不能可靠换算，需给出继续沿用旧版本或明确退出的规则。",
+      "interaction": "承接reference_estimation的版本变化，将映射结果送trend_qualification、staged_inventory和exit_policy；迁移在下一阶段初始化后先完成对账，再允许新回撤建仓，避免同一次更新反复触发买卖。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在仍受旧参考约束的库存和新参考下的回撤机会之间研究风险额度分配；比较以实际持仓、按层风险或待退出占用衡量可追加量，明确未成交部分的预算归属。",
+      "interaction": "旧层及退出待办来自staged_inventory和exit_policy；预算输出约束下一期staged_inventory建仓规模，不能通过降低新参考波动值无条件释放已有旧层风险。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能发生参考水平漂移、波动尺度骤变及长期持仓跨越多个参考版本。维护需要判断调整参考估计、限制新旧层重叠或改变迁移方法；任何修改都必须承接旧成本、可卖状态与退出待办。研究记录应区分行情变化引发的决策差异和口径更新引发的差异，不能用重新回测后的历史标签替代实际轨迹。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内股票，具体固定股票池和真实连续范围在数据绑定时明确；不依据未来成分筛选股票。",
+      "市场数据通过已绑定的Tushare桥接接口获得，不提供行情文件包。默认日线环境，不能由日线推断盘中委托排队位置。",
+      "daily成交价使用原始报价；adj_factor只可使用当前已可见版本，公司行为由平台处理，不能重复计算分红或使用最终复权因子回填过去。",
+      "至少连续两年并满足研发期加七段的有效交易日要求；实际分段、数据版本和公开虚拟范围在冻结后确定。",
+      "名称和代码保留真实值；公开日期只是虚拟顺序标签，不能据年份套用真实事件。"
+    ]
+  },
+  "parameter_space": [
+    "趋势参考的估计族与更新频率",
+    "风险尺度估计的窗口与异常值处理",
+    "参考版本生效时点和最短使用长度",
+    "新旧参考之间的可比映射方式",
+    "回撤事件重复识别的合并条件",
+    "按批次或按整体表达风险额度的方法",
+    "旧层与新层同时存在时的追加限制",
+    "建仓假设失效与当前趋势否定的退出优先级",
+    "迁移失败时的保留或退出条件",
+    "退出待办的跨段对账与重试策略"
+  ],
+  "novelty_claim": "与S02及TG-20261029-185109-ad8725相邻，二者已覆盖趋势回撤库存与状态迁移。本候选把参考估计版本作为必要研究对象，要求创建时参考、当前参考、回撤事件归属和库存层退出的可比关系；不是仅增加一个参考指标。新增结构关系仍可能是旧题的较具体实现，保持独立性未确认状态，不以结构差异宣称已经去除全部语义重复。",
+  "lineage": {
+    "derived_from": [
+      "S02",
+      "HT01",
+      "TG-20261029-185109-ad8725"
+    ],
+    "kind": "assistant_authored_research_candidate_not_claimed_independent"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-02",
+    "task_id": "TASK12-20261110-02",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

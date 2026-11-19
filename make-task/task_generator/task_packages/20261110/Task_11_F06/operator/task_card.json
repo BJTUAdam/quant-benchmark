@@ -1,0 +1,293 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "跨期库存的撤退可行性：流动性枯竭、分腿减仓与到期接续",
+  "family_id": "F06",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "calendar_spread_pairing",
+  "decision_object": "calendar_pair_inventory",
+  "required_decisions": [
+    "pair_selection",
+    "liquidity_filter",
+    "entry_exit",
+    "staged_inventory",
+    "margin_budget",
+    "failure_exit",
+    "roll_policy",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "liquidity_filter",
+      "pair_selection"
+    ],
+    [
+      "pair_selection",
+      "entry_exit"
+    ],
+    [
+      "entry_exit",
+      "staged_inventory"
+    ],
+    [
+      "staged_inventory",
+      "margin_budget"
+    ],
+    [
+      "margin_budget",
+      "entry_exit"
+    ],
+    [
+      "liquidity_filter",
+      "failure_exit"
+    ],
+    [
+      "failure_exit",
+      "staged_inventory"
+    ],
+    [
+      "staged_inventory",
+      "roll_policy"
+    ],
+    [
+      "roll_policy",
+      "pair_selection"
+    ],
+    [
+      "roll_policy",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "staged_inventory"
+    ]
+  ],
+  "maintenance_targets": [
+    "signal_execution_gap",
+    "expiry_roll",
+    "margin_exposure",
+    "cost_sensitivity",
+    "state_compatibility"
+  ],
+  "research_question": "FG或M近远月价差进入后，若远月流动性下降或近月即将退出可交易集合，如何把可撤退容量作为配对资格和建仓规模的前置约束，并在分腿减仓、移仓或停用之间选择能承接实际库存的路径？不能只研究一条理想价差曲线的均值回归。",
+  "research_modules": [
+    {
+      "decision_id": "pair_selection",
+      "description": "从同一品种真实合约中选择近远月组合，除当前可交易外，还需定义当时可估计的撤退资格，不能用未来成交量倒推最佳配对。",
+      "interaction": "流动性和预算会限制可选合约对；选择目标对时要考虑已有真实库存，不能每次重选后假定旧对瞬间消失。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "基于已完成日线成交量、持仓量及已绑定交易状态分别评估两腿参与容量、缺失证据和流动性退化。",
+      "interaction": "筛选结果既影响新配对资格，也可能触发旧仓失效处置；旧仓不能因不再入选而从风险预算里删除。"
+    },
+    {
+      "decision_id": "entry_exit",
+      "description": "将价差参与条件与撤退容量共同决定目标手数、持有时限及禁止加仓情形。",
+      "interaction": "目标进入分批库存队列，真实成交和占用反馈会重新约束下一轮目标；价差信号仍好但撤退容量不足时可维持、减仓或等待，须给出明确规则。"
+    },
+    {
+      "decision_id": "staged_inventory",
+      "description": "显式维护旧近月、旧远月及待建新月份的手数和挂单；规定分腿减仓、补对冲与撤单的优先次序。",
+      "interaction": "每次部分成交后重算剩余敞口和预算，不能把价差订单视作原子成交；失效退出与换月动作共享同一队列，不重复下达相反命令。"
+    },
+    {
+      "decision_id": "margin_budget",
+      "description": "在旧仓清理、新仓建立和未完成订单之间分配真实腿预算，同时对过渡阶段的缺腿风险保留约束。",
+      "interaction": "预算决定是否允许边退出边建新对；不能以同品种跨期关系推断交易所保证金优惠，除非运行契约明确支持。"
+    },
+    {
+      "decision_id": "failure_exit",
+      "description": "区分统计关系失效、撤退容量失效和到期资格失效，给出同时发生时的可解释处理优先级。",
+      "interaction": "先处理不可继续持有的合约风险，再考虑信号层重入；失败退出进入同一库存队列，并影响后续是否还允许选择同一月份。"
+    },
+    {
+      "decision_id": "roll_policy",
+      "description": "设计到期前停止新建、分批平旧、转向替代合约对或暂停的路径，允许不移仓但必须处置到期风险。",
+      "interaction": "换月路径由真实库存和预算决定，不先拼接连续价差再假定账户完成移仓。换月失败时保留剩余状态供下一事件处理。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "段间调参或改逻辑时，迁移已经部分退出的配对状态、失效标签和撤退队列；说明哪些阈值使用新版本、哪些订单先按旧意图清理。",
+      "interaction": "迁移先读取真实持仓与挂单，再重建待办，不能把版本切换当成一次平仓或重置初始资金；新队列仍受分腿执行和预算检查。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能揭示流动性指标高估撤退容量、退出先后顺序反而扩大缺腿风险、换月缓冲过短或版本迁移重复生成订单。维护要依据已经披露的执行差异调整资格、容量和队列规则；实际余额、各月份持仓、挂单和memory连续，未完成清理不得从结果中消失。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "FG",
+      "M"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内真实分合约；品种代码是待绑定合约池，实际合约月份、交易所、到期规则和覆盖范围由平台绑定，不用主力连续价格替代可交易合约。",
+      "行情经Tushare桥接查询，不交付行情文件包。真实时间范围、冻结版本及阶段边界尚未绑定；公开时间只为虚拟事件顺序，不依据虚拟年份套用现实事件。",
+      "仅登记fut_daily与fut_basic可提供字段；计算出的价差、残差、流动性度量及影子归属记录由策略在当前已可见信息上构造，不作为上游新字段。",
+      "平台须绑定合约乘数、报价单位、交易时段、结算价、逐日价格限制、保证金和费用。当前引擎不支持的按手收费或差异平今费不得静默设0；规则未齐不能正式运行。",
+      "多腿订单逐腿撮合，可能部分成交、撤单失败或产生临时净敞口；不得依赖原子组合成交、跨腿保证金优惠或未绑定的跨品种转换系数。",
+      "来源仅使用已登记来源卡的主题和目录启发；本题研究问题由本轮助手设计，未引用或读取未提供的全书内容，不是书中现成策略。",
+      "策略的订单/成交通知仅更新JSON memory中的归属、占用及剩余意图；新增订单和撤单只在平台允许的on_bars回调发出。不得假设on_order/on_trade可立即再次发单，也不得将下一根开盘的成交容量提前视为已知。"
+    ]
+  },
+  "parameter_space": [
+    "候选合约对的最低剩余可交易期限",
+    "两腿流动性度量窗口及容量折扣",
+    "撤退资格的确认与解除条件",
+    "价差参与与退出门槛",
+    "建仓手数随撤退容量收缩的规则",
+    "分腿减仓与补对冲的优先级",
+    "缺腿敞口与挂单总占用上限",
+    "统计失效与到期失效的冲突顺序",
+    "停止加仓、平旧及选新对的时间窗口",
+    "跨段迁移时待办重建与旧单清理规则"
+  ],
+  "novelty_claim": "与S11存在近远月配对和移仓的基础关系。本题候选差异是撤退容量作为建仓前提、失效类型优先级及真实分腿库存队列共同决定配对资格与手数，而不是仅换标的、阈值或到期天数。是否超出旧题允许的执行细化仍需语义判定，不预先承诺独立新题。",
+  "lineage": {
+    "derived_from": [
+      "S11"
+    ],
+    "kind": "assistant_authored_research_candidate_not_api_screened"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "FG",
+      "M"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-11",
+    "task_id": "TASK12-20261110-11",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "finlab.browser_qa.v2",
+  "checked_at": "2026-11-10T11:18:26.670Z",
+  "release": "v2-integrated-task12-20261110",
+  "passed": true,
+  "checks": {
+    "integrated_chapter": true,
+    "task_zip_links": 12,
+    "expandable_task_messages": 12,
+    "automated_tests_displayed": 308,
+    "patch_application_required": false,
+    "task_expansion_verified": true,
+    "phase_demo_end": "已成功提交 7 / 7 段",
+    "phase_demo_reset": "已成功提交 0 / 7 段",
+    "duplicate_ids": []
+  },
+  "layout": {
+    "scrollWidth": 1265,
+    "viewport": 1280
+  },
+  "console_errors": [],
+  "screenshot": "integrated_preview_v2.jpg",
+  "scope": "Read-only offline handbook preview; package links are checked as local artifact paths, no data or admission actions performed."
+}

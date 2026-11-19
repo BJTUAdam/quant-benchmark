@@ -1,0 +1,136 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-172301-36425d",
+  "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1",
+  "reviewed_at": "2026-11-05T04:25:15+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "核心问题与 TG-20261029-172301-36425d 语义等价：同机制、同对象、同必需决策集与维护目标，所谓闭环边与其原有 relationship_monitoring/state_migration 职责重叠，不构成独立研究决策；应并回原题或提出真实不同的核心决策后再审。",
+    "novelty_claim 自称与 TG-20261029-172301-36425d“决策对象相同但闭环边不同”，与其自身承认“若仅更换品种组合或调整阈值应视为变体”并列，实质上只是依赖描述细化，novelty 主张缺乏事实支撑。"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "e3373baa95046d39b7c24ca4447674a68363485bdd9b892a94ae1c5f76a0b490",
+  "content_hash": "73d4ccd3ead8c741d30117c788eaef567c2e6a6f1833700dc37f5c65b5092d76",
+  "rationale": "候选与 TG-20261029-172301-36425d 在 family、core_mechanism、decision_object、required_decisions、maintenance_targets 六维上完全一致，研究问题均为真实分合约双腿跨品种滚动对冲、关系失效暂停重估、逐腿撮合残余敞口、保证金预算与状态迁移。候选 novelty_claim 自称的差异仅为新增两条依赖边（state_migration→month_selection、relationship_monitoring→hedge_estimation）与放宽品种池；但原任务的 relationship_monitoring 本就包含“暂停与重新估计”、state_migration 本就包含迁移旧持仓与状态兼容，依赖细化属于在宽泛允许范围内重排/细化，不能构成实质新研究决策。放宽品种池与参数档位仅属标的与配置变化，不足以视为 distinct。与 TG-20261105-042329-afee5f 亦高度等价，仅标的由 FG/SA 扩展为品种池。综合判为原问题同义改写，classification=duplicate，closest 取 TG-20261029-172301-36425d。",
+  "pending_bindings": [
+    "futures_daily 桥接的真实数据未绑定（binding_status=not_bound、dataset_id=null），需绑定同时月份覆盖、乘数、保证金、结算、费用与到期规则后方可运行",
+    "virtual_start/virtual_stop 未定，实际分段边界与数据版本待绑定",
+    "正式分段评分细则与管线接入待平台在正式开始前固定",
+    "resources=null、resource_status=requires_human_setup，CPU/内存与运行时限须由本人运行 finlab setup 配置，不得由 AI 代填",
+    "runtime_profile.market_rules_status=requires_binding，交易规则尚未绑定，不证明运行可用"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同一 family F05、同一 core_mechanism=cross_product_residual、同一 decision_object=cross_product_leg_portfolio",
+        "required_decisions 完全一致：month_selection/hedge_estimation/entry_exit/relationship_monitoring/margin_budget/state_migration",
+        "maintenance_targets 完全一致：hedge_drift/margin_exposure/expiry_roll/state_compatibility",
+        "研究问题同为真实分合约双腿滚动对冲、关系失效暂停重估、逐腿部分成交与残余敞口、保证金预算与状态迁移"
+      ],
+      "task_id": "TG-20261029-172301-36425d",
+      "differences": [
+        "候选新增了 state_migration→month_selection 与 relationship_monitoring→hedge_estimation 两条依赖边，但这两条边所表达的“迁移后重新评估旧腿”“失效触发重估”已被原任务宽泛允许的 relationship_monitoring 与 state_migration 职责覆盖，属于依赖描述细化",
+        "候选将可用品种池扩为 B/M/Y/SC/FU/LU/FG/SA，未预先绑定品种对，但这只是标的/配置变化，不改变核心研究决策",
+        "参数空间与参数档位细化，属于配置变化"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 cross_product_residual / cross_product_leg_portfolio，决策集与依赖链几乎逐项一致（均含 state_migration→month_selection 与 relationship_monitoring→hedge_estimation）",
+        "研究问题结构相同：真实合约腿、滚动对冲、整数手数、残差参与、关系重估、保证金预算、迁移连续性"
+      ],
+      "task_id": "TG-20261105-042329-afee5f",
+      "differences": [
+        "该题预先绑定 FG/SA 两品种，候选则要求从更宽品种池中选择两腿；差异落在标的配置而非研究决策",
+        "候选把换月/口径失效并入 state_migration 而非独立 roll_policy，该题亦不含 roll_policy，二者结构高度接近",
+        "候选提出的“候选腿集合与对冲比例版本互不自动沿用”与该项的迁移闭环表述实质等价"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F05 跨品种统计价差/残差与关系重估",
+        "共享 month_selection/hedge_estimation/entry_exit/relationship_monitoring/margin_budget/state_migration",
+        "维护目标含 hedge_drift 与 state_compatibility"
+      ],
+      "task_id": "HT05",
+      "differences": [
+        "HT05 为 glass_soda_residual / glass_soda_leg_portfolio，且含独立 roll_policy；候选为 cross_product_residual 且不设 roll_policy",
+        "HT05 预先绑定 FG/SA，候选不绑定具体产业配对"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F05 跨品种多腿真实合约与对冲模型",
+        "共享 month_selection/hedge_estimation/entry_exit/relationship_monitoring/margin_budget/state_migration"
+      ],
+      "task_id": "HT04",
+      "differences": [
+        "HT04 为 multi_product_oil_relative_value / oil_leg_portfolio 且必需 signal_aggregation 与 roll_policy，属于油品三腿相对价值",
+        "候选为 cross_product_residual / cross_product_leg_portfolio，不要求分项信号汇总，标的不限于油品"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F05 真实多腿分合约、保证金预算与 state_migration 回指 month_selection"
+      ],
+      "task_id": "TG-20261105-042048-66d9a5",
+      "differences": [
+        "该题为 crush_component_aggregation / crush_leg_portfolio 且必需 signal_aggregation 冲突裁决，研究对象是 B/M/Y 加工关系",
+        "候选为 cross_product_residual 两品种统计残差，不存在加工系数或分项信号裁决"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F05 真实多腿与保证金预算、状态迁移"
+      ],
+      "task_id": "HT03",
+      "differences": [
+        "HT03 为 crush_component_aggregation / crush_leg_portfolio，以 B/M/Y 固定加工关系与分项信号为核心",
+        "候选不使用加工系数，core_mechanism 与 decision_object 均不同"
+      ]
+    },
+    {
+      "similarities": [
+        "共享 month_selection/entry_exit/margin_budget/state_migration 与 expiry_roll 维护目标"
+      ],
+      "task_id": "TG-20261029-185356-d4e28b",
+      "differences": [
+        "该题为 F06 calendar_spread_pairing / calendar_pair_inventory，两腿来自同品种不同到期月份，核心是期限可比与换腿库存",
+        "候选为 F05 跨品种对冲关系估计与残差参与，涉及 hedge_estimation 与 relationship_monitoring，机制对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "共享 month_selection 与 state_migration 回指、margin_budget 与 expiry_roll"
+      ],
+      "task_id": "TG-20261105-042355-2f1469",
+      "differences": [
+        "该题为 F06 term_curve_rotation / term_curve_pair_selection，以多月份曲线斜率和动态配对为核心",
+        "候选为 F05 跨品种统计残差，不涉及曲线信号或同品种月份结构"
+      ]
+    },
+    {
+      "similarities": [
+        "共享 month_selection/entry_exit/margin_budget/state_migration 与 margin_exposure 维护"
+      ],
+      "task_id": "TG-20261029-172301-684a8d",
+      "differences": [
+        "该题为 F06 calendar_spread_pairing / calendar_pair_inventory，近远月价差配对与移仓",
+        "候选为跨品种对冲与残差关系失效重估，决策对象与核心机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "共享期限口径→配对→预算与手数→参与退出→移仓→状态迁移的部分决策词"
+      ],
+      "task_id": "TG-20261029-185226-a83ad1",
+      "differences": [
+        "该题为 F06 calendar_spread_pairing，先解决同品种月份的可比期限表达与整数手数配对",
+        "候选为跨品种 residual，不涉及 tenor_normalization 或 calendar_pair_inventory"
+      ]
+    }
+  ]
+}

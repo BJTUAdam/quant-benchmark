@@ -1,0 +1,22 @@
+{
+  "spec_filename": "F01_01_breakout_order_expiry.json",
+  "spec_hash": "8d90d11dbe123c618edfa7c59d9fef8e3fe6f9398bfba8fb260a917965c31370",
+  "passed": true,
+  "blocking_issues": [],
+  "review_mode": "conversation_model_cross_review",
+  "reviewer": "spreads_peer",
+  "observations": [
+    "要求未完成突破信号、实际成交与持仓分别记账，撤单确认后才释放资金，未用下一开盘成交量或日内排队数据。",
+    "区间版本更新不回写旧信号，订单/持仓迁移影响下一期预算，已说明跨事件顺序，未假定T+1可卖或原子成交。"
+  ],
+  "semantic_independence": "not_guaranteed",
+  "closest_research_overlap": [
+    "S01",
+    "TG-20261105-041643-7e6569"
+  ],
+  "data_binding_caveats": [
+    "当前仅为规格；未调用外部模型API，未绑定真实数据、正式阶段边界和交易规则。",
+    "当前股票池为空，运营方需明确固定研究池并核验历史可见复权因子、公司行为、停牌/T+1与逐日价格限制；不能以下载时刻冒充历史可见时点。",
+    "公开时间为虚拟事件顺序；同段数据查询仍受当前事件时钟、累计披露范围与越界整次拒绝约束。"
+  ]
+}

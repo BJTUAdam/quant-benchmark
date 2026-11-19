@@ -1,0 +1,628 @@
+{
+  "checked_at": "2026-11-05T04:41:31+00:00",
+  "warnings": [
+    "仅完成规格检查：数据可得性、长程实际难度及管线执行均未验证"
+  ],
+  "spec_hash": "0e2f76ffa23e68584738d97d460520a1d7357176166f9d2678c840eb1a643b8d",
+  "passed": true,
+  "context_hash": "1745c4626fa697691811eec19ad0cb5f3483f16671cdce4453af4c4316cd6a2b",
+  "errors": [],
+  "content_hash": "ace1f0939ff350a15de330258e8eee36c663284c1dee685146aab2f389629ad9",
+  "scope": "specification_only",
+  "dedup": {
+    "exact_matches": [
+      "TG-20261105-041728-6227b7"
+    ],
+    "guarantee": "仅保证规范结构唯一；语义独立性仍需模型与人工复核",
+    "fingerprint": "7178f5b268e5a1a099e8fcd09175bcf355bcb14eb7ef9e0bb96d64c32b2defae",
+    "classification": "variant",
+    "nearest": [
+      {
+        "task_id": "TG-20261105-041728-6227b7",
+        "exact_structure": true,
+        "status": "variant_candidate",
+        "score": 1.0,
+        "spec": {
+          "decision_object": "ranked_stock_portfolio",
+          "core_mechanism": "relative_strength_rotation",
+          "title": "相对强弱排名中的候选池资格回溯：流动性集合边界与留存门槛的反向协商",
+          "novelty_claim": "与existing_tasks中最近的F03任务对照：HT06为dynamic_constituent_multifactor / constituent_stock_portfolio，核心含constituent_eligibility动态成分资格并带有基准超额目标，本题不含成分资格决策、不设基准超额目标，pool边界由流动性资格与现金预算共同决定。TG-20261029-172300-d78026与TG-20261029-184930-be6167为relative_strength_rotation / ranked_stock_portfolio，前者依赖链为特征→排名→缓冲→换手→分配，后者仅追加分配回指缓冲一条边，均不含liquidity_filter；本题把liquidity_filter设为必需决策并将capital_allocation回指到它，使资金分配结果改变下一期可参与排名的集合，而不仅是留存门槛的宽度，依赖结构从单向链变为资格集合与留存门槛的双向协商。TG-20261029-185132-5120cb与TG-20261029-185310-93eea1同含liquidity_filter，但两题把流动性限定为排名的前置输入或候选池边界，未让分配结果反写资格集合与特征口径；本题额外要求分配回指feature_definition，即现金约束改变特征窗口可用性，这与二者及S06（cross_sectional_reversal / cross_sectional_reversal_portfolio，含成交活跃度联合选择但机制为横截面反转）不同。本题不声称已证实独立，若实现退化为在d78026上增加一个附加过滤或仅调门槛窗口，应视为变体需人工语义审。书目仅提供方向，未引用具体章节、页码或最优参数。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "HT06",
+              "TG-20261029-172300-d78026",
+              "TG-20261029-184930-be6167",
+              "TG-20261029-185132-5120cb",
+              "TG-20261029-185310-93eea1"
+            ],
+            "kind": "eligibility_set_budget_feedback_pending_review"
+          },
+          "research_question": "在国内股票或ETF日线环境中，仅用当时已收盘的量价数据：如何用同一完成口径的收益与活跃度定义相对强弱特征，并让流动性筛选不是一次性的入场前置，而是由当期资金分配结果（仓位碎片化程度与剩余现金）反过来收缩或恢复下一期可参与排名的资格集合；当资格集合随现金预算变化而增删时，同刻排名分母随之改变，继续持有门槛与排名合成必须重新协商，使留存名单在排名噪声、换仓可执行性与现金约束之间保持可解释、可接续？",
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "liquidity_filter"
+            ],
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "liquidity_filter",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "liquidity_filter"
+            ],
+            [
+              "capital_allocation",
+              "feature_definition"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "feature_definition",
+            "liquidity_filter",
+            "rank_aggregation",
+            "holding_buffer",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185132-5120cb",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.9167,
+        "spec": {
+          "decision_object": "ranked_stock_portfolio",
+          "core_mechanism": "relative_strength_rotation",
+          "title": "相对强弱排名下的流动性筛选、留存门槛与现金预算联动",
+          "novelty_claim": "与给定最近失败候选 TG-20261029-184930-be6167 及其最接近任务 TG-20261029-172300-d78026 对比：两者均为 relative_strength_rotation / ranked_stock_portfolio，必需决策集合为特征定义、排名合成、持有缓冲、换手预算、资金分配，排名之前不含任何可交易性筛选决策，候选池被默认为全池可比；其依赖链为特征→排名→缓冲→换手→分配（be6167 仅追加分配回指缓冲一条边，被判为变体）。本任务把 liquidity_filter 设为必需决策并置于排名聚合之前，使‘谁可参与排名’成为独立于特征口径的研究取舍，依赖结构变为特征与流动性双输入排名，再由资金分配回指缓冲；研究核心是活跃度约束改变排名分母后，留存门槛与换手预算的可执行宽度如何重新协商，而非在既有链上增调门槛数值。与 S06（cross_sectional_reversal、cross_sectional_reversal_portfolio）机制与决策对象不同；与 HT06（dynamic_constituent_multifactor、constituent_stock_portfolio）不同，本题不依赖动态成分资格决策，也无基准超额目标。本任务仅使用既有机制与决策词表，未引入新ID，未声称数据已验收或已实证有效；若实现中流动性筛选退化为对既有全池特征的无实质影响的附加过滤，或仅调整门槛与窗口，应视为 d78026 的变体而非独立新题，需人工语义审。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "TG-20261029-172300-d78026",
+              "TG-20261029-184930-be6167",
+              "HT06"
+            ],
+            "kind": "liquidity_constrained_rank_selection_pending_review"
+          },
+          "research_question": "国内股票教学环境中，仅用当时已收盘的量价数据，如何把成交活跃度作为可交易性约束与相对强弱特征一起进入同日排名；当排名变化触发候选替换，而T+1新买库存、单票权重上限与现金余额又限制可换仓额度时，买入门槛、继续持有门槛、换手预算和资金分配应当如何相互让步，使留存名单在排名噪声与换仓成本之间保持可解释、可接续？",
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "liquidity_filter",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "holding_buffer"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "feature_definition",
+            "liquidity_filter",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185310-93eea1",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.9167,
+        "spec": {
+          "decision_object": "ranked_stock_portfolio",
+          "core_mechanism": "relative_strength_rotation",
+          "title": "横截面相对强弱下的可交易性前置筛选、留存门槛与现金预算闭环",
+          "novelty_claim": "与给定最近失败候选 TG-20261029-185132-5120cb 及其最接近任务 TG-20261029-184930-be6167、TG-20261029-172300-d78026 相比，三者均为 relative_strength_rotation / ranked_stock_portfolio：d78026 依赖链为特征→排名→缓冲→换手→分配；be6167 仅追加分配回指缓冲；5120cb 已含 liquidity_filter 但仅置于排名聚合前置，且其 novelty_claim 自相矛盾（先称与be6167必需决策集相同并入liquidity_filter，后又称排名前不含筛选）。本任务的实际研究取舍不同：liquidity_filter 不仅前置排名，还被 capital_allocation 反向约束回指——资金分配造成的仓位碎片与现金不足会缩小下一期可参与排名与可持有的集合边界，同时特征定义直接约束流动性度量口径（同一完成窗口与收益口径须一致），形成特征|流动性双输入排名、分配回压缓冲与流动性集合的双闭环；研究核心从“在既有链上增加筛选模块”转为“可交易性约束与预算约束共同重定义候选池边界后，留存门槛与换手预算如何重新协商”。与 S06（cross_sectional_reversal / cross_sectional_reversal_portfolio）机制与决策对象不同；与 HT06（dynamic_constituent_multifactor / constituent_stock_portfolio）不同，本题不含成分资格决策，也无基准超额目标。本任务只使用既有机制与决策词表，未引入新ID与决策对象，未声称数据已验收或已实证有效；若实现中流动性筛选与分配回压退化为对既有全池特征无实质影响的附加过滤，或仅调整门槛与窗口，应视为 d78026/be6167 的变体而非独立新题，需人工语义审。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "HT06",
+              "TG-20261029-172300-d78026",
+              "TG-20261029-184930-be6167",
+              "TG-20261029-185132-5120cb"
+            ],
+            "kind": "tradability_constrained_pool_boundary_pending_review"
+          },
+          "research_question": "在国内股票日线＋分钟教学环境中，仅用当时已收盘的量价数据，如何先以成交活跃度界定“可参与排名”的股票集合，再在同一集合上定义可比的相对强弱并合成同日排名；当排名变化触发替换、而T+1新买不可卖库存、单票权重上限与现金余额共同限制当期可换仓额度时，现金分配结果（碎片化仓位与剩余现金）如何反过来重新商量留存门槛的有效宽度与下一期可参与排名的集合边界，使留存名单在排名噪声、换仓成本与流动性约束之间保持可解释、可接续？",
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "liquidity_filter"
+            ],
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "liquidity_filter",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "holding_buffer"
+            ],
+            [
+              "capital_allocation",
+              "liquidity_filter"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "feature_definition",
+            "liquidity_filter",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185451-316d9a",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.9167,
+        "spec": {
+          "decision_object": "ranked_stock_portfolio",
+          "core_mechanism": "relative_strength_rotation",
+          "title": "可交易性守门后的相对强弱换仓：候选池边界随分配结果回缩与再评分",
+          "novelty_claim": "对比给定最近重复候选 TG-20261029-185310-93eea1 及其上游 5120cb、be6167、d78026：三者均为 relative_strength_rotation / ranked_stock_portfolio，且其差异主张集中在依赖边显式化、把 liquidity_filter 前置到排名之前、以及让 capital_allocation 回指 holding_buffer；三者都被判为同一主干上的模块位置调整或配饰，排名分母随活跃度守门变化的研究内容未被当作必须解决的取舍。本任务据此把新增研究内容落在守门与排除语义上，而不是再换一条依赖边：其一，明确区分守门性排除与排名性掉出，两类排除对既有持仓的处置路径不同，需要与留存门槛及其退出排队规则对齐；其二，把分配的回指对象设为 liquidity_filter 本身，要求研究分配造成的碎片与现金残留如何实际收紧或放松下一期可参与评分的集合，从而改变排名基准而不是仅改变缓冲宽度；其三，要求守门、缓冲与换手在同一时点联合求解，因为换手额度不足会使缓冲无法执行、从而使守门门槛的平滑方式成为决定名单周转的主要原因。与 S06（cross_sectional_reversal / cross_sectional_reversal_portfolio）机制与决策对象不同；与历史 HT06（dynamic_constituent_multifactor / constituent_stock_portfolio）不同，本题不依赖动态成分资格决策，也无基准超额目标。本任务只使用既有机制与决策词表，未引入新 ID 与决策对象，未声称数据已验收或已实证有效；若实现中守门可被等价改写为对既有全池特征加一个常数门槛、且两类排除未产生不同持仓处置，本任务即退化为 5120cb/d78026 的变体，需在人工语义审中归并。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "HT06",
+              "TG-20261029-172300-d78026",
+              "TG-20261029-184930-be6167",
+              "TG-20261029-185132-5120cb",
+              "TG-20261029-185310-93eea1"
+            ],
+            "kind": "exclusion_semantics_and_pool_boundary_refinement_pending_review"
+          },
+          "research_question": "在国内股票日线加分钟教学环境中，仅用当时已收盘的量价数据，如何把成交活跃度作为一道会随资金结果变化的守门条件而非一次性筛选：活跃度不足的股票被排除在评分集合外后，同一时点剩余股票的相对强弱分母与排名随之改变；当换手预算与单票权重上限使当期只能完成部分换仓、并造成小仓位碎片与现金残留时，这些分配结果如何回缩下一期可参与评分的集合边界，被挤出集合的既有持仓又如何区分守门性排除与排名性掉出并分别处置，使留存名单与现金状态在跨段维护中可解释？",
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "liquidity_filter"
+            ],
+            [
+              "liquidity_filter",
+              "rank_aggregation"
+            ],
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "liquidity_filter"
+            ],
+            [
+              "capital_allocation",
+              "holding_buffer"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "feature_definition",
+            "liquidity_filter",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-042228-c84215",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 0.8333,
+        "spec": {
+          "decision_object": "ranked_stock_portfolio",
+          "core_mechanism": "relative_strength_rotation",
+          "title": "相对强弱排名的候选池边界协商：流动性资格集合、留存门槛与换仓预算的联合维护",
+          "novelty_claim": "与existing_tasks逐项对照：HT06为dynamic_constituent_multifactor / constituent_stock_portfolio，核心含constituent_eligibility动态成分资格并设基准超额目标；本任务不含成分资格决策、不设基准超额目标，候选池边界由成交活跃度与资金分配执行结果共同决定。TG-20261029-172300-d78026与TG-20261029-184930-be6167同为relative_strength_rotation / ranked_stock_portfolio，不含liquidity_filter：d78026为特征→排名→缓冲→换手→分配单向链，be6167仅追加分配回指缓冲，二者候选池默认全池可比。TG-20261029-185132-5120cb与TG-20261029-185310-93eea1已把liquidity_filter置于排名前并由capital_allocation回指，形成资格集合与留存门槛的双向闭环，最近反馈据此判定TG-20261105-041728-6227b7与TG-20261105-041955-cc1583为93eea1的变体，理由是仅重排依赖边与删减决策集、回指feature_definition缺乏具体机制。本任务据此把实质取舍改为：turnover_budget保留为必需决策并置于holding_buffer与capital_allocation之间，要求T+1新增库存与未成交单对换手额度的扣减顺序成为可执行性判断，而capital_allocation同时回指liquidity_filter与holding_buffer，使执行结果改变下一期候选集合边界与留存门槛；这与93eea1缺失turnover_budget、6227b7删除turnover_budget的决策配置不同，研究核心从集合边界协商转为换手额度与候选集合、留存宽度的三方让步。与S06（cross_sectional_reversal / cross_sectional_reversal_portfolio）机制与决策对象不同。不声称已证实独立、数据已验收或已实证有效；若实现中流动性筛选或预算回指退化为对全池特征无实质影响的附加过滤，或仅调整门槛与窗口，应视为93eea1/6227b7的变体而非独立新题，需人工语义审。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "HT06",
+              "TG-20261029-185310-93eea1",
+              "TG-20261105-041728-6227b7"
+            ],
+            "kind": "turnover_budget_in_pool_boundary_pending_review"
+          },
+          "research_question": "在国内股票或ETF日线环境中，仅用当时已收盘的量价与复权数据：如何用同一完成窗口定义可比的相对强弱特征，并先以成交活跃度界定可参与排名的候选集合；当同刻排名触发替换时，买入门槛与继续持有门槛如何分设以保留既有持仓；T+1新买不可卖库存、已挂未成交单、单票权重上限与现金余额如何共同限制本期可换仓额度，而换仓额度与现金碎片化的执行结果又如何反过来收紧或放宽下一期可参与排名的流动性资格集合与留存门槛有效宽度，使留存名单在排名噪声、换仓可执行性与流动性边界之间保持可解释、可跨段接续？",
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "liquidity_filter"
+            ],
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "liquidity_filter",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "liquidity_filter"
+            ],
+            [
+              "capital_allocation",
+              "holding_buffer"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "feature_definition",
+            "liquidity_filter",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-172300-d78026",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.75,
+        "spec": {
+          "decision_object": "ranked_stock_portfolio",
+          "core_mechanism": "relative_strength_rotation",
+          "title": "相对强弱排名、继续持有门槛与换仓缓冲",
+          "novelty_claim": "相对单股信号，核心是同刻跨股票选择和留换；但HT06已含多因子排名和缓冲，换成45股不能证明独立，本示例应先视为HT06的已知数据适配草案。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "HT06"
+            ],
+            "kind": "data_and_scope_adaptation_pending_review"
+          },
+          "research_question": "同一股票池内如何让选入排名、留存门槛、换仓预算和资金分配协同？",
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "feature_definition",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-184930-be6167",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.75,
+        "spec": {
+          "decision_object": "ranked_stock_portfolio",
+          "core_mechanism": "relative_strength_rotation",
+          "title": "相对强弱排名下的继续持有门槛与换仓成本联动",
+          "novelty_claim": "与给定最近候选 TG-20261029-172300-d78026（同为 relative_strength_rotation、ranked_stock_portfolio）相比：该候选的必需决策为特征定义、排名合成、持有缓冲、换手预算、资金分配，依赖链为单向链式（特征→排名→缓冲→换手→分配）。本任务在此基础上把 capital_allocation 回指 holding_buffer 作为一条显式依赖边，要求研究资金分配结果（权重上限与现金约束导致的仓位碎片化）如何反过来改变留存门槛的有效宽度，使缓冲与预算形成闭环而非单向传导；并在各模块描述中明确T+1新增库存与成本对换手额度的扣减如何反馈到留存与分配。这与 S06（横截面反转与成交活跃度联合选股）的机制与决策对象不同，也不是 HT06 动态成分多因子草稿的标的替换。本任务沿用既有机制与决策词表，未引入新ID；若实现退化为在 d78026 上仅调整门槛数值或窗口，应视为该候选的变体而非独立新题，需由人工语义审判断闭环依赖是否带来实质研究取舍。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "HT06",
+              "TG-20261029-172300-d78026"
+            ],
+            "kind": "dependency_structure_refinement_pending_review"
+          },
+          "research_question": "在同一股票池内，如何仅用当时已收盘的量价数据定义可比的相对强弱特征并合成同日排名；买入门槛与继续持有门槛如何分设以保留既有持仓，换手预算与单票权重上限如何反过来约束留存缓冲和资金分配，使排名波动、换仓成本与现金约束在同一决策流程中协调？",
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "holding_buffer"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "feature_definition",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "HT06",
+        "exact_structure": false,
+        "status": "draft_data_missing",
+        "score": 0.4375,
+        "spec": {
+          "decision_object": "constituent_stock_portfolio",
+          "core_mechanism": "dynamic_constituent_multifactor",
+          "title": "中证500动态成分多因子组合草稿",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F03",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "从各时点有效中证500成分中选股并控制换手、风险和基准超额。",
+          "decision_dependencies": [
+            [
+              "constituent_eligibility",
+              "feature_definition"
+            ],
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "constituent_change",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "constituent_eligibility",
+            "feature_definition",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "HT01",
+        "exact_structure": false,
+        "status": "historical_package_unrevalidated",
+        "score": 0.1667,
+        "spec": {
+          "decision_object": "stock_trend_portfolio",
+          "core_mechanism": "short_horizon_trend",
+          "title": "45股短周期趋势追踪",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "从突破和趋势入手管理数日持仓并持续维护。",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "exit_policy",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-172300-ca5a47",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.1667,
+        "spec": {
+          "decision_object": "breakout_position_state",
+          "core_mechanism": "consolidation_breakout",
+          "title": "整理区间突破后的跟踪、失败退出与再入场",
+          "novelty_claim": "从宽泛趋势题聚焦到区间→确认→失败→重入生命周期，但HT01已允许这些方向，不能声称已证实独立；待人工语义审，可能归并为HT01扩展。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "如何使区间识别、突破确认、失败处置与再次参与形成可维护的状态流程？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      }
+    ]
+  }
+}

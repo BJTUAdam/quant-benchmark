@@ -1,0 +1,70 @@
+# fund_company · 公募基金公司
+
+来源：https://tushare.pro/document/2?doc_id=118
+
+> 来源为官方公开文档的离线正文；表格、限额、权限说明与示例保留。
+> 官方示例中的行情值、日期和输出仅为接口说明，不是本任务数据、答案或平台实测。
+> 本系统策略应使用 `from finlab import tushare as ts` 或 `ctx.query`。不要直接调用官方上游、设置真实Tushare令牌或照搬示例日期。
+> 文档列出接口不表示当前任务已授权、已冻结或具备历史可见性；以当前任务契约为准。
+
+## 官方正文
+
+## 公募基金公司
+
+接口：fund_company
+描述：获取公募基金管理人列表
+积分：用户需要1500积分才可以调取，一次可以提取全部数据。具体请参阅[积分获取办法](https://tushare.pro/document/1?doc_id=13) 
+
+输入参数
+
+无，可提取全部
+
+输出参数
+
+| 名称 | 类型 | 默认显示 | 描述 |
+| --- | --- | --- | --- |
+| name | str | Y | 基金公司名称 |
+| shortname | str | Y | 简称 |
+| short_enname | str | N | 英文缩写 |
+| province | str | Y | 省份 |
+| city | str | Y | 城市 |
+| address | str | Y | 注册地址 |
+| phone | str | Y | 电话 |
+| office | str | Y | 办公地址 |
+| website | str | Y | 公司网址 |
+| chairman | str | Y | 法人代表 |
+| manager | str | Y | 总经理 |
+| reg_capital | float | Y | 注册资本 |
+| setup_date | str | Y | 成立日期 |
+| end_date | str | Y | 公司终止日期 |
+| employees | float | Y | 员工总数 |
+| main_business | str | Y | 主要产品及业务 |
+| org_code | str | Y | 组织机构代码 |
+| credit_code | str | Y | 统一社会信用代码 |
+
+接口示例
+
+```text
+pro = ts.pro_api()
+
+df = pro.fund_company()
+
+```
+
+数据示例
+
+```text
+               name shortname   province       city                                                                      
+0      工银瑞信基金管理有限公司    工银瑞信基金        北京市        北京市                                              
+1      建信基金管理有限责任公司      建信基金        北京市        北京市                                                
+2        华商基金管理有限公司      华商基金        北京市        北京市                                                  
+3    中邮创业基金管理股份有限公司      中邮基金        北京市        北京市                                              
+4      中国国际金融股份有限公司      中金公司        北京市        北京市                                                
+..              ...       ...        ...        ...                                                                      
+198      汇贤房托管理有限公司    汇贤房托管理  中国香港特别行政区  中国香港特别行政区                                    
+199      富豪资产管理有限公司    富豪资产管理  中国香港特别行政区  中国香港特别行政区                                    
+200      小飞资产管理有限公司    小飞资产管理  中国香港特别行政区  中国香港特别行政区                                    
+201        领航集团有限公司      领航集团       None         境外                                                        
+202  辉立资本管理(香港)有限公司    辉立资本香港       None         境外                                                  
+
+```

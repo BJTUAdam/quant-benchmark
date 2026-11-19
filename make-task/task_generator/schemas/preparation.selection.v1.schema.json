@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "平台私有数据与运行准备选择",
+  "type": "object",
+  "required": ["real_start", "real_stop", "runtime", "feeds", "contract_review_confirmed"],
+  "properties": {
+    "schema_version": {"const": "finlab.preparation.selection.v1"},
+    "real_start": {"type": "string", "description": "本人明确提供的真实开始日，开始包含"},
+    "real_stop": {"type": "string", "description": "真实结束日，结束不包含；不能填写虚拟日期"},
+    "contract_review_confirmed": {"type": "boolean"},
+    "runtime": {"type": "object", "description": "显式交易规则，不接受resources预算；预算来自本人setup"},
+    "feeds": {"type": "array", "items": {"type": "object"}},
+    "research_fraction": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+    "year_offset": {"type": "integer", "minimum": -400, "maximum": 400, "not": {"const": 0}},
+    "stage_windows": {"type": "array", "minItems": 8, "maxItems": 8},
+    "api_policies": {"type": "object", "additionalProperties": {
+      "type": "object",
+      "properties": {
+        "rule": {"type": "object"},
+        "partitions": {"type": "array", "items": {"type": "object"}},
+        "pagination": {"type": "object"},
+        "exchanges": {"type": "array", "items": {"type": "string"}},
+        "coverage_confirmed": {"type": "boolean"},
+        "replayability": {"type": "string"},
+        "evidence": {"type": "string", "minLength": 1},
+        "event_scope": {"enum": ["task_range", "visible_history"]},
+        "query_time_rules": {"type": "object"}
+      }
+    }},
+    "derive_from_frozen": {"type": "object", "properties": {
+      "calendar_exchange": {"type": ["string", "null"]},
+      "execution_rules": {"type": "boolean"},
+      "nontradable_days": {"type": "array", "items": {"type": "object", "required": ["symbol", "trade_date", "evidence"]}},
+      "corporate_actions": {"type": ["object", "null"], "properties": {
+        "accounting": {"const": "ex_date_cash_credit"},
+        "cash_field": {"enum": ["cash_div", "cash_div_tax"]},
+        "confirmed": {"type": "boolean"},
+        "evidence": {"type": "string", "minLength": 1}
+      }}
+    }}
+  },
+  "additionalProperties": false
+}

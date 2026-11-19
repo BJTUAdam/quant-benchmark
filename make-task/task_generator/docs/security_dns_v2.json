@@ -1,0 +1,17 @@
+{
+  "synthetic_only": true,
+  "status": "passed",
+  "checks": {
+    "dns_egress_blocked": true,
+    "egress_blocked": true,
+    "future_blocked": true,
+    "private_paths_absent": true
+  },
+  "checked_at": "2026-11-10T05:33:26.763319+00:00",
+  "scope": "current_actual_Docker_isolation_scenario_in_acceptance_v2",
+  "source_report": "acceptance_v2.json",
+  "image_ids": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  }
+}

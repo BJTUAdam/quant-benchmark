@@ -1,0 +1,264 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "风险预算的回撤证据等级与恢复准入：预算档位下调、未成交待办清理与分步回升",
+  "family_id": "F04",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "drawdown_risk_budget",
+  "decision_object": "portfolio_risk_controller",
+  "required_decisions": [
+    "state_identification",
+    "risk_budget",
+    "drawdown_response",
+    "recovery_policy",
+    "capital_allocation"
+  ],
+  "decision_dependencies": [
+    [
+      "state_identification",
+      "risk_budget"
+    ],
+    [
+      "risk_budget",
+      "drawdown_response"
+    ],
+    [
+      "drawdown_response",
+      "recovery_policy"
+    ],
+    [
+      "recovery_policy",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "state_identification"
+    ],
+    [
+      "drawdown_response",
+      "state_identification"
+    ]
+  ],
+  "maintenance_targets": [
+    "risk_recovery",
+    "state_compatibility",
+    "signal_execution_gap"
+  ],
+  "research_question": "在国内股票与ETF日线环境中，仅用当时已收盘的价量与账户信息：如何把组合层面的已回撤幅度、近期已实现波动与暴露集中度整理成带证据等级的风险判断，使同一段回撤与同一类风险来源不被重复计为多档下调；该判断如何映射到可审计的预算档位，并在下调触发时按当时可成交约束（T+1不可卖库存、单票权重上限、现金不足）决定下到哪一档以及哪些未成交待办随之失效；下调后现金碎片与剩余仓位的实际占用，又如何改变下一段风险证据的读取口径与可信等级，使恢复准入读取的是调整后的占用而非被覆盖前的记忆？",
+  "research_modules": [
+    {
+      "decision_id": "state_identification",
+      "description": "仅用已完成交易日收盘后可用的价格、成交与账户字段，把组合已回撤幅度、近期已实现波动和暴露集中度整理为带来源标签与可信等级的风险证据；同一回撤来源在一段内只计一次，需给出优先与去重规则，并把当时被缩减后的实际仓位占用作为下一段读取口径。",
+      "interaction": "为 risk_budget 提供分级证据输入；同时接收 drawdown_response 执行结果与 capital_allocation 占用结果回写，使缩减后的仓位碎片改变证据的可信等级而非沿用原判定。"
+    },
+    {
+      "decision_id": "risk_budget",
+      "description": "把带可信等级的风险证据映射为可审计的预算档位（含名义暴露上限、现金留存与单票集中度三个可选项的组合表达），明确档位边界与占用计量方式；档位表达的选择本身须可解释其可执行性，而不是仅作阈值比较。",
+      "interaction": "依赖 state_identification 的证据等级；输出档位目标给 drawdown_response；档位占用计量口径与 capital_allocation 的现金碎片结果对齐，避免目标与占用不同度量。"
+    },
+    {
+      "decision_id": "drawdown_response",
+      "description": "依据档位目标与当前真实持仓决定下调幅度阶梯与执行顺序：先识别可卖与不可卖部分，撤销与档位语义冲突的未成交挂单，在现金不足一次性合规减仓时给出分步处置与残余敞口记录；执行结果回写 state_identification。",
+      "interaction": "消费 risk_budget 的档位差；产生实际占用与未成交待办余额供 recovery_policy 判定回升条件，并回写 evidence 使缩减结果参与下一段证据。"
+    },
+    {
+      "decision_id": "recovery_policy",
+      "description": "定义分步回升准入：回升所需证据须独立于被覆盖的回撤记忆，按档位逐级而非一次性回到原档；清晰记录每级上调的占用门槛、最短间隔与撤回条件，并说明回升判断与未清待办的关系。",
+      "interaction": "依赖 drawdown_response 后的实际占用与待办余额；输出可用预算给 capital_allocation，使回升速度受可执行性约束而非仅受价格条件约束。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在回升后的可用预算下分配资金与现金，处理T+1新增库存、单票权重上限导致的仓位碎片与剩余现金；明确碎片化程度如何反馈为下一期预算占用与证据读取口径的一部分。",
+      "interaction": "消费 recovery_policy 给出的可用预算；输出占用与碎片结果回指 state_identification 的读取口径，并约束 risk_budget 档位目标的可达性，形成闭环。"
+    }
+  ],
+  "maintenance_rationale": "后续分段揭晓的观察若显示同一回撤被多次计档或档位下调无法按当时可卖约束执行，说明证据去重与执行顺序需要调整；若回升长期停留在低档或反复触发下调，需要保持或改写恢复准入的间隔与占用门槛，而非仅调数值。每次维护须核验跨段现金、持仓、未完成订单与JSON memory连续，并检查缩减未完成部分是否被下一段误计为已达成目标；不保证维护必然提高收益。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "股票池待绑定真实代码，不使用匿名代号；空池表示待绑定。",
+      "所有指标（已回撤幅度、已实现波动、暴露集中度、占用碎片）由 daily/adj_factor/stk_limit/trade_cal 字段在研究模块内计算，不新增额外字段。",
+      "交易单位、T+1规则、涨跌停与费用须在数据绑定时确认，未绑定前不宣称可运行。"
+    ]
+  },
+  "parameter_space": [
+    "风险证据来源的组合与权重结构（不含具体取值）",
+    "证据可信等级的划分方式与去重规则",
+    "预算档位表达选择：名义暴露上限、现金留存、单票集中度",
+    "档位下限与档位间步长结构",
+    "缩减执行的分步顺序与未成交挂单撤销规则",
+    "回升所需独立证据类型、每级间隔与撤回条件",
+    "T+1不可卖库存与现金不足时的处置优先级",
+    "现金碎片与剩余现金对证据读取口径的反馈方式"
+  ],
+  "novelty_claim": "与 existing_tasks 中最近的同机制、同对象任务逐项对照：TG-20261029-185155-f10be3（drawdown_risk_budget / portfolio_risk_controller）研究预算是名义比例、暴露上限还是现金留存的表达选择及缩减执行连续性，不含参与方式与证据等级的分级去重；TG-20261029-185000-a26d12 把回撤响应与恢复作为参与控制主循环内的规则，并以 state_migration 承接旧状态，本任务不含 state_migration，而以缩减执行结果回写证据读取口径、资金分配回指证据等级构成闭环；TG-20261029-185515-8f94f2 含 participation_policy 且以参与方式与预算档位并列交接，本任务不含参与方式决策，差异来自证据可信等级与恢复准入的独立证据要求；TG-20261029-172300-e01b9a 以 switch_hysteresis 为核心，本任务不含切换迟滞。与种子 S08 方向一致，据此明确预算档位、缩减执行与分步回升之间的相互依赖，以及缩减结果对证据读取口径的回压。最近反馈判定的重复项 TG-20261105-041755-b4949b 与本任务不同：该候选与 f10be3 决策集和依赖边完全一致，本任务必需决策以 capital_allocation 替代 participation_policy 并把 drawdown_response 直接回写 state_identification，要求解决的是证据等级与占用口径的相互影响，而非把既有执行可行性约束写得更显式。不声称已证实独立、数据已验收或已实证有效；若实现退化为在 f10be3 上仅调整档位数量或阈值，应视为该任务的变体，需人工语义审。书目仅提供方向，不引用章节、页码、最优参数或实证结果。",
+  "lineage": {
+    "derived_from": [
+      "S08",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "kind": "evidence_grade_and_recovery_admission_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "strategy.py",
+      "backtest.py",
+      "params.json",
+      "RESEARCH.md",
+      "CHANGELOG.md"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "batch_id": "B-20261105-041626-d5ef52",
+    "version": 0,
+    "provenance": "model_api",
+    "pipeline_status": "not_connected",
+    "data_status": "not_bound",
+    "status": "pending_human_review",
+    "model_review_status": "needs_attention",
+    "id": "TG-20261105-042021-e6bb50",
+    "created_at": "2026-11-05T04:20:21+00:00"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "finance_task_input.draft.v2",
+  "task_id": "TASK12-20261110-05",
+  "candidate_id": "TASK12-20261110-05",
+  "task_version": 1,
+  "initial_message": {
+    "role": "user",
+    "content_file": "TASK.md"
+  },
+  "expected_outputs": [
+    "CHANGELOG.md",
+    "RESEARCH.md",
+    "backtest.py",
+    "params.json",
+    "strategy.py"
+  ],
+  "dataset_id": null,
+  "formal_intervals": null,
+  "spec_status": "spec_checked",
+  "data_status": "not_bound",
+  "runtime_status": "not_connected",
+  "binding_contract": "bridge_contract.json",
+  "runtime_profile": "runtime_profile.json",
+  "generation_mode": "conversation_model",
+  "review_mode": "conversation_peer_review",
+  "external_api_review_status": "not_run",
+  "automatic_acceptance_status": "not_registered",
+  "human_approval_required": false,
+  "human_approved": false,
+  "path_base": "entry_directory",
+  "package_revision": "integrated-r2",
+  "readiness": {
+    "can_start_strategy_design": true,
+    "can_start_configurable_coding": true,
+    "can_query_real_bridge_now": false,
+    "can_run_real_backtest_now": false,
+    "can_run_formal_batch_now": false
+  }
+}

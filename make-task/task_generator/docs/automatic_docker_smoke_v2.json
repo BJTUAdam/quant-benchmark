@@ -1,0 +1,16 @@
+{
+  "schema_version": "finlab.automatic_docker_smoke.v1",
+  "checked_at": "2026-11-10T10:08:00.874995+00:00",
+  "passed": true,
+  "synthetic_only": true,
+  "asset": "STOCK",
+  "research": "passed",
+  "formal_segments_advanced": 0,
+  "operator_setup_created": false,
+  "resource_scope": "explicit_test_fixture_only_not_personal_settings",
+  "image_ids": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  },
+  "scope": "Current host code uses fixed engine/worker containers for one synthetic research smoke; machine admission and private handoff verified separately by tests."
+}

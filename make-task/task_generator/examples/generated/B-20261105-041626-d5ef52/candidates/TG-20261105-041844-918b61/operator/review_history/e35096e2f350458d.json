@@ -1,0 +1,128 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-042355-2f1469",
+  "spec_hash": "a814457c9689001193b83afc6c664c7b9a668dfc8a7574025e92814e39a52a70",
+  "reviewed_at": "2026-11-05T04:25:25+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "候选与TG-20261105-042355-2f1469核心问题与决策语义等价，新增mass依赖边与pair_selection/month_selection命名替换属重排与同义改写，未形成独立研究决策",
+    "decision_dependencies引用margin_budget相关描述（entry_exit→roll_policy交互中提到margin_budget），但margin_budget不在required_decisions中，决策词表引用不闭合，需明确删除或补入",
+    "research_modules中entry_exit的interaction提到“margin_budget之外的保证金占用变化”，引用了未定义的必需决策，接口与决策标准自相矛盾"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "b696c356bbe935b3f0f4fa870e38b743c2c7f3219fe096c25007cd5d02c288c3",
+  "content_hash": "0d9d865ad027302115884150155fd24b23ef3539abab2fa27733d90f697913c6",
+  "rationale": "候选与TG-20261105-042355-2f1469在族、机制、决策对象、研究对象、维护目标上一致：都是同品种多月份曲线斜率信号驱动的动态配对，都含期限口径、曲线信号、从可交易月份选出真实两腿、整数手数与逐腿部分成交、到期移仓及口径版本与中间态迁移。差异仅为配对决策ID由month_selection改为pair_selection、删去margin_budget必需项并在state_migration上增加一条回指依赖；这些属于同义命名与依赖边增删/描述粒度变化，未改变核心触发机制与必需研究取舍，符合重复判定。与684a8d、a83ad1、d4e28b、ab9792等calendar_spread_pairing题相比确有curve_signal为必需决策的机制差异，但这些差异已被2f1469覆盖，故候选相对2f1469不构成独立新题。novelty_claim所述“curve_signal驱动配对、state_migration回指”均已被2f1469表述包含，其自称与2f1469差异仅在决策ID与依赖边，不构成事实性独立依据。",
+  "pending_bindings": [
+    "真实起止、dataset_id、分段边界与月份覆盖未绑定，binding_status=not_bound，属数据接入阶段待办",
+    "乘数、保证金率、费用、夜盘交易日与到期规则待绑定，runtime market_rules_status=requires_binding，属外部待办",
+    "resources=null、resource_status=requires_human_setup，资源预算由本人运行finlab setup选择，属预期外部待办",
+    "评分配置待正式开始前固定，属管线绑定阶段待办"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "family_id同为F06，core_mechanism同为term_curve_rotation，decision_object同为term_curve_pair_selection",
+        "required_decisions高度重合：curve_signal、tenor_normalization、pair_selection/month_selection、entry_exit、state_migration均必需",
+        "依赖链均由tenor_normalization→curve_signal→配对选择→entry_exit，并由state_migration回指curve_signal（候选还额外回指pair_selection）",
+        "研究目标均为：可比期限口径、多月份曲线斜率信号、动态选对而非固定近远月、整数手数/逐腿部分成交、到期移仓与口径版本迁移",
+        "maintenance_targets相同：curve_stability、expiry_roll、margin_exposure、state_compatibility"
+      ],
+      "task_id": "TG-20261105-042355-2f1469",
+      "differences": [
+        "候选用pair_selection、2f1469用month_selection命名，但二者职责均为从可交易月份中选出本期真实配对两腿，属同义表述",
+        "候选缺margin_budget必需决策，改为state_migration额外回指pair_selection；这只是依赖边增删与描述粒度差异，未改变触发机制或必需研究取舍",
+        "候选未显式纳入保证金预算作为必需决策，2f1469纳入；这是从既有决策集删项而非新增实质决策",
+        "参数列表（观察窗口、确认阈值、剩余期限差、流动性格局门槛等）几乎同名同义，仅表述顺序不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F06，同品种多到期月份、整数手数、到期移仓与状态迁移",
+        "均含tenor_normalization、entry_exit、roll_policy、state_migration"
+      ],
+      "task_id": "TG-20261029-172301-684a8d",
+      "differences": [
+        "684a8d机制为calendar_spread_pairing、对象为calendar_pair_inventory，以近远月价差配对为核心，不含curve_signal必需决策；候选以多月份曲线斜率信号驱动配对，决策链方向不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F06，同品种多月份、可比期限单位、整数手数与到期迁移",
+        "均含tenor_normalization、pair_selection、entry_exit、roll_policy、state_migration"
+      ],
+      "task_id": "TG-20261029-185226-a83ad1",
+      "differences": [
+        "a83ad1机制为calendar_spread_pairing、对象为calendar_pair_inventory，不含curve_signal，配对依据为价差与期限单位；候选以曲线斜率/形态信号驱动配对排序，决策触发不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F06，同品种多月份、剩余期限可比表达、换腿与状态迁移",
+        "均涉及从多个可交易月份中选两腿"
+      ],
+      "task_id": "TG-20261029-185356-d4e28b",
+      "differences": [
+        "d4e28b不含curve_signal必需决策，month_selection为枢纽且以价差参与为主；候选以多月份曲线斜率信号为必需决策并直接决定配对排序，机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F06，同品种跨期、到期迁移、状态迁移",
+        "均含tenor_normalization、pair_selection、roll_policy、state_migration"
+      ],
+      "task_id": "TG-20261029-185538-ab9792",
+      "differences": [
+        "ab9792以relationship_monitoring为枢纽，关系可信度随近腿流动性衰减驱动缩减/暂停/换对，不含curve_signal；候选以曲线斜率信号驱动配对，触发机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为多腿真实合约与到期移仓维护"
+      ],
+      "task_id": "HT03",
+      "differences": [
+        "HT03为F05压榨加工关系crush_component_aggregation，腿为B/M/Y跨品种，涉及加工系数与对冲估计；候选两腿同品种不同月份，不涉及跨品种对冲或加工关系"
+      ]
+    },
+    {
+      "similarities": [
+        "均为双腿配对与关系维护、到期移仓"
+      ],
+      "task_id": "HT05",
+      "differences": [
+        "HT05为F05玻璃纯碱跨品种统计价差glass_soda_residual；候选为同品种不同月份，不涉及跨品种对冲估计"
+      ]
+    },
+    {
+      "similarities": [
+        "均为真实多腿组合与状态迁移"
+      ],
+      "task_id": "HT04",
+      "differences": [
+        "HT04为F05油品跨品种相对价值multi_product_oil_relative_value；候选为同一品种月份结构，决策对象与机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "均为真实双腿、关系监控与状态迁移"
+      ],
+      "task_id": "TG-20261029-172301-36425d",
+      "differences": [
+        "36425d为F05跨品种FU/LU对冲残差cross_product_residual；候选为同品种多月份期限曲线，不涉及跨品种对冲估计"
+      ]
+    },
+    {
+      "similarities": [
+        "均为真实双腿、月份选择、状态迁移与保证金约束"
+      ],
+      "task_id": "TG-20261105-041820-c67182",
+      "differences": [
+        "c67182为F05跨品种残差与对冲比例重估cross_product_leg_portfolio；候选为同品种多月份期限曲线与曲线信号配对，机制与决策对象不同"
+      ]
+    }
+  ]
+}

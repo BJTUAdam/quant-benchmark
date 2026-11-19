@@ -1,0 +1,53 @@
+{
+  "schema_version": "finlab.delivery.validation.v1",
+  "release": "v2-delivery-20261110",
+  "checked_at": "2026-11-10T05:42:07.654337+00:00",
+  "toolchain_validation_passed": true,
+  "full_suite_tests": 274,
+  "full_suite_failures": 0,
+  "full_suite_errors": 0,
+  "roundtrip_module_tests": 6,
+  "supplemental_new_variant_tests_after_full_suite_discovery": 2,
+  "distinct_tests_exercised": 276,
+  "actual_docker_synthetic_acceptance": "passed",
+  "docker_assets": [
+    "STOCK",
+    "FUND",
+    "FUTURES"
+  ],
+  "formal_segments_per_asset": 7,
+  "image_ids": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  },
+  "upstream_probe_report": "upstream_probe_v2.json",
+  "live_upstream_status": "partial_capability_samples_not_coverage",
+  "new_approvals_created": 0,
+  "real_runnable_tasks_delivered": 0,
+  "existing_candidates_retained": 15,
+  "original_snapshot_files_byte_identical": 301,
+  "operator_setup_created": false,
+  "checks": [
+    "immutable_approved_versions",
+    "old_approved_version_reuse_after_update",
+    "transactional_approval_public_snapshot",
+    "windows_atomic_write_sharing_retry",
+    "explicit_approved_parent_variant_lineage",
+    "frozen_data_plan_and_binding_compilation",
+    "whole_batch_preflight_before_execution",
+    "matching_research_receipt_required",
+    "private_handoff_roundtrip_and_tamper_refusal",
+    "receiver_resource_reset_and_new_local_acceptance"
+  ],
+  "real_task_blockers": [
+    "APPROVED_VERSION_NOT_FOUND",
+    "REPORTED_REAL_FREEZE_NOT_PRESENT",
+    "SETUP_REQUIRED"
+  ],
+  "reports": {
+    "full_suite": "unit_tests_v2.json",
+    "docker": "acceptance_v2.json",
+    "readiness": "delivery_readiness_v2.json",
+    "upstream": "upstream_probe_v2.json"
+  }
+}

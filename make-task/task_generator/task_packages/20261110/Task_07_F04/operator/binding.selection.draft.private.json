@@ -1,0 +1,65 @@
+{
+  "schema_version": "finlab.preparation.selection.v1",
+  "real_start": null,
+  "real_stop": null,
+  "contract_review_confirmed": false,
+  "feeds": [
+    {
+      "api_name": "daily",
+      "event_field": "trade_date",
+      "close_time": null,
+      "volume_multiplier": null,
+      "amount_multiplier": null
+    }
+  ],
+  "runtime": {
+    "instruments": [
+      {
+        "symbol": "000001.SZ",
+        "asset_type": "STOCK"
+      },
+      {
+        "symbol": "600000.SH",
+        "asset_type": "STOCK"
+      },
+      {
+        "symbol": "600036.SH",
+        "asset_type": "STOCK"
+      },
+      {
+        "symbol": "601318.SH",
+        "asset_type": "STOCK"
+      },
+      {
+        "symbol": "600519.SH",
+        "asset_type": "STOCK"
+      },
+      {
+        "symbol": "000858.SZ",
+        "asset_type": "STOCK"
+      },
+      {
+        "symbol": "600030.SH",
+        "asset_type": "STOCK"
+      },
+      {
+        "symbol": "601166.SH",
+        "asset_type": "STOCK"
+      }
+    ],
+    "calendar": null,
+    "sessions": null,
+    "execution_rules": null,
+    "corporate_actions": null,
+    "corporate_actions_verified": false,
+    "benchmark": null,
+    "market_rules_status": "requires_binding"
+  },
+  "api_policies": {},
+  "derive_from_frozen": {
+    "calendar_exchange": null,
+    "execution_rules": false,
+    "nontradable_days": [],
+    "corporate_actions": null
+  }
+}

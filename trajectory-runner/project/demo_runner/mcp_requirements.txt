@@ -1,0 +1,2 @@
+# Optional, host-side only. Install with the interpreter running finlab_v2.py.
+fastmcp==4.1.6

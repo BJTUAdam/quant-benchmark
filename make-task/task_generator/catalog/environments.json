@@ -1,0 +1,80 @@
+[
+  {
+    "id": "akquant_stock_etf_v2",
+    "name": "国内股票ETF日线桥接与AKQuant环境",
+    "profile_id": "stock_etf_daily",
+    "supported_families": [
+      "F01",
+      "F02",
+      "F03",
+      "F04"
+    ],
+    "directions": [
+      "long_only"
+    ],
+    "decision_frequency": "已完成日线收盘后",
+    "execution": "NextOpen，下一根可执行行情开盘",
+    "hard_constraints": [
+      "股票ETF按绑定后交易单位及T+0/T+1规则运行",
+      "停牌、价格限制、费用和公司行为必须绑定",
+      "指数仅查询及基准，不下单",
+      "现金、持仓、未完成订单和JSON memory跨段连续",
+      "资源预算由本人运行finlab setup选择，任务草案不预填生效值"
+    ],
+    "available_data_evidence": "新任务通过Tushare桥接获取数据，未绑定真实冻结版本。",
+    "readiness": "规格草案；真实名称与代码保留，所有事件日期均为虚拟日期，不映射真实年份事件。",
+    "unsupported_without_extension": [
+      "股票卖空",
+      "期权",
+      "缺少历史可见性依据的数据",
+      "未绑定交易规则"
+    ]
+  },
+  {
+    "id": "akquant_futures_v2",
+    "name": "国内期货真实分合约日线桥接与AKQuant环境",
+    "profile_id": "futures_daily",
+    "supported_families": [
+      "F01",
+      "F02",
+      "F04",
+      "F05",
+      "F06"
+    ],
+    "supported_products": [
+      "B",
+      "M",
+      "Y",
+      "SC",
+      "FU",
+      "LU",
+      "FG",
+      "SA"
+    ],
+    "supported_quote_units": [
+      "CNY/tonne",
+      "CNY/barrel"
+    ],
+    "directions": [
+      "long",
+      "short"
+    ],
+    "decision_frequency": "已完成交易日日线收盘后",
+    "execution": "NextOpen；多腿逐腿撮合，可部分成交，不保证原子成交",
+    "hard_constraints": [
+      "真实分合约有符号整数手数，不交易合成价差",
+      "乘数、保证金、结算、费用、夜盘交易日及到期规则须绑定",
+      "需处理部分成交、残余敞口、移仓及失效后的旧腿",
+      "现金、持仓、未完成订单和JSON memory跨段连续",
+      "资源预算由本人运行finlab setup选择，任务草案不预填生效值"
+    ],
+    "available_data_evidence": "新任务通过Tushare桥接获取真实分合约数据；同时月份覆盖和规则证据待绑定。",
+    "readiness": "规格草案；虚拟年份不代表真实历史年份。",
+    "unsupported_without_extension": [
+      "交割",
+      "跨品种保证金优惠",
+      "连续合约拼接价直接交易",
+      "缺失规则的正式运行"
+    ]
+  }
+]

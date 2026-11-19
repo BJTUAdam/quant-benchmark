@@ -1,0 +1,132 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-185333-ed0ecc",
+  "spec_hash": "b62af25e58a8d4984f1442534bf38c3e4788cf7833608827d63431727db3855b",
+  "reviewed_at": "2026-11-05T04:23:17+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "核心问题与TG-20261029-185333-ed0ecc高度重合，候选的switch_hysteresis与双档位交接未带来实质研究决策变化，novelty_claim对ed0ecc的区分缺乏事实支撑"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "48b7384656f5dabd845ac26d30348c1a30639b9ad3f68497bab063a4e8e11bff",
+  "content_hash": "d08e246079a7a4eb8e89bb5a8cd9fe197ff3935e93dad0c241f0fb888d5a41c4",
+  "rationale": "候选与TG-20261029-185333-ed0ecc在机制、对象、五项必需决策和维护目标上完全一致；两者都研究参与档位进/出各有证据门槛、降档时挂单与T+1库存失效集合、恢复时升档不沿用回撤记忆。候选新增的switch_hysteresis在ed0ecc中已由“状态确认后再降档”的迟滞要求覆盖，所谓“双档位交接”在ed0ecc中亦由drawdown_response与recovery_policy承担降档触发与回升，属于同一职责的不同表述与依赖重排，不构成实质研究决策变化。与e01b9a、a26d12、f10be3、8f94f2、e6bb50的差异来自控制量侧重（预算表达/证据合并）而非新的研究决策。novelty_claim自称不沿用8f94f2决策集、以switch_hysteresis保留迟滞并让回撤响应独立进入同一控制器，但这恰是ed0ecc已具备的结构，claim缺乏事实支撑。其余F01任务决策对象与机制均不同，明显不相似。故判duplicate。",
+  "pending_bindings": [
+    "真实symbols为空池，待运营方绑定真实代码",
+    "dataset_id、虚拟起止与正式分段边界为null，待数据绑定阶段确定",
+    "交易规则（交易单位、T+0/T+1、停牌、价格限制、费用、公司行为）待绑定时确认",
+    "resources=null且resource_status=requires_human_setup，需本人运行finlab setup配置",
+    "评分配置待正式开始前固定并绑定管线",
+    "运行难度与行为表现未实测"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同族F04、同机制regime_participation_control、同决策对象participation_controller",
+        "同样以参与档位为核心，要求档位进/出各有证据门槛，并在降档时处置挂单、T+1不可卖库存与排队候选",
+        "同样包含state_identification、participation_policy、drawdown_response、recovery_policy、state_migration五项必需决策，维护目标完全一致（regime_transition、risk_recovery、state_compatibility、signal_execution_gap）"
+      ],
+      "task_id": "TG-20261029-185333-ed0ecc",
+      "differences": [
+        "候选增加独立的switch_hysteresis决策并设置参与档位与回撤档位两套档位交接；但ed0ecc已要求状态确认后再降档（即隐式迟滞），且其drawdown_response/recovery_policy已承担降档触发与回升",
+        "候选强调双档位优先级与去重、分步回升；ed0ecc已处理降档后哪些待办失效、恢复时回到低档更快且升档不沿用回撤记忆，属于同一职责的不同表述",
+        "候选把迁移口径改写下一段证据长度与动作集，ed0ecc的state_migration已回指state_identification与participation_policy，同样改变可用证据长度与允许动作集"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F04、同机制regime_participation_control、同决策对象participation_controller",
+        "同样以state_identification→switch_hysteresis→participation_policy为主干，并包含state_migration"
+      ],
+      "task_id": "TG-20261029-172300-e01b9a",
+      "differences": [
+        "e01b9a的risk_budget是参与映射末端，无独立drawdown_response与recovery_policy；候选以独立回撤档位与恢复决策补充",
+        "候选的档位交接与待办清理比e01b9a的单一路径更细，但核心仍是参与控制器在状态切换下的参与档位映射"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F04，含drawdown_response与recovery_policy，并处理T+1、挂单与减仓可行性",
+        "同样维护risk_recovery与state_compatibility"
+      ],
+      "task_id": "TG-20261029-185000-a26d12",
+      "differences": [
+        "a26d12机制为drawdown_risk_budget、对象为portfolio_risk_controller，以组合损失预算为控制量；候选对象仍为participation_controller，回撤只是第二路降档来源",
+        "候选的档位交接两套档位问题在a26d12中由预算与参与联动承担，研究决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F04，处理回撤触发缩减、挂单与T+1库存处置、逐级恢复"
+      ],
+      "task_id": "TG-20261029-185155-f10be3",
+      "differences": [
+        "f10be3机制为drawdown_risk_budget、对象portfolio_risk_controller，核心是预算刻度表达与缩减执行连续性",
+        "候选不研究预算表达形式，决策对象与核心机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F04，含多源证据合并、预算/参与档位交接、降档待办失效与恢复准入"
+      ],
+      "task_id": "TG-20261029-185515-8f94f2",
+      "differences": [
+        "8f94f2机制为drawdown_risk_budget、对象portfolio_risk_controller，以证据合并与预算档位为核心；候选以参与档位为核心",
+        "候选的双档位交接与去重在8f94f2中已由证据合并去重与预算/参与两套档位交接覆盖，仅控制量侧重不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F04，含回撤证据分级、单段回撤不重复多档下调、下调时待办失效与分步回升"
+      ],
+      "task_id": "TG-20261105-042021-e6bb50",
+      "differences": [
+        "e6bb50机制为drawdown_risk_budget、对象portfolio_risk_controller，以capital_allocation替代participation_policy；候选以参与控制器为核心",
+        "候选的独立回撤档位与恢复不同步类似于e6bb50的证据等级与恢复准入，但控制对象与预算/参与定位不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同含state_identification与switch_hysteresis，并涉及预算恢复"
+      ],
+      "task_id": "TG-20261029-184839-b184fc",
+      "differences": [
+        "b184fc机制为consolidation_breakout、对象breakout_position_state，核心是区间突破与失败退出再入场",
+        "决策对象、核心机制与候选的参与控制器不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F01且含state_migration"
+      ],
+      "task_id": "TG-20261029-185109-ad8725",
+      "differences": [
+        "ad8725机制为trend_pullback、对象trend_pullback_inventory，研究趋势回撤资格复核与分批库存",
+        "与候选的参与/回撤档位交接无共同决策对象"
+      ]
+    },
+    {
+      "similarities": [
+        "同含state_migration"
+      ],
+      "task_id": "TG-20261029-184647-ca78bb",
+      "differences": [
+        "ca78bb机制为trend_pullback、对象trend_pullback_inventory，研究分层库存与退出维护",
+        "决策对象与核心机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同含状态资格切换与库存处置"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "8868c8机制为trend_pullback、对象trend_pullback_inventory，研究退出政策吸收资格切换",
+        "与候选的参与档位与回撤档位双档位交接不同机制与对象"
+      ]
+    }
+  ]
+}

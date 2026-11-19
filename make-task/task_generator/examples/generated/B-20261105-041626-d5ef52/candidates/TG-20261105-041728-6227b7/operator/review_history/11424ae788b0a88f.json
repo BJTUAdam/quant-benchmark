@@ -1,0 +1,120 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-041955-cc1583",
+  "spec_hash": "f5f91dfab8471cf41b4086bafa35675b547a1a85e936f248d9f697baf29be208",
+  "reviewed_at": "2026-11-05T04:28:29+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "候选与TG-20261105-041955-cc1583在核心问题、决策集合、依赖图与维护目标上等价，构成重复；novelty_claim未识别该同构任务，反而以剔除turnover_budget和特征口径统一作为新颖性依据，而cc1583已完整占据同一取舍。",
+    "决策依赖列表声明capital_allocation回指feature_definition并要求“现金约束改变特征窗口可用性”，但feature_definition模块描述与参数空间中未给出任何可执行机制（如窗口长度随预算调整的规则或判定条件），该依赖边在规格层面不可落地。"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "c513a13de294e1bd26d1e0a0981b4f3120fa24b557c43c812b175d7ae333589d",
+  "content_hash": "ed7e041eab81220b5b0fe4a5f81ac52cc243d15889ad3441a75a3c769e49a8df",
+  "rationale": "候选与TG-20261105-041955-cc1583在机制、决策对象、必需决策集合、决策依赖图、维护目标和研究问题上逐项等价：两者均为relative_strength_rotation / ranked_stock_portfolio，都剔除turnover_budget而以capital_allocation承担换仓与现金约束，都设capital_allocation回指liquidity_filter与feature_definition，都要求流动性资格集合作为排名分母并由现金预算结果反向收缩/恢复、留存门槛随分母重新协商。cc1583的novelty_claim已自述其创新点在于剔除turnover_budget并由capital_allocation承担换仓可执行性、把特征口径统一性写成feature_definition前置条件，候选正文正落在此同一取舍上，仅标题与叙述措辞不同（“相对强弱排名中的候选池资格回溯”对“候选池资格的反向协商”），属同义改写，不构成实质研究决策变化。相较其余历史题，候选删去turnover_budget、增加资格集合回溯闭环确实偏离5120cb/93eea1/316d9a/c84215的依赖结构，但这一偏离已被cc1583完整占据，故最近任务为cc1583且判duplicate。novelty_claim声称“与最近F03任务对照”并提及d78026等，但未提及与其结构完全相同的cc1583，事实上其创新点表述与cc1583重合，缺乏事实支撑。",
+  "pending_bindings": [
+    "股票池真实代码与成分资料待绑定，空symbols仅表示尚未选定",
+    "日期范围实际虚拟分段边界待绑定阶段确定",
+    "交易单位、T+1、费用、公司行为、价格限制与结算规则待runtime_profile绑定",
+    "资源预算须由本人运行finlab setup选择，草案resources=null属预期待办",
+    "评分细则与指标配置待管线绑定"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F03 relative_strength_rotation / ranked_stock_portfolio，研究目标、必需决策集合（feature_definition、liquidity_filter、rank_aggregation、holding_buffer、capital_allocation）完全一致",
+        "决策依赖图完全相同，均含capital_allocation回指liquidity_filter与feature_definition的双向闭环",
+        "核心机制均为流动性资格集合作为排名分母、由现金预算结果反向收缩/恢复，留存门槛随排名分母变化重新协商",
+        "maintenance_targets一致，且都要求同口径收益与活跃度定义、资格连续期数与失效有效期"
+      ],
+      "task_id": "TG-20261105-041955-cc1583",
+      "differences": [
+        "两者核心问题、决策对象、必需决策与依赖结构逐项等价，差异仅为标题与叙述措辞，不构成实质研究决策变化"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制同对象，均含liquidity_filter与capital_allocation联动"
+      ],
+      "task_id": "TG-20261029-185132-5120cb",
+      "differences": [
+        "5120cb保留turnover_budget且缺少capital_allocation回指liquidity_filter与feature_definition的依赖边，候选的资格集合回溯闭环在该题不存在"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制同对象，均含liquidity_filter前置与capital_allocation回指liquidity_filter的闭环"
+      ],
+      "task_id": "TG-20261029-185310-93eea1",
+      "differences": [
+        "93eea1保留turnover_budget且置于holding_buffer与capital_allocation之间，候选剔除turnover_budget；但这一差异与cc1583的决策集配置相同，属同一决策集重组方向"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制同对象，流动性守门与预算回缩候选池边界的研究内容重叠"
+      ],
+      "task_id": "TG-20261029-185451-316d9a",
+      "differences": [
+        "316d9a保留turnover_budget并强调守门性排除与排名性掉出的处置区分，候选未设该区分且依赖图不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制同对象，候选池边界与留存门槛协商的研究问题相近"
+      ],
+      "task_id": "TG-20261105-042228-c84215",
+      "differences": [
+        "c84215保留turnover_budget作为holding_buffer与capital_allocation之间必需决策，并设capital_allocation回指holding_buffer；候选剔除turnover_budget，依赖图和决策集均不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制同对象，相对强弱排名、持有缓冲与资金分配母题一致"
+      ],
+      "task_id": "TG-20261029-172300-d78026",
+      "differences": [
+        "d78026不含liquidity_filter，为单向链特征→排名→缓冲→换手→分配，无资格集合回溯闭环"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制同对象，均含分配回指闭环"
+      ],
+      "task_id": "TG-20261029-184930-be6167",
+      "differences": [
+        "be6167不含liquidity_filter与feature_definition回指，回指仅落在holding_buffer，候选池边界不随预算变化"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F03股票组合族，含排名、缓冲、换手与分配"
+      ],
+      "task_id": "HT06",
+      "differences": [
+        "HT06决策对象为constituent_stock_portfolio，核心含constituent_eligibility与基准超额目标，机制为dynamic_constituent_multifactor"
+      ]
+    },
+    {
+      "similarities": [
+        "同为国内股票组合类任务"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "F01 short_horizon_trend / stock_trend_portfolio，决策对象为趋势持仓状态，不含横截面排名与流动性资格集合"
+      ]
+    },
+    {
+      "similarities": [
+        "同为股票多头任务"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "F01 consolidation_breakout / breakout_position_state，研究区间突破生命周期，与横截面相对强弱排名机制无关"
+      ]
+    }
+  ]
+}

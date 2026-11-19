@@ -1,0 +1,630 @@
+{
+  "checked_at": "2026-11-05T04:41:36+00:00",
+  "warnings": [
+    "仅完成规格检查：数据可得性、长程实际难度及管线执行均未验证"
+  ],
+  "spec_hash": "b62af25e58a8d4984f1442534bf38c3e4788cf7833608827d63431727db3855b",
+  "passed": true,
+  "context_hash": "d54ba24c1a449840c9ab928cb62fb6e663e29312caf312ef7d2ef6a42a156295",
+  "errors": [],
+  "content_hash": "d08e246079a7a4eb8e89bb5a8cd9fe197ff3935e93dad0c241f0fb888d5a41c4",
+  "scope": "specification_only",
+  "dedup": {
+    "exact_matches": [],
+    "guarantee": "仅保证规范结构唯一；语义独立性仍需模型与人工复核",
+    "fingerprint": "bba98e0055db6ee652548913b4072d6737eafe208ae132a13cd29c80f3d9e089",
+    "classification": "needs_semantic_review",
+    "nearest": [
+      {
+        "task_id": "TG-20261029-185333-ed0ecc",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.9167,
+        "spec": {
+          "decision_object": "participation_controller",
+          "core_mechanism": "regime_participation_control",
+          "title": "三档参与方式的逐档准入与逐档退出：状态确认后再降档的控制器",
+          "novelty_claim": "与给定最近任务 TG-20261029-172300-e01b9a（同机制 regime_participation_control、同对象 participation_controller）相比，其必需决策为状态识别、切换迟滞、参与政策、风险预算、状态迁移，主循环是状态→迟滞→参与→预算→迁移，回撤与恢复不是独立决策，参与政策被视为单一映射而档位本身没有被当作跨段延续的状态；本任务把参与方式拆成有语义差别的多个档位并要求档位进出各有独立证据门槛，删除 switch_hysteresis 与 risk_budget 而改用 drawdown_response 与 recovery_policy 承担触发与回升，并把 state_migration 设为回指状态识别与参与政策的双向依赖，使迁移口径直接改变下一段可用的证据长度与允许动作集，维护目标也新增 signal_execution_gap 以追查降档未完成部分。与 TG-20261029-185000-a26d12 相比，其研究对象是组合损失预算的缩减与暂停在参与控制闭环中的规则细化，本任务的控制量是档位语义与待办余额而非预算刻度，且不要求风险预算模块。与 TG-20261029-185155-f10be3 相比，其核心是预算表达形式与分步减仓可行性，本任务不以预算表达为取舍。与历史 HT01/HT02 的宽泛趋势与超跌题相比，立项对象是控制器而非单标的入场规则。沿用既有机制与决策词表，未引入新 ID，未声称已获数据或已实证有效；若实现退化为在 e01b9a 上把参与政策改成三档并调整阈值，应视为该任务变体而非独立新题，需人工语义审。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S07",
+              "HT01",
+              "HT02",
+              "TG-20261029-172300-e01b9a",
+              "TG-20261029-185000-a26d12",
+              "TG-20261029-185155-f10be3"
+            ],
+            "kind": "participation_state_refinement_pending_review"
+          },
+          "research_question": "在国内股票日线＋分钟教学环境中，仅用当时已收盘的数据，如何把参与方式而不是仓位比例作为控制器的一等状态（例如完整参与、限制参与、停止新增），使档位进入与离开各有独立证据门槛：状态识别给出的档位建议必须经过一次跨段延续才被采纳；当回撤或连续未成交累积出现时，如何按档位语义执行降档并确定哪些待办（挂单、T+1新增库存、排队候选）随之失效；恢复时如何保证回到低档比升回高档更快、且升档不依赖回撤记忆被覆盖？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "participation_policy"
+            ],
+            [
+              "participation_policy",
+              "drawdown_response"
+            ],
+            [
+              "drawdown_response",
+              "recovery_policy"
+            ],
+            [
+              "recovery_policy",
+              "state_identification"
+            ],
+            [
+              "state_migration",
+              "state_identification"
+            ],
+            [
+              "state_migration",
+              "participation_policy"
+            ]
+          ],
+          "maintenance_targets": [
+            "regime_transition",
+            "risk_recovery",
+            "state_compatibility",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "participation_policy",
+            "drawdown_response",
+            "recovery_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-172300-e01b9a",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.6923,
+        "spec": {
+          "decision_object": "participation_controller",
+          "core_mechanism": "regime_participation_control",
+          "title": "趋势/震荡切换下的策略参与控制",
+          "novelty_claim": "复用HT01/HT02的基础交易思想，以参与控制器和持久化状态转移作为研究对象；如仅增加波动过滤或统一止损则不算独立新题。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S07",
+              "HT01",
+              "HT02"
+            ],
+            "kind": "controller_candidate_pending_review"
+          },
+          "research_question": "状态辨识与切换控制如何决定策略参与和预算，并接住旧状态和未清仓头寸？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "switch_hysteresis"
+            ],
+            [
+              "switch_hysteresis",
+              "participation_policy"
+            ],
+            [
+              "participation_policy",
+              "risk_budget"
+            ],
+            [
+              "risk_budget",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "regime_transition",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "switch_hysteresis",
+            "participation_policy",
+            "risk_budget",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185000-a26d12",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.6,
+        "spec": {
+          "decision_object": "portfolio_risk_controller",
+          "core_mechanism": "drawdown_risk_budget",
+          "title": "回撤预算下的暂停、恢复与状态迁移：组合风险控制器与参与方式的联动",
+          "novelty_claim": "与给定最近候选 TG-20261029-172300-e01b9a（state_identification、switch_hysteresis、participation_policy、risk_budget、state_migration，对象participation_controller）相比：该候选以状态切换迟滞为核心，风险预算只是参与映射的末端，且不含回撤响应与恢复策略；本任务以组合损失预算为控制量，必需决策改为risk_budget→drawdown_response→recovery_policy→participation_policy，并用participation_policy回指state_identification形成闭环，维护目标也由state_compatibility/regime_transition扩展为含risk_recovery与signal_execution_gap；与种子S08一致但补齐了state_migration与未成交减仓的持久化要求。与S07及历史HT01/HT02的宽泛趋势、超跌题相比，本题研究对象是组合级预算与暂停恢复控制器，而非单标的入场规则。本任务沿用既有机制与决策词表，未引入新ID；不声称已具备独立数据或已实证有效。若实现退化为在e01b9a或S08上仅调阈值，应视为其变体而非独立新题，需人工语义审。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S08",
+              "S07",
+              "HT01",
+              "HT02",
+              "TG-20261029-172300-e01b9a"
+            ],
+            "kind": "controller_candidate_pending_review"
+          },
+          "research_question": "在国内股票日线＋分钟教学环境中，仅用当时可见数据识别组合层面的风险状态，把已识别风险映射为可执行的预算上限；当回撤或连续亏损出现时缩减参与、暂停某类参与方式，并按什么条件与节奏恢复；缩减或恢复期间如何在T+1、单票权重上限和现金约束下迁移已有持仓与持久化状态，使预算控制器、参与方式与状态识别形成可接续的闭环？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "risk_budget"
+            ],
+            [
+              "risk_budget",
+              "drawdown_response"
+            ],
+            [
+              "drawdown_response",
+              "recovery_policy"
+            ],
+            [
+              "recovery_policy",
+              "participation_policy"
+            ],
+            [
+              "participation_policy",
+              "state_identification"
+            ],
+            [
+              "drawdown_response",
+              "state_migration"
+            ],
+            [
+              "recovery_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "risk_recovery",
+            "regime_transition",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "risk_budget",
+            "drawdown_response",
+            "recovery_policy",
+            "participation_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185155-f10be3",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.4667,
+        "spec": {
+          "decision_object": "portfolio_risk_controller",
+          "core_mechanism": "drawdown_risk_budget",
+          "title": "风险预算缩放的连续性：按暴露单位缩减、逐级恢复与已挂单处置",
+          "novelty_claim": "与给定最近失败候选 TG-20261029-185000-a26d12 及其最近任务 TG-20261029-172300-e01b9a 相比：两者把回撤触发、暂停与恢复作为参与控制器主循环内的规则细化，预算只是参与度的末端表达，且未把缩减执行的可行性与未完成待办纳入核心决策。本任务的实际研究取舍不同：核心问题是预算刻度本身（暴露比例、名义上限或现金留存三种表达的选择）如何决定缩减与恢复的可执行性，并要求处理缩减触发的确认时点、分步减仓可行性、挂单与T+1库存的处置顺序，以及缩减后预算占用与目标预算的差额如何在逐级恢复中被识别并回退；恢复条件回指风险预算而非参与政策，状态迁移回指状态识别，形成以预算占用为控制量的闭环，维护目标聚焦风险恢复与跨段兼容而非参与方式的切换频率。与同家族种子S08相同的是组合级损失预算方向，本任务据此扩展并明确预算表达形式的取舍与缺口处置；与S07状态参与控制相比，不以切换迟滞和参与方式映射为核心。本任务仅使用既有机制与决策词表，未引入新机制或新决策ID，也未引入新决策对象；不声称已获得已验收数据或已实证有效。若实现退化为在既有控制器上仅调整阈值、窗口或维护目标表述顺序，应视为既有任务的变体而非独立新题，需人工语义审。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S08",
+              "S07",
+              "TG-20261029-185000-a26d12",
+              "TG-20261029-172300-e01b9a"
+            ],
+            "kind": "budget_expression_and_recovery_refinement_pending_review"
+          },
+          "research_question": "在国内股票日线＋分钟教学环境中，只使用当时已收盘的价格与成交数据，如何把组合层面的风险度量（已回撤幅度、近期波动、暴露集中度中的可选项）整理为可审计的预算刻度，并在不依赖事后收益的前提下决定缩减的幅度阶梯；缩减触发时，T+1不可卖的新买库存、已挂未成交单和现金不足以一次性合规减仓如何处置，缩减后按什么分级条件允许部分恢复而不是一次性回到原预算？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "risk_budget"
+            ],
+            [
+              "risk_budget",
+              "drawdown_response"
+            ],
+            [
+              "drawdown_response",
+              "recovery_policy"
+            ],
+            [
+              "recovery_policy",
+              "risk_budget"
+            ],
+            [
+              "drawdown_response",
+              "state_migration"
+            ],
+            [
+              "state_migration",
+              "state_identification"
+            ]
+          ],
+          "maintenance_targets": [
+            "risk_recovery",
+            "state_compatibility",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "risk_budget",
+            "drawdown_response",
+            "recovery_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185515-8f94f2",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.4667,
+        "spec": {
+          "decision_object": "portfolio_risk_controller",
+          "core_mechanism": "drawdown_risk_budget",
+          "title": "风险状态的多源证据合并与预算档位交接：状态识别、预算映射、缩仓执行与恢复准入",
+          "novelty_claim": "与给定最近的 TG-20261029-185155-f10be3（同 drawdown_risk_budget、同 portfolio_risk_controller）相比：其核心是预算表达形式的取舍与缩减执行的连续性（挂单与T+1库存处置、逐级恢复回指预算），未把参与方式作为独立决策，也未让参与方式回指风险状态识别；本任务的实际研究取舍是风险状态的多源证据合并与去重口径、预算档位与参与方式档位两套状态之间的一致与交接、以及受限参与改变证据分布后如何重新读取风险状态，闭环为 drawdown_response 回写 state_identification、participation_policy 回写 state_identification。与 TG-20261029-185000-a26d12 相比，后者把回撤响应与恢复作为参与控制主循环内的规则显式化；本任务不把参与方式视为预算的末端映射，而是与预算档位并列并纳入证据口径反馈，且新增缩减结果对状态识别的回写这条边。与 TG-20261029-172300-e01b9a（state_identification、switch_hysteresis、participation_policy、risk_budget、state_migration）相比，本任务不含切换迟滞与状态迁移，差异来自证据合并与执行可行性约束，而非迟滞机制本身。与种子S08一致，属该方向扩展。沿用既有机制、对象与决策词表，未引入新ID；未声称已获取数据、已运行或已实证有效。若实现退化为在f10be3或a26d12上仅调整档位数量与阈值，应视为其变体而非独立新题。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S08",
+              "S07",
+              "TG-20261029-185155-f10be3",
+              "TG-20261029-185000-a26d12",
+              "TG-20261029-172300-e01b9a"
+            ],
+            "kind": "evidence_merge_and_participation_budget_handoff_pending_review"
+          },
+          "research_question": "在国内股票日线＋分钟教学环境中，只使用当时已收盘的价量与账户信息：如何把不同来源的风险证据（组合已回撤幅度、近期已实现波动、仓位与现金集中度）合并为一个可审计的风险状态判断，并明确各证据的优先与去重关系，使同一段回撤不会被重复计为多档缩减；该判断如何映射到预算档位，并在缩减触发时按当时可成交约束（T+1新买不可卖、单票权重上限、现金不足）决定缩减到哪一档以及哪些待办失效；缩减之后，恢复准入需要哪些独立于回撤记忆被覆盖的证据才能升档，而升档后参与方式的调整又如何反过来改变下一段风险证据的读取口径？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "risk_budget"
+            ],
+            [
+              "risk_budget",
+              "drawdown_response"
+            ],
+            [
+              "drawdown_response",
+              "recovery_policy"
+            ],
+            [
+              "recovery_policy",
+              "participation_policy"
+            ],
+            [
+              "participation_policy",
+              "state_identification"
+            ],
+            [
+              "drawdown_response",
+              "state_identification"
+            ]
+          ],
+          "maintenance_targets": [
+            "risk_recovery",
+            "regime_transition",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "risk_budget",
+            "drawdown_response",
+            "recovery_policy",
+            "participation_policy"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-041755-b4949b",
+        "exact_structure": false,
+        "status": "variant_candidate",
+        "score": 0.4667,
+        "spec": {
+          "decision_object": "portfolio_risk_controller",
+          "core_mechanism": "drawdown_risk_budget",
+          "title": "风险预算表达与恢复执行链：暴露刻度选择、分步减仓可行性与逐级恢复准入",
+          "novelty_claim": "与existing_tasks中最近的F04任务对照：TG-20261029-185155-f10be3（drawdown_risk_budget / portfolio_risk_controller，必需决策为state_identification、risk_budget、drawdown_response、recovery_policy、state_migration）已把预算刻度表达与缩减执行连续性作为核心；TG-20261029-185000-a26d12与TG-20261029-185515-8f94f2分别以参与方式联动和多源证据合并与参与档位交接为差异来源，均包含participation_policy。本任务的必需决策集合与f10be3相同，但实际研究取舍不同：f10be3强调预算表达形式的取舍与逐级恢复回指预算，本任务在此基础上把缩减执行的可行性约束（T+1新买不可卖、已挂未成交单、单票权重上限、现金不足）对预算档位选择与恢复准入的约束显式化，并使恢复准入必须读取预算占用与目标预算差额及残余敞口，而非仅依据回撤记忆被覆盖；state_migration回指state_identification，要求缩减未完成与恢复进行中的中间状态在段间被识别，避免重复缩减或跳档恢复。与a26d12相比，本任务不把参与方式作为独立必需决策，不以参与档位语义为控制量；与8f94f2相比，本任务不纳入participation_policy，不以多源证据合并与参与档位交接为核心，差异来自执行可行性对预算刻度的约束与承接规则。与种S08方向一致，属该方向扩展；若实现退化为在f10be3上仅调整档位数量、阈值或维护目标表述顺序，应视为其变体而非独立新题，需人工语义审。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S08",
+              "SRC_CHAN",
+              "SRC_PROJECT_PLAN",
+              "TG-20261029-185155-f10be3",
+              "TG-20261029-185000-a26d12"
+            ],
+            "kind": "budget_execution_feasibility_and_recovery_admissibility_pending_review"
+          },
+          "research_question": "在国内股票或ETF日线环境中，仅使用已完成交易日收盘后可见的价格、成交与账户信息：如何把组合风险状态（已回撤幅度、近期已实现波动、仓位与现金集中度）整理为可审计的预算表达刻度（例如暴露比例、名义上限或现金留存比例），并在缩减触发时按当时可成交约束——T+1新买不可卖、已挂未成交单、单票权重上限与现金不足——决定缩减到哪一档、哪些待办失效、未完成减仓如何顺延；缩减后又如何按逐级恢复条件部分回升预算，而不是一次性回到原预算，使预算占用、未完成待办与目标预算的差额在跨段维护中连续可核？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "risk_budget"
+            ],
+            [
+              "risk_budget",
+              "drawdown_response"
+            ],
+            [
+              "drawdown_response",
+              "recovery_policy"
+            ],
+            [
+              "recovery_policy",
+              "risk_budget"
+            ],
+            [
+              "drawdown_response",
+              "state_migration"
+            ],
+            [
+              "state_migration",
+              "state_identification"
+            ]
+          ],
+          "maintenance_targets": [
+            "risk_recovery",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "risk_budget",
+            "drawdown_response",
+            "recovery_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-042021-e6bb50",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 0.375,
+        "spec": {
+          "decision_object": "portfolio_risk_controller",
+          "core_mechanism": "drawdown_risk_budget",
+          "title": "风险预算的回撤证据等级与恢复准入：预算档位下调、未成交待办清理与分步回升",
+          "novelty_claim": "与 existing_tasks 中最近的同机制、同对象任务逐项对照：TG-20261029-185155-f10be3（drawdown_risk_budget / portfolio_risk_controller）研究预算是名义比例、暴露上限还是现金留存的表达选择及缩减执行连续性，不含参与方式与证据等级的分级去重；TG-20261029-185000-a26d12 把回撤响应与恢复作为参与控制主循环内的规则，并以 state_migration 承接旧状态，本任务不含 state_migration，而以缩减执行结果回写证据读取口径、资金分配回指证据等级构成闭环；TG-20261029-185515-8f94f2 含 participation_policy 且以参与方式与预算档位并列交接，本任务不含参与方式决策，差异来自证据可信等级与恢复准入的独立证据要求；TG-20261029-172300-e01b9a 以 switch_hysteresis 为核心，本任务不含切换迟滞。与种子 S08 方向一致，据此明确预算档位、缩减执行与分步回升之间的相互依赖，以及缩减结果对证据读取口径的回压。最近反馈判定的重复项 TG-20261105-041755-b4949b 与本任务不同：该候选与 f10be3 决策集和依赖边完全一致，本任务必需决策以 capital_allocation 替代 participation_policy 并把 drawdown_response 直接回写 state_identification，要求解决的是证据等级与占用口径的相互影响，而非把既有执行可行性约束写得更显式。不声称已证实独立、数据已验收或已实证有效；若实现退化为在 f10be3 上仅调整档位数量或阈值，应视为该任务的变体，需人工语义审。书目仅提供方向，不引用章节、页码、最优参数或实证结果。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S08",
+              "SRC_CHAN",
+              "SRC_PROJECT_PLAN"
+            ],
+            "kind": "evidence_grade_and_recovery_admission_pending_review"
+          },
+          "research_question": "在国内股票与ETF日线环境中，仅用当时已收盘的价量与账户信息：如何把组合层面的已回撤幅度、近期已实现波动与暴露集中度整理成带证据等级的风险判断，使同一段回撤与同一类风险来源不被重复计为多档下调；该判断如何映射到可审计的预算档位，并在下调触发时按当时可成交约束（T+1不可卖库存、单票权重上限、现金不足）决定下到哪一档以及哪些未成交待办随之失效；下调后现金碎片与剩余仓位的实际占用，又如何改变下一段风险证据的读取口径与可信等级，使恢复准入读取的是调整后的占用而非被覆盖前的记忆？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "risk_budget"
+            ],
+            [
+              "risk_budget",
+              "drawdown_response"
+            ],
+            [
+              "drawdown_response",
+              "recovery_policy"
+            ],
+            [
+              "recovery_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "state_identification"
+            ],
+            [
+              "drawdown_response",
+              "state_identification"
+            ]
+          ],
+          "maintenance_targets": [
+            "risk_recovery",
+            "state_compatibility",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "risk_budget",
+            "drawdown_response",
+            "recovery_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-184839-b184fc",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.2632,
+        "spec": {
+          "decision_object": "breakout_position_state",
+          "core_mechanism": "consolidation_breakout",
+          "title": "整理区间突破的参与控制：切换迟滞、失败处置与预算恢复",
+          "novelty_claim": "与nearest候选 TG-20261029-172300-ca5a47（同为consolidation_breakout、breakout_position_state）相比：该候选的必需决策为区间识别、突破确认、失败退出、再入场与资金分配，状态辨识与迟滞不在其中，决策依赖链以突破确认为枢纽。本任务把state_identification与switch_hysteresis设为必需决策并让迟滞成为失败退出与再入场的前置条件，使依赖结构形成闭环（资金分配回馈状态识别），维护目标也从signal_execution_gap转向regime_transition与risk_recovery。相对历史HT01宽泛短周期趋势，本任务明确引入状态参与控制与预算恢复，而非仅调整窗口或阈值。仍复用既有机制与决策词表，未引入新ID；若实现退化为在HT01或ca5a47上增加一个过滤阈值，应视作原题扩展而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01",
+              "TG-20261029-172300-ca5a47",
+              "TG-20261029-172300-e01b9a"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "在国内股票日线与分钟教学环境中，如何仅用当时已收盘数据界定整理区间并识别趋势/震荡状态，用切换迟滞控制突破后的参与程度；当突破失败时如何退出、冷却与再入场，并在回撤或连续失败后缩减或恢复资金预算，同时让已建仓、T+1 不可卖库存与跨段状态连续兼容？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "state_identification"
+            ],
+            [
+              "state_identification",
+              "switch_hysteresis"
+            ],
+            [
+              "switch_hysteresis",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "state_identification"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "regime_transition",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "state_identification",
+            "switch_hysteresis",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185109-ad8725",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.2,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "趋势回撤中的资格复核、回撤定位与分批库存迁移",
+          "novelty_claim": "与给定最近候选 TG-20261029-184647-ca78bb（同为trend_pullback、trend_pullback_inventory，必需决策含趋势资格、回撤定位、分批库存、退出政策、状态迁移）相比，本任务的实际差异在于：把entry_confirmation设为必需决策，使回撤定位到分批库存之间存在显式的可成交确认环节，并要求退出政策回指趋势资格形成复核反馈边，以及趋势资格直接约束状态迁移的承接规则；依赖结构从近似链式变为含两条回指边的闭环，维护目标新增regime_transition以覆盖资格撤回后的状态衔接。与同家族冲突题 TG-20261029-172300-ca5a47（整理区间突破、失败退出与再入场）相比，决策对象由突破候选状态改为趋势回撤库存，不以突破确认和再入场为核心；与历史 HT01 宽泛短周期趋势相比，明确增加了分批库存与状态迁移决策。本任务复用既有机制与决策词表，未引入新ID，也未声称已证实独立或已实证有效；若实现退化为在 ca78bb 上仅调整回撤阈值或增加一个过滤器，应视为该候选的变体而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-184647-ca78bb"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "在国内股票日线与分钟教学环境中，如何仅用当时已收盘数据确认既有上升趋势仍然适用，并把回撤深度与回撤结束的判定转化为可成交的入场确认；入场后如何分批建仓以满足T+1不可卖库存约束，退出条件触发或趋势资格被撤回时如何承接已建批次与未决状态，使趋势资格、回撤定位、分批库存和退出在跨段维护中保持一致？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "trend_qualification"
+            ],
+            [
+              "staged_inventory",
+              "state_migration"
+            ],
+            [
+              "trend_qualification",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility",
+            "regime_transition"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "entry_confirmation",
+            "staged_inventory",
+            "exit_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-184647-ca78bb",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.1579,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "趋势回撤中的分层库存与退出维护",
+          "novelty_claim": "与 nearest 候选 TG-20261029-172300-ca5a47（整理区间突破、失败退出与再入场）相比，本任务不以突破确认和再入场为核心，而是把趋势回撤位置、分层库存和退出政策作为必须解决的相互依赖决策，并要求状态迁移承接部分批次与趋势资格撤回后的未决状态；与历史 HT01 宽泛短周期趋势相比，明确增加了分层库存和状态迁移决策。不声称已证实独立于突破题，仍可能人工审认为同家族相邻扩展；判断依据是决策对象从突破候选状态转为趋势回撤库存，需实际研究取舍而非仅改参数。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-172300-ca5a47"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "在已确认趋势内，如何定位回撤结束以启动分层建仓，并将趋势否定、T+1 库存约束与退出后状态迁移衔接为可维护的连续流程？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "staged_inventory",
+            "exit_policy",
+            "state_migration"
+          ]
+        }
+      }
+    ]
+  }
+}

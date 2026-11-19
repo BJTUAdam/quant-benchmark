@@ -1,0 +1,8 @@
+**
+!finlab
+!finlab/**
+!deployment
+!deployment/Dockerfile.v2
+!deployment/requirements.v2.lock
+**/__pycache__
+**/*.pyc

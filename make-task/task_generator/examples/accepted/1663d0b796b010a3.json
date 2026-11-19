@@ -1,0 +1,450 @@
+{
+  "action": "auto_accepted",
+  "admission_content_source": "verified_reviewed_snapshot",
+  "approval": {
+    "action": "auto_accepted",
+    "candidate_id": "TG-20261105-041820-c67182",
+    "created_at": "2026-11-10T10:05:15+00:00",
+    "review_hash": "f2eda92d370021013160e0d661d2d9e4f9ad4a4f79f9b297b935bcbfd97eaf7b",
+    "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1",
+    "task_id": "TG-20261105-041820-c67182",
+    "version": 1
+  },
+  "approval_method": "automated",
+  "artifacts": {
+    "public_files": {
+      "CHANGELOG.md": "# 维护记录\n\n逐段记录保持、调参或改逻辑的依据及状态兼容。\n",
+      "DATA_API.md": "# 桥接数据契约\n\n仅从桥接器获取数据，无行情文件包。URL和令牌由运行系统注入；上游URL和Tushare令牌属于运营方。\n\n```python\nfrom finlab import tushare as ts\npro = ts.pro_api()  # 默认DataFrame；dataframe=False可返回列表\n# pro.query(\"daily\", ts_code=\"000001.SZ\", end_date=\"虚拟YYYYMMDD\")\n```\n\n|接口|允许字段|频率|\n|---|---|---|\n|fut_daily|ts_code, trade_date, open, high, low, close, settle, vol, oi|daily|\n|fut_basic|ts_code, name, list_date, delist_date|daily|\n\n字段含义与单位以绑定契约及官方定义为准。Tushare股票/ETF日线vol通常为手、amount为千元；回测输入由平台转成股/元。\n期货vol为手，价格按合约报价单位；不能套用股票倍率。分钟接口的单位必须另行确认。\n缺失值使用null，不填造价格；停牌、无交易和数据缺失分别处理。\n未知字段、未冻结范围和未来查询会返回错误，不能将错误当作零值或无交易。\n独立日期、时间戳、报告期和已登记时间文本统一映射，全部均为虚拟日期，不是实际历史年份。\n不得根据虚拟年份套用已知股灾、政策、节假日或预设事件；只按桥接交易日历与当前可见信息运行。\n名称代码及其嵌入年月保留，但不得用它们重建真实时间映射。\n",
+      "RESEARCH.md": "# 研究记录\n\n说明研究决策、证据、验证与限制。尚未执行的检查须标明。\n",
+      "SUBMISSION.md": "# 提交协议 finlab.submission.v2\n\n必需：strategy.py、backtest.py、params.json、RESEARCH.md、CHANGELOG.md。\nStrategy继承finlab.sdk.Strategy，使用initialize(ctx)、on_bars(ctx)、on_order(ctx,event)、on_trade(ctx,event)、on_finish(ctx)。\nctx.now为虚拟时间；虚拟年份仅是事件索引，不对应真实历史年份，不据此预设股灾、政策或未来事件。\nctx.bars为同时间戳已完成行情切片；ctx.portfolio为当前账户；ctx.params为本轮参数；ctx.memory必须是JSON对象。\nctx.order(symbol,quantity,side=\"buy\"/\"sell\",limit_price=None,tif=\"GTC\"/\"DAY\")按股或合约手数下单；ctx.cancel(order_id)撤销未完成订单。\nctx.query通过受限桥接器查询。回调返回前产生的订单依次校验，不能修改平台费用、成交价格或账户。\nbacktest.py调用finlab.sdk.launch。只能使用预装finlab、pandas、numpy及标准库；如需依赖由运营方构建审核后的新镜像。\n资源预算由本人先运行finlab setup明确设置；AI不能代填CPU、内存或时限。未配置时不能启动正式运行。\n提交检查不在宿主机执行代码；真正可运行性由隔离Docker运行验证。每轮代码与参数取内容哈希。\n系统结果包括equity.csv、orders.csv、trades.csv、metrics.json、run_manifest.json；可信检查点仅在平台保存。\n",
+      "TASK.md": "# 跨品种加工链条的关系重估与残差腿组合：月份选择、对冲比例、分项信号汇总与保证金预算的联合维护\n\n> v2任务规格。规格批准、数据绑定和运行接入分别记录，当前状态以task_input.draft.json与平台登记记录为准。\n\n研究目标：在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段：如何在两个不同品种之间估计当时可见的滚动对冲关系（含合约乘数与整数手数约束），并根据当时已知的剩余期限和流动性选出实际参与的两条合约腿；当残差偏离达到参与条件时，如何以真实有符号手数建仓并逐腿撮合、容许部分成交与残余敞口；当关系残差尺度或对冲比例发生变化时，如何判定关系失效、暂停参与并重新估计，而不是把普通波动当作关系断裂；双腿保证金占用与费用随价格、保证金率和手数变化时，如何在预算约束下决定配对手数、缩减或退出；版本更新或重新估计后，如何迁移旧腿、未成交换腿与已确认的对冲比例版本，使分段研发中头寸与状态连续可核？\n\n## 运行协议\n\n先在研发期开发首版，再经历七段逐步揭晓的正式期。每段运行时冻结代码；完成后可以保持、调参或修改逻辑。\n现金、持仓、未完成订单和JSON memory连续。修改不重置账户，不覆盖过去结果。全部七段的连续账户用于评价。\n实际虚拟时间范围、数据版本和分段边界在绑定后确定。\n\n## 研究决策\n\n- 在两个已支持品种的可交易合约集合中，仅用当时已收盘且已发布的剩余期限、成交活跃度与价格刻度，决定本期实际参与的两条合约腿；须处理某腿临近到期或流动性迁移时的候选更替，并把候选集合与选择依据作为可核状态保存，不交易合成价差或连续拼接价。；相互影响：选出的两腿直接决定hedge_estimation可比的价格序列与合约乘数口径；state_migration回指本模块，要求迁移时重新评估旧腿是否仍在候选集合内，从而让上月确认的配对不自动沿用。\n- 在选定两腿的已完成日线序列上估计当时可见的滚动对冲比例，处理两品种计价单位、合约乘数差异与整数手数取整规则；输出对冲比例及其可信区间、取整后的残余敞口估计，并按固定节奏或事件触发重估，不引用未来数据。；相互影响：接收month_selection的腿集合后产出残差定义，供entry_exit判定参与；relationship_monitoring判定关系失效时回指本模块触发重估并改变残差口径，重估结果又改变entry_exit的参与阈值含义。\n- 依据当前残差水平与波动标准化后的偏离尺度，决定是否参与、方向与真实有符号手数；逐腿下单并记录逐腿成交、部分成交与残余敞口，退出条件考虑价差收敛、持有时限与关系状态，未成交残余须在后续可执行时点处置。；相互影响：依赖hedge_estimation给出的比例与残差口径确定参与规模；退出与残余敞口的处置结果进入relationship_monitoring作为关系变化的证据来源，并影响margin_budget占用的释放节奏。\n- 持续监控残差尺度、对冲比例稳定性与两腿流动性是否偏离估计窗口所描述的关系；区分残差扩大属于正常波动还是关系断裂，据此输出暂停参与、维持参数或触发重估的状态，并记录判定依据与生效时点。；相互影响：接收entry_exit退出证据与本模块自身的偏离度量，输出暂停或重估决定；重估回指hedge_estimation，暂停则约束margin_budget只在处置旧腿范围内使用预算。\n- 按真实腿的价格、合约乘数、保证金率候选与费用估计，将可用资金映射为每腿可下单手数与预算上限；缩减时按可成交约束分步处理，优先释放流动性较好一腿并记录残余敞口，禁止在预算不足时新开双腿。；相互影响：接收relationship_monitoring的暂停或恢复状态决定预算是否可用于新开仓；预算与手数结果进入state_migration作为迁移时必须保留的占用基线。\n- 在重新估计、合约更替或版本更新时迁移两腿持仓、未完成订单、残余敞口、对冲比例版本与预算占用基线；迁移规则须与已确认的腿选择兼容，处置无法对应的旧腿并把处置结果写入持久化状态。；相互影响：回指month_selection，要求迁移后旧配对重新通过候选筛选；承接margin_budget的占用基线，使下一段预算计算不会重复占用或遗漏已挂未成交单。\n\n可研究的参数与结构选择：\n\n- 滚动估计窗口长度（辅助参数，不替代关系估计设计）\n- 残差偏离的波动标准化方式与参与阈值档位\n- 整数手数取整规则与残余敞口容忍上限\n- 关系失效判定的连续确认次数与暂停时长\n- 预算占用的安全边际与逐腿缩仓顺序规则\n- 对冲比例重估的固定节奏与事件触发条件\n\n持续维护依据：后续揭晓的已完成交易日数据可能显示对冲比例漂移、残差尺度变化或某腿流动性迁移。若对冲比例在重估窗口内仍稳定且残余敞口可控，应保持参数与逻辑；若残差尺度持续超出估计区间，应调整关系失效判定与暂停条件；若某腿频繁因流动性或到期被迫更替，则需修改month_selection与state_migration的衔接逻辑。核心维护对象是关系漂移与保证金暴露：真实腿敞口、费用与保证金变化会改变可承受手数，旧题的固定比例或固定手数做法可能不再适用。本任务不承诺每次维护提升收益，也不要求实盘盈利。\n\n## 数据与执行\n\n行情通过Tushare协议桥接器查询。使用环境变量MARKET_BRIDGE_URL和MARKET_BRIDGE_TOKEN，详见DATA_API.md。\n名称与代码保持真实；全部时间字段使用虚拟时间，仅表示事件顺序和可见时点。\n虚拟年份不对应真实历史年份，不得按年份预设股灾、政策、节假日或未来事件，也不得反推实际时期。\n交易日以服务返回日历为准，不按虚拟日期的星期猜测；策略只能根据当时已可见数据形成判断。\n只能使用当前可见信息，不访问外网。指数仅用于查询与基准，不可下单。\nAKQuant 0.3.76执行撮合；收盘后决策、下一根行情开盘撮合。期货多腿逐腿撮合，可能部分成交，需处理残余敞口。\n交易单位、T+0/T+1、费用、公司行为、价格限制、保证金与结算按绑定后的runtime_profile固定。\n资源预算尚未选择，必须由本人先运行finlab setup；CPU、内存和时限由本人明确配置，AI不能代填。\n任务只提供非生效的CPU/内存建议；单次运行时限由使用者本人明确选择，不预填。\n规则未绑定时不能正式运行。原始价格用于撮合，研究复权数据不得重复计入公司行为收益。\n\n## 提交与评价\n\n提交strategy.py、backtest.py、params.json、RESEARCH.md、CHANGELOG.md，遵守SUBMISSION.md。\n回测入口必须可执行，策略通过finlab.strategy.v2接口运行。系统生成权益、订单、成交、指标和运行记录。\n统一记录扣除成本后的收益、风险和维护过程；评分配置在正式开始前固定，题目不提供答案或预期成绩。\n",
+      "backtest.py": "from finlab.sdk import launch\n\nif __name__ == \"__main__\":\n    launch(\"strategy.py\", \"params.json\")\n",
+      "bridge_contract.json": "{\n  \"schema_version\": \"finlab.bridge_contract.v2\",\n  \"identity_policy\": \"real_names_and_codes\",\n  \"date_domain\": \"virtual\",\n  \"calendar_semantics\": \"virtual_sequence_only_not_historical_years\",\n  \"virtual_date_notice\": \"全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。\",\n  \"url_env\": \"MARKET_BRIDGE_URL\",\n  \"token_env\": \"MARKET_BRIDGE_TOKEN\",\n  \"virtual_start\": null,\n  \"virtual_stop\": null,\n  \"minimum_years\": 2,\n  \"symbols\": [\n    \"B\",\n    \"M\",\n    \"Y\",\n    \"SC\",\n    \"FU\",\n    \"LU\",\n    \"FG\",\n    \"SA\"\n  ],\n  \"endpoints\": [\n    {\n      \"api_name\": \"fut_daily\",\n      \"fields\": [\n        \"ts_code\",\n        \"trade_date\",\n        \"open\",\n        \"high\",\n        \"low\",\n        \"close\",\n        \"settle\",\n        \"vol\",\n        \"oi\"\n      ],\n      \"frequency\": \"daily\",\n      \"visibility\": \"available_at_lte_controller_clock\"\n    },\n    {\n      \"api_name\": \"fut_basic\",\n      \"fields\": [\n        \"ts_code\",\n        \"name\",\n        \"list_date\",\n        \"delist_date\"\n      ],\n      \"frequency\": \"daily\",\n      \"visibility\": \"available_at_lte_controller_clock\"\n    }\n  ],\n  \"binding_status\": \"not_bound\",\n  \"dataset_id\": null,\n  \"required_checks\": [\n    \"point_in_time\",\n    \"coverage\",\n    \"calendar\",\n    \"units\",\n    \"corporate_actions_or_settlement\",\n    \"trading_rules\"\n  ]\n}\n",
+      "params.json": "{}\n",
+      "runtime_profile.json": "{\n  \"schema_version\": \"finlab.runtime.v2\",\n  \"engine\": \"akquant\",\n  \"engine_version\": \"0.3.76\",\n  \"strategy_api\": \"finlab.strategy.v2\",\n  \"asset_types\": [\n    \"FUTURES\"\n  ],\n  \"index_role\": \"query_and_benchmark_only\",\n  \"frequency\": \"daily\",\n  \"fill_policy\": \"NextOpen\",\n  \"initial_cash\": 1000000,\n  \"currency\": \"CNY\",\n  \"formal_segments\": 7,\n  \"multi_leg_execution\": \"per_leg_partial_fills_possible\",\n  \"state_continuity\": [\n    \"cash\",\n    \"positions\",\n    \"open_orders\",\n    \"memory\"\n  ],\n  \"resources\": null,\n  \"resource_status\": \"requires_human_setup\",\n  \"resource_recommendations\": {\n    \"cpus\": 2,\n    \"memory_mb\": 4096\n  },\n  \"market_rules_status\": \"requires_binding\",\n  \"instruments\": null,\n  \"benchmark\": null\n}\n",
+      "strategy.py": "\"\"\"接口演示：仅保持空仓，不构成题目参考答案。\"\"\"\nfrom finlab.sdk import Strategy as BaseStrategy\n\nclass Strategy(BaseStrategy):\n    def initialize(self, ctx):\n        ctx.memory.setdefault(\"observations\", 0)\n\n    def on_bars(self, ctx):\n        ctx.memory[\"observations\"] += 1\n        # ctx.order(\"真实代码\", 100, side=\"buy\")\n        # 日期均为虚拟日期。查询格式与任务授权见DATA_API.md。\n",
+      "task_input.draft.json": "{\n  \"schema_version\": \"finance_task_input.draft.v2\",\n  \"task_id\": \"TG-20261105-041820-c67182\",\n  \"candidate_id\": \"TG-20261105-041820-c67182\",\n  \"task_version\": 1,\n  \"initial_message\": {\n    \"role\": \"user\",\n    \"content_file\": \"public/TASK.md\"\n  },\n  \"expected_outputs\": [\n    \"CHANGELOG.md\",\n    \"RESEARCH.md\",\n    \"backtest.py\",\n    \"params.json\",\n    \"strategy.py\"\n  ],\n  \"dataset_id\": null,\n  \"formal_intervals\": null,\n  \"spec_status\": \"spec_accepted\",\n  \"approval_method\": \"automated\",\n  \"novelty\": \"duplicate\",\n  \"counts_new_question\": false,\n  \"data_status\": \"not_bound\",\n  \"runtime_status\": \"not_connected\",\n  \"binding_contract\": \"bridge_contract.json\",\n  \"runtime_profile\": \"runtime_profile.json\"\n}\n"
+    },
+    "public_hash": "4aaf4ec2533639a335edf7d7aa2373a4278b31f7476b3631f9de7f8dc8d097ca",
+    "review": {
+      "classification": "duplicate",
+      "closest_task_id": "TG-20261105-042329-afee5f",
+      "comparisons": [
+        {
+          "differences": [
+            "历史项聚焦FU/LU固定双腿，候选改为品种池内择两腿，但择腿与对冲仍属旧题宽泛允许范围",
+            "候选新增state_migration回指month_selection、relationship_monitoring回指hedge_estimation两条闭环边，仅为依赖描述细化，不改变核心决策对象",
+            "候选未引入新的必需决策或维护机制"
+          ],
+          "similarities": [
+            "同为F05跨品种残差机制、cross_product_leg_portfolio决策对象",
+            "必需决策集合相同，均含month_selection/hedge_estimation/entry_exit/relationship_monitoring/margin_budget/state_migration",
+            "均要求滚动对冲、关系失效暂停重估、真实腿逐腿撮合与残余敞口处理"
+          ],
+          "task_id": "TG-20261029-172301-36425d"
+        },
+        {
+          "differences": [
+            "该pending项限定FG/SA两品种，候选使用B/M/Y/SC/FU/LU/FG/SA宽品种池并要求择两腿",
+            "此项差异仅为标的池配置与表述变化，核心机制、决策对象、必需决策与闭环依赖一致，未产生实质研究决策变化"
+          ],
+          "similarities": [
+            "同为cross_product_residual与cross_product_leg_portfolio",
+            "必需决策集合完全相同，依赖链亦含state_migration→month_selection与relationship_monitoring→hedge_estimation两条闭环边",
+            "研究问题均覆盖：当时可见滚动对冲估计、整数手数与乘数、残差参与建仓、关系失效区分与暂停重估、双腿保证金预算、迁移旧腿与对冲比例版本使状态连续",
+            "维护目标高度重合（hedge_drift、margin_exposure、state_compatibility/expiry_roll）"
+          ],
+          "task_id": "TG-20261105-042329-afee5f"
+        },
+        {
+          "differences": [
+            "HT05固定FG/SA且含独立roll_policy，候选不含roll_policy而将换月并入state_migration",
+            "候选不预绑产业配对，但择腿机制与HT05的month_selection宽泛范围重叠"
+          ],
+          "score": 0.6667,
+          "similarities": [
+            "同属跨品种统计残差与双腿对冲母题",
+            "均涉及关系失效判定与换月迁移"
+          ],
+          "task_id": "HT05"
+        },
+        {
+          "differences": [
+            "HT04为油品多品种相对价值且含signal_aggregation，候选为两品种残差对冲",
+            "候选不以油品组合为对象，但残差对冲框架已被HT04宽泛允许"
+          ],
+          "similarities": [
+            "同为多腿真实合约相对价值与滚动对冲",
+            "均含month_selection、hedge_estimation、relationship_monitoring、margin_budget"
+          ],
+          "task_id": "HT04"
+        },
+        {
+          "differences": [
+            "该题为crush_component_aggregation，核心是B/M/Y加工关系与分项信号冲突裁决",
+            "候选跨品种残差机制与择两腿，决策对象different"
+          ],
+          "similarities": [
+            "同为F05真实分合约、整数手数、保证金预算与状态迁移",
+            "均有state_migration回指month_selection的闭环"
+          ],
+          "task_id": "TG-20261105-042048-66d9a5"
+        },
+        {
+          "differences": [
+            "HT03为豆类加工系数压榨关系，候选为统计残差对冲，不使用加工系数",
+            "决策对象分别为crush_leg_portfolio与cross_product_leg_portfolio"
+          ],
+          "similarities": [
+            "同为F05真实多腿头寸与资金占用管理"
+          ],
+          "task_id": "HT03"
+        },
+        {
+          "differences": [
+            "该题为F06同品种跨期价差配对，决策对象calendar_pair_inventory",
+            "候选为F05跨品种残差，机制与对象不同"
+          ],
+          "similarities": [
+            "均涉及月份/到期选择与迁移闭环"
+          ],
+          "task_id": "TG-20261029-185356-d4e28b"
+        },
+        {
+          "differences": [
+            "同品种近远月价差配对，非跨品种对冲估计",
+            "机制calendar_spread_pairing与候选cross_product_residual不同"
+          ],
+          "similarities": [
+            "同为期货真实分合约、到期迁移与保证金预算"
+          ],
+          "task_id": "TG-20261029-172301-684a8d"
+        },
+        {
+          "differences": [
+            "同品种期限单位配对与移仓，决策对象calendar_pair_inventory",
+            "候选跨品种残差，不涉及期限曲线可比表达"
+          ],
+          "similarities": [
+            "同为多月份选择与整数手数配对"
+          ],
+          "task_id": "TG-20261029-185226-a83ad1"
+        },
+        {
+          "differences": [
+            "该题监控近腿流动性衰减下的配对与规模，机制calendar_spread_pairing",
+            "候选监控跨品种对冲比例稳定性，机制不同"
+          ],
+          "similarities": [
+            "均含relationship_monitoring并回指选择模块"
+          ],
+          "task_id": "TG-20261029-185538-ab9792"
+        }
+      ],
+      "content_hash": "73d4ccd3ead8c741d30117c788eaef567c2e6a6f1833700dc37f5c65b5092d76",
+      "context_hash": "38d2d465548e4ad2eff33950a839456b94d04158ea4a7ebe1fd3e688df4067d6",
+      "issues": [],
+      "long_horizon_valid": true,
+      "mode": "model_api",
+      "pending_bindings": [
+        "真实分合约同时月份覆盖与规则证据待绑定（binding_status=not_bound, market_rules_status=requires_binding）",
+        "虚拟起止与正式分段边界待绑定",
+        "资源预算须本人运行finlab setup配置，resources=null为预期待办",
+        "评分配置待正式开始前固定",
+        "运行难度与覆盖需实测"
+      ],
+      "public_information_safe": true,
+      "rationale": "候选与pending项TG-20261105-042329-afee5f在核心机制（cross_product_residual）、决策对象（cross_product_leg_portfolio）、必需决策集合、闭环依赖边（state_migration→month_selection、relationship_monitoring→hedge_estimation）及研究问题各环节上逐项等价。唯一显见差异是标的池从FG/SA固定两品种改为宽品种池内择两腿，month_selection本身已允许按当时可见条件选择实际参与的合约腿，属旧题宽泛允许范围内的参数/样本配置变化，不构成实质研究决策改变。与历史项TG-20261029-172301-36425d相比同样只增加依赖边与择腿范围，属依赖描述细化。novelty_claim所强调的“迁移时对冲比例版本与候选腿集合互不自动沿用”已在pending项与36425d中作为state_migration回指描述覆盖，非新增必需决策。因此判duplicate。",
+      "reviewed_at": "2026-11-05T04:28:48+00:00",
+      "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1",
+      "status": "needs_attention",
+      "validation_errors": []
+    },
+    "status": "captured"
+  },
+  "candidate_id": "TG-20261105-041820-c67182",
+  "counts_new_question": false,
+  "created_at": "2026-11-10T10:05:15+00:00",
+  "novelty": "duplicate",
+  "provenance": {
+    "approval_event": {
+      "action": "auto_accepted",
+      "candidate_id": "TG-20261105-041820-c67182",
+      "created_at": "2026-11-10T10:05:15+00:00",
+      "note": "Program checks + current model review; no human approval",
+      "review_hash": "f2eda92d370021013160e0d661d2d9e4f9ad4a4f79f9b297b935bcbfd97eaf7b",
+      "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1",
+      "task_id": "TG-20261105-041820-c67182",
+      "version": 1
+    },
+    "human_approved": false,
+    "model_event": {
+      "action": "model_reviewed",
+      "candidate_id": "TG-20261105-041820-c67182",
+      "created_at": "2026-11-05T04:28:48+00:00",
+      "id": 58,
+      "note": "独立API初筛完成；并非人工批准",
+      "review_hash": "f2eda92d370021013160e0d661d2d9e4f9ad4a4f79f9b297b935bcbfd97eaf7b",
+      "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1"
+    },
+    "origin": "local_automated_acceptance",
+    "trusted_import": false
+  },
+  "related_reference_status": "comparison_reference_only_not_inherited_approval",
+  "related_task_id": "TG-20261105-042329-afee5f",
+  "review_hash": "f2eda92d370021013160e0d661d2d9e4f9ad4a4f79f9b297b935bcbfd97eaf7b",
+  "schema_version": "taskgen.approved.v1",
+  "spec": {
+    "bridge_contract": {
+      "binding_status": "not_bound",
+      "calendar_semantics": "virtual_sequence_only_not_historical_years",
+      "dataset_id": null,
+      "date_domain": "virtual",
+      "endpoints": [
+        {
+          "api_name": "fut_daily",
+          "fields": [
+            "ts_code",
+            "trade_date",
+            "open",
+            "high",
+            "low",
+            "close",
+            "settle",
+            "vol",
+            "oi"
+          ],
+          "frequency": "daily",
+          "visibility": "available_at_lte_controller_clock"
+        },
+        {
+          "api_name": "fut_basic",
+          "fields": [
+            "ts_code",
+            "name",
+            "list_date",
+            "delist_date"
+          ],
+          "frequency": "daily",
+          "visibility": "available_at_lte_controller_clock"
+        }
+      ],
+      "identity_policy": "real_names_and_codes",
+      "minimum_years": 2,
+      "required_checks": [
+        "point_in_time",
+        "coverage",
+        "calendar",
+        "units",
+        "corporate_actions_or_settlement",
+        "trading_rules"
+      ],
+      "schema_version": "finlab.bridge_contract.v2",
+      "symbols": [
+        "B",
+        "M",
+        "Y",
+        "SC",
+        "FU",
+        "LU",
+        "FG",
+        "SA"
+      ],
+      "token_env": "MARKET_BRIDGE_TOKEN",
+      "url_env": "MARKET_BRIDGE_URL",
+      "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+      "virtual_start": null,
+      "virtual_stop": null
+    },
+    "core_mechanism": "cross_product_residual",
+    "data_requirements": {
+      "date_end": "2025-12-31",
+      "date_start": "2022-01-01",
+      "extra_fields": [],
+      "minimum_years": 2,
+      "notes": [
+        "仅运营方采集需求；公开任务正文不含真实起止与虚拟日期映射。",
+        "需确认B/M/Y/SC/FU/LU/FG/SA各自可交易分合约的同时月份覆盖；缺失月份只记录缺口，不假设可用。",
+        "对冲关系参与的具体两品种与合约对由研究模块在当时可见数据下决定，此处仅列可用品种池。",
+        "计价单位仅限CNY/吨与CNY/桶；其他单位需另行扩展，本轮不生成。"
+      ],
+      "profile_id": "futures_daily",
+      "symbols": [
+        "B",
+        "M",
+        "Y",
+        "SC",
+        "FU",
+        "LU",
+        "FG",
+        "SA"
+      ]
+    },
+    "decision_dependencies": [
+      [
+        "month_selection",
+        "hedge_estimation"
+      ],
+      [
+        "hedge_estimation",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "relationship_monitoring"
+      ],
+      [
+        "relationship_monitoring",
+        "margin_budget"
+      ],
+      [
+        "margin_budget",
+        "state_migration"
+      ],
+      [
+        "state_migration",
+        "month_selection"
+      ],
+      [
+        "relationship_monitoring",
+        "hedge_estimation"
+      ]
+    ],
+    "decision_object": "cross_product_leg_portfolio",
+    "environment_id": "akquant_futures_v2",
+    "family_id": "F05",
+    "lineage": {
+      "derived_from": [
+        "S09",
+        "HT04",
+        "TG-20261029-172301-36425d"
+      ],
+      "kind": "residual_relationship_reestimation_pending_review"
+    },
+    "maintenance_rationale": "后续揭晓的已完成交易日数据可能显示对冲比例漂移、残差尺度变化或某腿流动性迁移。若对冲比例在重估窗口内仍稳定且残余敞口可控，应保持参数与逻辑；若残差尺度持续超出估计区间，应调整关系失效判定与暂停条件；若某腿频繁因流动性或到期被迫更替，则需修改month_selection与state_migration的衔接逻辑。核心维护对象是关系漂移与保证金暴露：真实腿敞口、费用与保证金变化会改变可承受手数，旧题的固定比例或固定手数做法可能不再适用。本任务不承诺每次维护提升收益，也不要求实盘盈利。",
+    "maintenance_targets": [
+      "hedge_drift",
+      "margin_exposure",
+      "expiry_roll",
+      "state_compatibility"
+    ],
+    "novelty_claim": "与existing_tasks对照：HT04为multi_product_oil_relative_value/oil_leg_portfolio，覆盖SC/FU/LU多腿油品相对价值并已含month_selection与hedge_estimation，本任务不复用其油品三腿框架，也不以油品品种组合为研究对象。HT05为glass_soda_residual/glass_soda_leg_portfolio，指定FG/SA统计对冲；本任务不预先绑定某一产业配对，而是要求当时可见条件下选择两腿并让关系监控回指对冲估计，形成重估闭环。HT03为crush_component_aggregation/crush_leg_portfolio，依赖固定加工关系与分项信号汇总；本任务不使用加工系数，也不以分项信号汇总为必需决策。已登记的TG-20261029-172301-36425d与本任务机制和决策对象相同，但其必需决策与依赖链未包含state_migration回指month_selection与relationship_monitoring回指hedge_estimation两条闭环边；本任务的实质取舍是对冲比例版本与候选腿集合在迁移时互不自动沿用，且关系失效触发的重估会直接改变残差口径与参与阈值含义。若实现退化为仅更换品种组合或调整窗口阈值，应视为TG-20261029-172301-36425d或HT04的变体而非独立新题。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+    "parameter_space": [
+      "滚动估计窗口长度（辅助参数，不替代关系估计设计）",
+      "残差偏离的波动标准化方式与参与阈值档位",
+      "整数手数取整规则与残余敞口容忍上限",
+      "关系失效判定的连续确认次数与暂停时长",
+      "预算占用的安全边际与逐腿缩仓顺序规则",
+      "对冲比例重估的固定节奏与事件触发条件"
+    ],
+    "protocol": {
+      "boundaries": null,
+      "formal_segments": 7,
+      "maintenance": [
+        "hold",
+        "parameters",
+        "logic"
+      ],
+      "release_rule": "completed_segment_only_after_commit",
+      "research_fraction": 0.3
+    },
+    "required_decisions": [
+      "month_selection",
+      "hedge_estimation",
+      "entry_exit",
+      "relationship_monitoring",
+      "margin_budget",
+      "state_migration"
+    ],
+    "research_modules": [
+      {
+        "decision_id": "month_selection",
+        "description": "在两个已支持品种的可交易合约集合中，仅用当时已收盘且已发布的剩余期限、成交活跃度与价格刻度，决定本期实际参与的两条合约腿；须处理某腿临近到期或流动性迁移时的候选更替，并把候选集合与选择依据作为可核状态保存，不交易合成价差或连续拼接价。",
+        "interaction": "选出的两腿直接决定hedge_estimation可比的价格序列与合约乘数口径；state_migration回指本模块，要求迁移时重新评估旧腿是否仍在候选集合内，从而让上月确认的配对不自动沿用。"
+      },
+      {
+        "decision_id": "hedge_estimation",
+        "description": "在选定两腿的已完成日线序列上估计当时可见的滚动对冲比例，处理两品种计价单位、合约乘数差异与整数手数取整规则；输出对冲比例及其可信区间、取整后的残余敞口估计，并按固定节奏或事件触发重估，不引用未来数据。",
+        "interaction": "接收month_selection的腿集合后产出残差定义，供entry_exit判定参与；relationship_monitoring判定关系失效时回指本模块触发重估并改变残差口径，重估结果又改变entry_exit的参与阈值含义。"
+      },
+      {
+        "decision_id": "entry_exit",
+        "description": "依据当前残差水平与波动标准化后的偏离尺度，决定是否参与、方向与真实有符号手数；逐腿下单并记录逐腿成交、部分成交与残余敞口，退出条件考虑价差收敛、持有时限与关系状态，未成交残余须在后续可执行时点处置。",
+        "interaction": "依赖hedge_estimation给出的比例与残差口径确定参与规模；退出与残余敞口的处置结果进入relationship_monitoring作为关系变化的证据来源，并影响margin_budget占用的释放节奏。"
+      },
+      {
+        "decision_id": "relationship_monitoring",
+        "description": "持续监控残差尺度、对冲比例稳定性与两腿流动性是否偏离估计窗口所描述的关系；区分残差扩大属于正常波动还是关系断裂，据此输出暂停参与、维持参数或触发重估的状态，并记录判定依据与生效时点。",
+        "interaction": "接收entry_exit退出证据与本模块自身的偏离度量，输出暂停或重估决定；重估回指hedge_estimation，暂停则约束margin_budget只在处置旧腿范围内使用预算。"
+      },
+      {
+        "decision_id": "margin_budget",
+        "description": "按真实腿的价格、合约乘数、保证金率候选与费用估计，将可用资金映射为每腿可下单手数与预算上限；缩减时按可成交约束分步处理，优先释放流动性较好一腿并记录残余敞口，禁止在预算不足时新开双腿。",
+        "interaction": "接收relationship_monitoring的暂停或恢复状态决定预算是否可用于新开仓；预算与手数结果进入state_migration作为迁移时必须保留的占用基线。"
+      },
+      {
+        "decision_id": "state_migration",
+        "description": "在重新估计、合约更替或版本更新时迁移两腿持仓、未完成订单、残余敞口、对冲比例版本与预算占用基线；迁移规则须与已确认的腿选择兼容，处置无法对应的旧腿并把处置结果写入持久化状态。",
+        "interaction": "回指month_selection，要求迁移后旧配对重新通过候选筛选；承接margin_budget的占用基线，使下一段预算计算不会重复占用或遗漏已挂未成交单。"
+      }
+    ],
+    "research_question": "在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段：如何在两个不同品种之间估计当时可见的滚动对冲关系（含合约乘数与整数手数约束），并根据当时已知的剩余期限和流动性选出实际参与的两条合约腿；当残差偏离达到参与条件时，如何以真实有符号手数建仓并逐腿撮合、容许部分成交与残余敞口；当关系残差尺度或对冲比例发生变化时，如何判定关系失效、暂停参与并重新估计，而不是把普通波动当作关系断裂；双腿保证金占用与费用随价格、保证金率和手数变化时，如何在预算约束下决定配对手数、缩减或退出；版本更新或重新估计后，如何迁移旧腿、未成交换腿与已确认的对冲比例版本，使分段研发中头寸与状态连续可核？",
+    "runtime_profile": {
+      "asset_types": [
+        "FUTURES"
+      ],
+      "benchmark": null,
+      "currency": "CNY",
+      "engine": "akquant",
+      "engine_version": "0.3.76",
+      "fill_policy": "NextOpen",
+      "formal_segments": 7,
+      "frequency": "daily",
+      "index_role": "query_and_benchmark_only",
+      "initial_cash": 1000000,
+      "instruments": null,
+      "market_rules_status": "requires_binding",
+      "multi_leg_execution": "per_leg_partial_fills_possible",
+      "resource_recommendations": {
+        "cpus": 2,
+        "memory_mb": 4096
+      },
+      "resource_status": "requires_human_setup",
+      "resources": null,
+      "schema_version": "finlab.runtime.v2",
+      "state_continuity": [
+        "cash",
+        "positions",
+        "open_orders",
+        "memory"
+      ],
+      "strategy_api": "finlab.strategy.v2"
+    },
+    "schema_version": "finance_task_spec.v2",
+    "source_ids": [
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "submission_contract": {
+      "dependencies": [
+        "finlab",
+        "pandas",
+        "numpy"
+      ],
+      "required_files": [
+        "strategy.py",
+        "backtest.py",
+        "params.json",
+        "RESEARCH.md",
+        "CHANGELOG.md"
+      ],
+      "results_generated_by": "platform",
+      "schema_version": "finlab.submission.v2",
+      "strategy_api": "finlab.strategy.v2"
+    },
+    "title": "跨品种加工链条的关系重估与残差腿组合：月份选择、对冲比例、分项信号汇总与保证金预算的联合维护"
+  },
+  "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1",
+  "task_id": "TG-20261105-041820-c67182",
+  "version": 1
+}

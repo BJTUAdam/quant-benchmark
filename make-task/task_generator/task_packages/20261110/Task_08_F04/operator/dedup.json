@@ -1,0 +1,79 @@
+{
+  "fingerprint": "f7cd074bba1d0fed676446dd383df04052afb72aa03210c4ca4c9f856951f1b0",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "TG-20261029-185155-f10be3",
+      "score": 0.7692,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "风险预算缩放的连续性：按暴露单位缩减、逐级恢复与已挂单处置"
+    },
+    {
+      "task_id": "TG-20261105-041755-b4949b",
+      "score": 0.7692,
+      "exact_structure": false,
+      "status": "variant_candidate",
+      "title": "风险预算表达与恢复执行链：暴露刻度选择、分步减仓可行性与逐级恢复准入"
+    },
+    {
+      "task_id": "TG-20261029-185000-a26d12",
+      "score": 0.6667,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "回撤预算下的暂停、恢复与状态迁移：组合风险控制器与参与方式的联动"
+    },
+    {
+      "task_id": "TG-20261105-042021-e6bb50",
+      "score": 0.6429,
+      "exact_structure": false,
+      "status": "spec_accepted",
+      "title": "风险预算的回撤证据等级与恢复准入：预算档位下调、未成交待办清理与分步回升"
+    },
+    {
+      "task_id": "TG-20261029-185515-8f94f2",
+      "score": 0.5333,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "风险状态的多源证据合并与预算档位交接：状态识别、预算映射、缩仓执行与恢复准入"
+    },
+    {
+      "task_id": "TG-20261029-185333-ed0ecc",
+      "score": 0.4118,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "三档参与方式的逐档准入与逐档退出：状态确认后再降档的控制器"
+    },
+    {
+      "task_id": "TG-20261105-042307-e14bb5",
+      "score": 0.3889,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "参与档位与回撤档位的双档位交接：证据分级、降档待办清理与分步回升"
+    },
+    {
+      "task_id": "TASK12-20261110-01",
+      "score": 0.3158,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "突破信号等待队列：成交受限时的信号有效期、撤回与区间版本交接"
+    },
+    {
+      "task_id": "TASK12-20261110-07",
+      "score": 0.3158,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "股票池广度与指数趋势分歧时的参与模式和旧仓过渡"
+    },
+    {
+      "task_id": "TASK12-20261110-05",
+      "score": 0.3,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "多窗口相对强弱分歧下的排名裁决、换仓队列与部分执行维护"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

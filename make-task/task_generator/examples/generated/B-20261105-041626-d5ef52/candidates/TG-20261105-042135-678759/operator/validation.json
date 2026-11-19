@@ -1,0 +1,609 @@
+{
+  "checked_at": "2026-11-05T04:41:34+00:00",
+  "warnings": [
+    "仅完成规格检查：数据可得性、长程实际难度及管线执行均未验证"
+  ],
+  "spec_hash": "430eee70e1e20916a66bdb4131e65807e95d8d10b8066b306d39535b0abb2a1f",
+  "passed": true,
+  "context_hash": "03971c27b0acd73d964ce9dd8947627cfca15a1dedea7f0135e9b7b9a0f0c617",
+  "errors": [],
+  "content_hash": "0d62d2cca5f96d68034fa044f32e5e5da0826094e9dc0ee70987cb46dd34322b",
+  "scope": "specification_only",
+  "dedup": {
+    "exact_matches": [
+      "TG-20261105-041906-253472"
+    ],
+    "guarantee": "仅保证规范结构唯一；语义独立性仍需模型与人工复核",
+    "fingerprint": "0fe2e23984d327caa971d1cc34b7fccab081e6328172fd46fb1c9bac41e33d30",
+    "classification": "variant",
+    "nearest": [
+      {
+        "task_id": "TG-20261105-041906-253472",
+        "exact_structure": true,
+        "status": "variant_candidate",
+        "score": 1.0,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "期货趋势回撤中的资格复核、回撤定位与分批库存连续维护",
+          "novelty_claim": "与历史对照HT01（short_horizon_trend / stock_trend_portfolio）相比，本任务不以宽泛短周期突破跟踪为目标，而是以趋势内回撤的分批库存与退出、预算回压为决策对象。与最近同类候选TG-20261029-184647-ca78bb、TG-20261029-185109-ad8725、TG-20261029-185249-24341b、TG-20261029-185416-8868c8相比，均为trend_pullback / trend_pullback_inventory：ca78bb以状态迁移承接批次；ad8725以entry_confirmation作为差异来源；24341b设failure_exit吸收失效信号；8868c8不设failure_exit而要求退出政策吸收资格切换。本任务的实际取舍为：不设state_migration，也不新增确认环节，而由capital_allocation同时回指trend_qualification与staged_inventory，使已实现保证金占用与现金碎片直接改变下一段趋势资格的有效宽度与可用批次手数；同时exit_policy须在真实多腿逐腿撮合、可部分成交且有残余敞口的约束下定义退出顺序。与TG-20261029-172300-ca5a47（consolidation_breakout / breakout_position_state）相比，决策对象为趋势回撤库存而非突破候选状态，且不以再入场为核心。最近反馈指出仅重排依赖边不算新题，故本任务将实质取舍落在预算对资格宽度与批次手数的双向约束上，仍需人工语义审；若实现退化为在既有回撤题上仅调阈值，应视为变体。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-184647-ca78bb",
+              "TG-20261029-185249-24341b"
+            ],
+            "kind": "budget_coupled_qualification_and_inventory_pending_review"
+          },
+          "research_question": "在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段，如何在单个品种上确认既有趋势仍然适用，并把回撤深度与回撤结束的判定转化为可按真实整数手数、逐腿撮合参与的分批建仓节奏；当退出条件触发或趋势资格被撤回时，如何对已建批次逐批处置并处理未成交与残余敞口；处置后的资金预算缩减与保证金占用变化又如何反过来收窄下一段趋势资格的判定宽度与可接受的回撤容差，使资格、定位、库存、退出与预算在同一跨段状态中连续可核？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "trend_qualification"
+            ],
+            [
+              "capital_allocation",
+              "staged_inventory"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "staged_inventory",
+            "exit_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185416-8868c8",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 1.0,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "趋势回撤的资格切换与分批库存处置：趋势资格、回撤定位、分批库存与退出维护",
+          "novelty_claim": "与给定最近任务TG-20261029-185249-24341b（mechanism=trend_pullback、object=trend_pullback_inventory，必需决策含trend_qualification、pullback_location、failure_exit、staged_inventory、exit_policy、capital_allocation，并明确以失效信号吸收与预算回压为核心）相比：本任务不设failure_exit，也不依赖state_migration，而是要求把'趋势资格撤回'与'回撤位置失效'两路证据直接并入exit_policy的优先级与去重规则以及pullback_location的状态更新，研究核心是退出政策如何吸收资格切换而无需独立失效决策模块，差异在于决策划分而非阈值。与TG-20261029-185109-ad8725相比，后者新增entry_confirmation作为差异来源且不含capital_allocation回指趋势资格；与TG-20261029-184647-ca78bb相比，后者以状态迁移承接批次；与TG-20261029-172300-ca5a47（整理区间突破、失败退出与再入场）相比，决策对象是趋势回撤库存而非突破候选状态，且不以再入场为核心；与历史HT01宽泛短周期趋势相比，明确以趋势内回撤与分批库存为对象。最近反馈指出同类trend_pullback候选多次仅重排依赖边即被判为变体，本任务据此把实质取舍写为退出政策合并两路失效证据并去重、以及预算回压直接改变资格容差，二者在既有ad8725与ca78bb中分别由独立failure_exit和state_migration承担，故需要实际研究取舍而非仅换窗口或门槛。仍沿用既有机制、对象与决策词表，未引入新ID，未声称已证实独立、数据已验收或已实证有效；若实现退化为在ad8725/24341b上仅调整回撤阈值或删除一个决策，应视为其变体而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-184647-ca78bb",
+              "TG-20261029-185249-24341b"
+            ],
+            "kind": "exit_policy_absorption_refinement_pending_review"
+          },
+          "research_question": "在国内股票日线＋分钟教学环境中，仅用当时已收盘数据确认既有上升趋势并定位趋势内回撤，把回撤深度与回撤结束判定转化为可成交的分批建仓节奏；当退出条件触发、趋势资格被撤回或前一批次止损时，如何在不新增失败退出决策的前提下，把资格撤回与回撤位置失效两路证据并入退出政策与回撤定位的更新，对已建批次逐批清退并处理T+1不可卖库存；清退后的预算缩减与现金碎片又如何回压下一段趋势资格的判定宽度与回撤容差，使资格、定位、库存、退出与预算在同一跨段状态中连续可接续？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "trend_qualification"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "staged_inventory",
+            "exit_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185249-24341b",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.9167,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "趋势回撤中的趋势资格撤回、回撤失效辨识与分批库存清退",
+          "novelty_claim": "与最近的 TG-20261029-185109-ad8725（同为 trend_pullback / trend_pullback_inventory）及 TG-20261029-184647-ca78bb 相比，二者把必需决策落在趋势资格、回撤定位、分批库存、退出政策与状态迁移上，失效率如何被吸收进头寸处置未成为独立必需决策——ad8725 以 entry_confirmation 补充确认环节，本轮反馈指出该环节本已隐含于回撤定位的语义中，差异主张证据不足。本任务不再依赖新增确认环节作为差异来源，而是把 failure_exit 设为必需决策，要求把“趋势资格撤回”与“回撤位置失效”两路信号区分、去重并转化为对已建批次的清退与顺延，且清退可行性反过来约束资金分配；同时取消 state_migration 而改用 capital_allocation 回指 trend_qualification 的闭环，使预算缩减改变资格判定的有效宽度，研究核心是失效信号吸收与预算回压，而非确认环节的显式拆分。维护目标也从 signal_execution_gap 主导扩展为包含 risk_recovery。与历史 HT01 宽泛短周期趋势相比，本任务明确以趋势内回撤及失效清退为对象，不做宽泛突破跟踪。与 TG-20261029-172300-ca5a47（整理区间突破、失败退出与再入场）相比，决策对象是趋势回撤库存而非突破候选状态，且不以再入场为核心。本任务沿用既有机制与决策词表，未引入新ID与决策对象，不声称已证实独立或已实证有效；若实现中失效退出只是既有退出政策的阈值重命名，应视为已有趋势回撤任务的变体而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-184647-ca78bb",
+              "TG-20261029-185109-ad8725"
+            ],
+            "kind": "failure_absorption_refinement_pending_review"
+          },
+          "research_question": "在国内股票日线＋分钟教学环境中，仅用当时已收盘数据确认既有上升趋势并定位回撤，当回撤继续深化而无法判定为趋势内回撤时，如何把“趋势资格被撤回”与“回撤位置失效”区分开来并转化为对已建批次的清退与预算缩减；清退期间T+1不可卖的新买库存与已挂未成交单如何处理，缩减后的现金与仓位碎片又如何反过来约束下一步趋势资格的重新确认？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "staged_inventory"
+            ],
+            [
+              "trend_qualification",
+              "failure_exit"
+            ],
+            [
+              "pullback_location",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "failure_exit",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "trend_qualification"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "failure_exit",
+            "staged_inventory",
+            "exit_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-184647-ca78bb",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.75,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "趋势回撤中的分层库存与退出维护",
+          "novelty_claim": "与 nearest 候选 TG-20261029-172300-ca5a47（整理区间突破、失败退出与再入场）相比，本任务不以突破确认和再入场为核心，而是把趋势回撤位置、分层库存和退出政策作为必须解决的相互依赖决策，并要求状态迁移承接部分批次与趋势资格撤回后的未决状态；与历史 HT01 宽泛短周期趋势相比，明确增加了分层库存和状态迁移决策。不声称已证实独立于突破题，仍可能人工审认为同家族相邻扩展；判断依据是决策对象从突破候选状态转为趋势回撤库存，需实际研究取舍而非仅改参数。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-172300-ca5a47"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "在已确认趋势内，如何定位回撤结束以启动分层建仓，并将趋势否定、T+1 库存约束与退出后状态迁移衔接为可维护的连续流程？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "staged_inventory",
+            "exit_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185109-ad8725",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.6429,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "趋势回撤中的资格复核、回撤定位与分批库存迁移",
+          "novelty_claim": "与给定最近候选 TG-20261029-184647-ca78bb（同为trend_pullback、trend_pullback_inventory，必需决策含趋势资格、回撤定位、分批库存、退出政策、状态迁移）相比，本任务的实际差异在于：把entry_confirmation设为必需决策，使回撤定位到分批库存之间存在显式的可成交确认环节，并要求退出政策回指趋势资格形成复核反馈边，以及趋势资格直接约束状态迁移的承接规则；依赖结构从近似链式变为含两条回指边的闭环，维护目标新增regime_transition以覆盖资格撤回后的状态衔接。与同家族冲突题 TG-20261029-172300-ca5a47（整理区间突破、失败退出与再入场）相比，决策对象由突破候选状态改为趋势回撤库存，不以突破确认和再入场为核心；与历史 HT01 宽泛短周期趋势相比，明确增加了分批库存与状态迁移决策。本任务复用既有机制与决策词表，未引入新ID，也未声称已证实独立或已实证有效；若实现退化为在 ca78bb 上仅调整回撤阈值或增加一个过滤器，应视为该候选的变体而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-184647-ca78bb"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "在国内股票日线与分钟教学环境中，如何仅用当时已收盘数据确认既有上升趋势仍然适用，并把回撤深度与回撤结束的判定转化为可成交的入场确认；入场后如何分批建仓以满足T+1不可卖库存约束，退出条件触发或趋势资格被撤回时如何承接已建批次与未决状态，使趋势资格、回撤定位、分批库存和退出在跨段维护中保持一致？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "trend_qualification"
+            ],
+            [
+              "staged_inventory",
+              "state_migration"
+            ],
+            [
+              "trend_qualification",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility",
+            "regime_transition"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "entry_confirmation",
+            "staged_inventory",
+            "exit_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "HT01",
+        "exact_structure": false,
+        "status": "historical_package_unrevalidated",
+        "score": 0.3125,
+        "spec": {
+          "decision_object": "stock_trend_portfolio",
+          "core_mechanism": "short_horizon_trend",
+          "title": "45股短周期趋势追踪",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "从突破和趋势入手管理数日持仓并持续维护。",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "exit_policy",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-041643-7e6569",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 0.2941,
+        "spec": {
+          "decision_object": "breakout_position_state",
+          "core_mechanism": "consolidation_breakout",
+          "title": "整理区间突破后的确认缺失处置：区间失效与突破未确认的区分、失败退出与再入场预算回压",
+          "novelty_claim": "与 existing_tasks 中最近的 TG-20261029-172300-ca5a47（同为 consolidation_breakout / breakout_position_state，必需决策为区间识别、突破确认、失败退出、再入场、资金分配）相比：该候选把失败处置当作单一入口，突破确认到失败退出为单向链，资金分配只位于链末端承担分配，不反向影响区间识别与确认宽度。本任务的实际研究取舍是 failure_exit 同时接收“区间结构失效”与“突破未确认”两路证据并须给出优先级与去重规则，且 capital_allocation 回指 entry_confirmation 与 range_detection，使预算缩减直接改变确认等待宽度与可接受区间宽度；维护目标也由 signal_execution_gap 主导扩展为加入 risk_recovery 与 structure_validity 的双重检验。与 TG-20261029-184839-b184fc 相比，该候选以 state_identification 与 switch_hysteresis 作为差异来源，本任务不含状态辨识与切换迟滞，差异来自失效证据合并与预算回压而非参与控制。与历史 HT01 宽泛短周期趋势相比，本任务不以宽泛突破跟踪为目标，而聚焦区间→确认→两路失效→冷却→预算回压的闭环。沿用既有机制、对象与决策词表，未引入新 ID，未声称已获数据、已运行或已实证有效；若实现退化为在 ca5a47 上仅增加一个撤销挂单步骤或调整阈值，应视为该候选的变体而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01",
+              "TG-20261029-172300-ca5a47",
+              "TG-20261029-184839-b184fc"
+            ],
+            "kind": "failure_evidence_merge_and_budget_feedback_pending_review"
+          },
+          "research_question": "在国内股票或ETF日线环境中，仅用当时已收盘数据界定整理区间并给出突破信号；当突破后价格未能完成确认、又退回区间内部时，如何把“区间本身被证伪（结构失效）”与“区间仍有效但突破未获确认”两路证据区分并去重，转化为对已有候选持仓的退出与对已挂未成交单的撤销，而不是把两种情况都当成普通止损；退出与撤销造成的预算缩减与现金碎片，又如何反过来收窄下一段区间识别的有效边界与突破确认的等待宽度，使整个状态生命周期在跨段维护中连续可核？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "failure_exit"
+            ],
+            [
+              "range_detection",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "entry_confirmation"
+            ],
+            [
+              "capital_allocation",
+              "range_detection"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-172300-ca5a47",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.2353,
+        "spec": {
+          "decision_object": "breakout_position_state",
+          "core_mechanism": "consolidation_breakout",
+          "title": "整理区间突破后的跟踪、失败退出与再入场",
+          "novelty_claim": "从宽泛趋势题聚焦到区间→确认→失败→重入生命周期，但HT01已允许这些方向，不能声称已证实独立；待人工语义审，可能归并为HT01扩展。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "如何使区间识别、突破确认、失败处置与再次参与形成可维护的状态流程？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-042021-e6bb50",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 0.2353,
+        "spec": {
+          "decision_object": "portfolio_risk_controller",
+          "core_mechanism": "drawdown_risk_budget",
+          "title": "风险预算的回撤证据等级与恢复准入：预算档位下调、未成交待办清理与分步回升",
+          "novelty_claim": "与 existing_tasks 中最近的同机制、同对象任务逐项对照：TG-20261029-185155-f10be3（drawdown_risk_budget / portfolio_risk_controller）研究预算是名义比例、暴露上限还是现金留存的表达选择及缩减执行连续性，不含参与方式与证据等级的分级去重；TG-20261029-185000-a26d12 把回撤响应与恢复作为参与控制主循环内的规则，并以 state_migration 承接旧状态，本任务不含 state_migration，而以缩减执行结果回写证据读取口径、资金分配回指证据等级构成闭环；TG-20261029-185515-8f94f2 含 participation_policy 且以参与方式与预算档位并列交接，本任务不含参与方式决策，差异来自证据可信等级与恢复准入的独立证据要求；TG-20261029-172300-e01b9a 以 switch_hysteresis 为核心，本任务不含切换迟滞。与种子 S08 方向一致，据此明确预算档位、缩减执行与分步回升之间的相互依赖，以及缩减结果对证据读取口径的回压。最近反馈判定的重复项 TG-20261105-041755-b4949b 与本任务不同：该候选与 f10be3 决策集和依赖边完全一致，本任务必需决策以 capital_allocation 替代 participation_policy 并把 drawdown_response 直接回写 state_identification，要求解决的是证据等级与占用口径的相互影响，而非把既有执行可行性约束写得更显式。不声称已证实独立、数据已验收或已实证有效；若实现退化为在 f10be3 上仅调整档位数量或阈值，应视为该任务的变体，需人工语义审。书目仅提供方向，不引用章节、页码、最优参数或实证结果。",
+          "family_id": "F04",
+          "lineage": {
+            "derived_from": [
+              "S08",
+              "SRC_CHAN",
+              "SRC_PROJECT_PLAN"
+            ],
+            "kind": "evidence_grade_and_recovery_admission_pending_review"
+          },
+          "research_question": "在国内股票与ETF日线环境中，仅用当时已收盘的价量与账户信息：如何把组合层面的已回撤幅度、近期已实现波动与暴露集中度整理成带证据等级的风险判断，使同一段回撤与同一类风险来源不被重复计为多档下调；该判断如何映射到可审计的预算档位，并在下调触发时按当时可成交约束（T+1不可卖库存、单票权重上限、现金不足）决定下到哪一档以及哪些未成交待办随之失效；下调后现金碎片与剩余仓位的实际占用，又如何改变下一段风险证据的读取口径与可信等级，使恢复准入读取的是调整后的占用而非被覆盖前的记忆？",
+          "decision_dependencies": [
+            [
+              "state_identification",
+              "risk_budget"
+            ],
+            [
+              "risk_budget",
+              "drawdown_response"
+            ],
+            [
+              "drawdown_response",
+              "recovery_policy"
+            ],
+            [
+              "recovery_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "state_identification"
+            ],
+            [
+              "drawdown_response",
+              "state_identification"
+            ]
+          ],
+          "maintenance_targets": [
+            "risk_recovery",
+            "state_compatibility",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "state_identification",
+            "risk_budget",
+            "drawdown_response",
+            "recovery_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "HT02",
+        "exact_structure": false,
+        "status": "historical_package_unrevalidated",
+        "score": 0.2222,
+        "spec": {
+          "decision_object": "oversold_stock_portfolio",
+          "core_mechanism": "oversold_rebound",
+          "title": "45股短周期超跌反转",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F02",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "研究短期超跌后的反弹机会及T+1退出。",
+          "decision_dependencies": [
+            [
+              "reference_estimation",
+              "deviation_measurement"
+            ],
+            [
+              "deviation_measurement",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "reference_drift",
+            "reversion_failure",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "reference_estimation",
+            "deviation_measurement",
+            "entry_confirmation",
+            "staged_inventory",
+            "exit_policy",
+            "capital_allocation"
+          ]
+        }
+      }
+    ]
+  }
+}

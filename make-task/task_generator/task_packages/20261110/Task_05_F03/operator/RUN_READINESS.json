@@ -1,0 +1,30 @@
+{
+  "schema_version": "finlab.task_package_readiness.v1",
+  "task_id": "TASK12-20261110-05",
+  "checked_at": "2026-11-10T10:58:27.344593+00:00",
+  "specification_valid": true,
+  "public_entry_self_contained": true,
+  "sdk_reference_embedded": true,
+  "submission_template_compatible": true,
+  "can_start_strategy_design": true,
+  "can_start_configurable_coding": true,
+  "real_market_data_bound": false,
+  "external_api_review_executed": false,
+  "automatic_acceptance_registered": false,
+  "real_backtest_executed": false,
+  "formal_batch_ready": false,
+  "remaining_work": [
+    "核验所列固定股票池与选定指数基准；不得用仅有3只股票的数据冒充所列8只股票的完整覆盖",
+    "完成当前规格的外部模型复核与自动接纳（不需要人工审批）",
+    "选择并冻结真实起止范围、数据版本、研发期与七段边界；公开端只接收虚拟日期",
+    "声明每个接口的历史可见时点、修订与缺失范围，不能以下载时间代替历史证据",
+    "逐日可交易状态、价格限制、费用、交易单位、事件时钟及成交量/金额单位完成核验",
+    "平台提供MARKET_BRIDGE_URL和本任务桥接令牌，策略不接触上游凭证",
+    "使用者本人选择运行资源，不能由AI代填；不从建议值推定已确认",
+    "基于题意编写实际策略；当前空仓模板不能当作完成研究",
+    "相同接纳规格、冻结数据、固定镜像、代码完成研发验收，之后才交付正式批跑"
+  ],
+  "synthetic_template_evidence": "总包的可用性检查报告.json；两环境的共用模板及独立接口探针，不是本题策略成绩",
+  "system_release": "v2-integrated-task12-20261110",
+  "host_fixes_merged": true
+}

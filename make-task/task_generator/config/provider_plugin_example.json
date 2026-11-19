@@ -1,0 +1,13 @@
+{
+  "adapter": "provider_plugin",
+  "provider_plugin": "taskgen.provider_example:ExampleNativeAdapter",
+  "base_url": "",
+  "generation_model": "",
+  "review_model": "",
+  "api_key_env": "TASKGEN_API_KEY",
+  "timeout_seconds": 60,
+  "max_retries": 2,
+  "format_retries": 1,
+  "max_calls_per_batch": 48,
+  "json_mode": "json_object"
+}

@@ -1,0 +1,14 @@
+{
+  "provider_name": "oneapi",
+  "adapter": "chat_completions",
+  "base_url": "http://127.0.0.1:3000/v1",
+  "generation_model": "",
+  "review_model": "",
+  "api_key_env": "TASKGEN_API_KEY",
+  "timeout_seconds": 60,
+  "max_retries": 2,
+  "format_retries": 1,
+  "max_calls_per_batch": 48,
+  "json_mode": "json_object",
+  "provider_plugin": null
+}

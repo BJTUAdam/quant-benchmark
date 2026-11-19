@@ -1,0 +1,4 @@
+numpy==1.26.4
+pandas==2.2.3
+# Research only: pandas Spearman correlation requires scipy.
+scipy==1.11.4

@@ -1,0 +1,298 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "突破信号等待队列：成交受限时的信号有效期、撤回与区间版本交接",
+  "family_id": "F01",
+  "source_ids": [
+    "SRC_STOCK_TRENDS",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "consolidation_breakout",
+  "decision_object": "breakout_position_state",
+  "required_decisions": [
+    "range_detection",
+    "entry_confirmation",
+    "liquidity_filter",
+    "turnover_budget",
+    "failure_exit",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "range_detection",
+      "entry_confirmation"
+    ],
+    [
+      "range_detection",
+      "failure_exit"
+    ],
+    [
+      "entry_confirmation",
+      "turnover_budget"
+    ],
+    [
+      "liquidity_filter",
+      "turnover_budget"
+    ],
+    [
+      "entry_confirmation",
+      "failure_exit"
+    ],
+    [
+      "failure_exit",
+      "state_migration"
+    ],
+    [
+      "range_detection",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "turnover_budget"
+    ],
+    [
+      "turnover_budget",
+      "entry_confirmation"
+    ]
+  ],
+  "maintenance_targets": [
+    "structure_validity",
+    "signal_execution_gap",
+    "cost_sensitivity",
+    "state_compatibility"
+  ],
+  "research_question": "当多个突破信号因流动性、涨跌停或资金竞争而等待执行时，如何共同决定信号仍有效多久、哪些旧委托应撤回，以及新区间版本能否接续旧信号，使等待队列与真实成交和持仓连续一致？",
+  "research_modules": [
+    {
+      "decision_id": "range_detection",
+      "description": "仅用已完成日线建立有版本号的整理区间，区分边界更新、区间延续和结构失效；记录每个信号创建时所依据的区间版本。",
+      "interaction": "区间版本及有效性传给entry_confirmation和failure_exit；新边界不能追溯性地让旧信号重新成立，旧未成交订单由state_migration处理。"
+    },
+    {
+      "decision_id": "entry_confirmation",
+      "description": "研究突破证据在等待下一开盘、部分成交或连续未成交后应如何衰减或失效；选择按信号年龄、结构变化还是成交反馈重新确认，而非无限重复原始买入信号。",
+      "interaction": "接收区间版本及liquidity_filter的可参与量；有效但尚未完成的确认形成待办队列，供turnover_budget排序；已耗尽有效性的信号送failure_exit撤回。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "根据截至当前收盘已知的成交活跃度和涨跌停状态估计可参与规模，区分不参与、少量参与和允许继续等待；不使用下一根行情的成交量或日内排队数据。",
+      "interaction": "参与规模限制turnover_budget的下单量；实际部分成交与估计偏差只在后续已完成事件后更新下一期参与规则，不能修改当期已发订单。"
+    },
+    {
+      "decision_id": "turnover_budget",
+      "description": "在多个仍有效的突破信号及未完成订单之间研究预算预留、优先级和机会替换，区分已占用资金、未成交预留和可新分配现金；不得把未成交预留当作已持仓。",
+      "interaction": "接收entry_confirmation和liquidity_filter的候选，输出待执行顺序；撤回释放的预算只能在平台确认撤单或订单结束后供后续决策使用；反过来影响下一期entry_confirmation的等待成本。"
+    },
+    {
+      "decision_id": "failure_exit",
+      "description": "分别判定结构失效、确认失效与订单执行失效，并研究撤销剩余买入量及已有成交仓位的处置；不能假设撤单指令瞬时生效或清退可绕过T+1。",
+      "interaction": "结构与信号失效来自range_detection和entry_confirmation；处置结果交给state_migration对账，未释放的占用继续留在turnover_budget中，不因逻辑退出而消失。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "将区间版本、信号创建时刻、已成交量、未完成委托及失效原因保存在JSON memory；研究新逻辑如何承接旧队列和真实持仓，并建立一对一订单归属和可核对的注销规则。",
+      "interaction": "接收failure_exit与区间版本变化；迁移只影响下一决策时点的队列和预留，不重写历史成交。迁移后的队列与平台订单/持仓对账后，才能进入下一期turnover_budget。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能出现持续未成交、部分成交增多、区间频繁更新或候选竞争加剧。同一突破判据可能继续有效，但队列中信号年龄和订单占用发生变化，需要研究等待、撤回、替换或保持规则，并证明维护后旧挂单与已成交持仓没有被遗漏。效果须从实际轨迹检验，不承诺每次维护改善收益。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内股票，具体固定股票池和真实连续范围在数据绑定时明确；不依据未来成分筛选股票。",
+      "市场数据通过已绑定的Tushare桥接接口获得，不提供行情文件包。默认日线环境，不能由日线推断盘中委托排队位置。",
+      "daily成交价使用原始报价；adj_factor只可使用当前已可见版本，公司行为由平台处理，不能重复计算分红或使用最终复权因子回填过去。",
+      "至少连续两年并满足研发期加七段的有效交易日要求；实际分段、数据版本和公开虚拟范围在冻结后确定。",
+      "名称和代码保留真实值；公开日期只是虚拟顺序标签，不能据年份套用真实事件。"
+    ]
+  },
+  "parameter_space": [
+    "整理区间的因果构造与更新条件",
+    "突破确认的证据组合及等待长度",
+    "信号年龄衰减方式与最大存活条件",
+    "成交活跃度的回看尺度和参与上限",
+    "部分成交后保留剩余订单的条件",
+    "待办队列优先级和预算预留方式",
+    "新机会替换旧机会的门槛及成本表达",
+    "结构失效与执行失效的分流规则",
+    "区间版本切换时的订单迁移策略",
+    "T+1受限清退的完成与残留判定"
+  ],
+  "novelty_claim": "与S01及TG-20261105-041643-7e6569的相邻点是整理突破生命周期。本候选将必要研究对象放在多个未完成信号和真实委托的等待队列，要求信号有效期、流动性参与量、预算预留及区间版本迁移共同决定是否继续等待；不靠改变阈值、年份或股票池主张新题。虽然结构指纹与既有题不同，等待和撤回也可能被宽泛趋势题覆盖，语义独立性尚未由独立API复核确认。",
+  "lineage": {
+    "derived_from": [
+      "S01",
+      "HT01",
+      "TG-20261105-041643-7e6569"
+    ],
+    "kind": "assistant_authored_research_candidate_not_claimed_independent"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-01",
+    "task_id": "TASK12-20261110-01",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

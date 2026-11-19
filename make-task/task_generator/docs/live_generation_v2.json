@@ -1,0 +1,114 @@
+{
+  "schema_version": "finlab.live_generation.v2",
+  "checked_at": "2026-11-05T04:41:41+00:00",
+  "batch_id": "B-20261105-041626-d5ef52",
+  "provider": "deepseek_official",
+  "api_connection": "verified_by_successful_generation_and_review_responses",
+  "response_models": [
+    "deepseek-flash"
+  ],
+  "schema_version_generated": "finance_task_spec.v2",
+  "scope": "specification_only",
+  "status": "completed_with_independent_task_shortfall",
+  "batch_snapshot": "examples/generated/B-20261105-041626-d5ef52",
+  "counts": {
+    "source_candidates": 18,
+    "retained_candidates": 15,
+    "excluded_candidates": 3,
+    "static_passed_at_snapshot": 15,
+    "current_reviews_retained": 15,
+    "current_independent_reviews_passed_retained": 0,
+    "human_approved": 0,
+    "candidate_state_counts": {
+      "pending_human_review": 10,
+      "invalid": 3,
+      "variant_candidate": 5
+    },
+    "model_review_state_counts": {
+      "needs_attention": 15,
+      "stale": 3
+    },
+    "http_attempts_reserved": 64,
+    "http_attempt_records": 64,
+    "http_success_responses": 64,
+    "http_non_success_records": 0,
+    "unobserved_reserved_attempts": 0,
+    "total_tokens_reported": 1330865,
+    "http_stage_counts": {
+      "generate": 19,
+      "review": 45
+    }
+  },
+  "classification_counts_retained": {
+    "duplicate": 11,
+    "variant": 4
+  },
+  "families": {
+    "F01": {
+      "target_independent": 1,
+      "retained_drafts": 3,
+      "current_independent_passed": 0,
+      "shortfall": 1
+    },
+    "F02": {
+      "target_independent": 1,
+      "retained_drafts": 2,
+      "current_independent_passed": 0,
+      "shortfall": 1
+    },
+    "F03": {
+      "target_independent": 1,
+      "retained_drafts": 3,
+      "current_independent_passed": 0,
+      "shortfall": 1
+    },
+    "F04": {
+      "target_independent": 1,
+      "retained_drafts": 3,
+      "current_independent_passed": 0,
+      "shortfall": 1
+    },
+    "F05": {
+      "target_independent": 1,
+      "retained_drafts": 3,
+      "current_independent_passed": 0,
+      "shortfall": 1
+    },
+    "F06": {
+      "target_independent": 1,
+      "retained_drafts": 1,
+      "current_independent_passed": 0,
+      "shortfall": 1
+    }
+  },
+  "human_approved": 0,
+  "real_tushare_tested": false,
+  "new_candidates_backtested": false,
+  "operator_resources_selected": false,
+  "credentials_in_artifacts": false,
+  "generation_candidate_limit": 18,
+  "normal_default_http_limit": 48,
+  "explicit_http_limit_for_post_fix_verification": 72,
+  "final_revalidation_errors": [],
+  "fixes_verified": [
+    "Fixed contract membership arrays accept reordered members, reject missing/extra/duplicate members.",
+    "Known futures product/exchange mismatches are rejected before publication.",
+    "Static-valid variant candidates remain in comparison context; review state does not oscillate.",
+    "Distributed snapshots preserve unapproved identity and enter future deduplication read-only."
+  ],
+  "baseline_interruption": {
+    "batch_id": "B-20261105-041329-c8c297",
+    "status": "interrupted_for_validator_fix",
+    "http_attempts_reserved": 9,
+    "http_attempt_records": 8,
+    "http_success_responses": 8,
+    "unobserved_reserved_attempts": 1,
+    "reason": "Stopped an order-sensitive validator failure. Original outputs were preserved privately; invalid drafts are not distributed."
+  },
+  "notes": [
+    "Successful HTTP responses and static validity do not establish independent task novelty.",
+    "All retained drafts have current model evidence, remain unapproved, and require substantive review.",
+    "Current mechanism/object seed enumeration is crowded. Expand reviewed sources and decision objects before another generation batch.",
+    "Private source runs, registry database, credentials, market cache, time mappings and operator settings are excluded."
+  ]
+}

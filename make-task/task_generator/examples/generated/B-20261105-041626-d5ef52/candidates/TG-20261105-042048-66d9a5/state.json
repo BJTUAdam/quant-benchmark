@@ -1,0 +1,11 @@
+{
+  "batch_id": "B-20261105-041626-d5ef52",
+  "version": 0,
+  "provenance": "model_api",
+  "pipeline_status": "not_connected",
+  "data_status": "not_bound",
+  "status": "pending_human_review",
+  "model_review_status": "needs_attention",
+  "id": "TG-20261105-042048-66d9a5",
+  "created_at": "2026-11-05T04:20:48+00:00"
+}

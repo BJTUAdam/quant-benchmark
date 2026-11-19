@@ -1,0 +1,49 @@
+{
+  "schema_version": "finlab.disclosure.validation.v1",
+  "checked_at": "2026-11-05T14:12:13.110131+00:00",
+  "release": "v2-disclosure-audit-20261105",
+  "passed": true,
+  "root_tests": 217,
+  "disclosure_tests_in_full_suite": 35,
+  "synthetic_only": true,
+  "live_tushare_tested": false,
+  "operator_setup_created": false,
+  "image_ids": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  },
+  "docker_acceptance_report": "acceptance_v2.json",
+  "checks": {
+    "callback_failure_no_commit": "passed",
+    "retry_segment": 2,
+    "checkpoint_tamper_blocked": "passed",
+    "public_archive": "passed",
+    "disclosure_403_sdk_details": "passed",
+    "container_audit_persisted": "passed",
+    "audit_request_id_correlated": "passed",
+    "current_event_clock": "passed",
+    "uncommitted_segment_blocked": "passed",
+    "committed_segment_released": "passed",
+    "private_audit_not_exported": "passed"
+  },
+  "public_disclosure_contract": {
+    "source": "platform_controller",
+    "interval": "[start,stop)",
+    "release": "cumulative_committed_segments",
+    "strategy_clock": "current_event",
+    "out_of_range": "reject_entire_request",
+    "error_code": "TIME_RANGE_EXCEEDED",
+    "audit": "platform_private_sqlite"
+  },
+  "generated_candidates_retained": 15,
+  "original_snapshot_files_byte_identical": 301,
+  "current_independent_candidates": 0,
+  "candidate_human_approvals": 0,
+  "private_disclosure_or_audit_in_public_exports": false,
+  "reports": {
+    "unit": "unit_tests_v2.json",
+    "docker": "acceptance_v2.json",
+    "distribution": "distribution_audit_v2.json",
+    "portable": "release_smoke_v2.json"
+  }
+}

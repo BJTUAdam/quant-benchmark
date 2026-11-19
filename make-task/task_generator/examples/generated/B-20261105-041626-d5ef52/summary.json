@@ -1,0 +1,28 @@
+{
+  "source_candidates": 18,
+  "retained_candidates": 15,
+  "excluded_candidates": 3,
+  "static_passed_at_snapshot": 15,
+  "current_reviews_retained": 15,
+  "current_independent_reviews_passed_retained": 0,
+  "human_approved": 0,
+  "candidate_state_counts": {
+    "pending_human_review": 10,
+    "invalid": 3,
+    "variant_candidate": 5
+  },
+  "model_review_state_counts": {
+    "needs_attention": 15,
+    "stale": 3
+  },
+  "http_attempts_reserved": 64,
+  "http_attempt_records": 64,
+  "http_success_responses": 64,
+  "http_non_success_records": 0,
+  "unobserved_reserved_attempts": 0,
+  "total_tokens_reported": 1330865,
+  "http_stage_counts": {
+    "generate": 19,
+    "review": 45
+  }
+}

@@ -1,0 +1,11 @@
+[project]
+name = "trajectory-runner"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["numpy==1.26.4", "pandas==2.2.3", "scipy==1.11.4"]
+
+[project.optional-dependencies]
+mcp = ["fastmcp==4.1.6"]
+
+[tool.uv]
+package = false

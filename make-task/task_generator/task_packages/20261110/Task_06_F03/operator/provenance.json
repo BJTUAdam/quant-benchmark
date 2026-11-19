@@ -1,0 +1,13 @@
+{
+  "schema_version": "finlab.task_spec_package.v1",
+  "created_at": "2026-11-10T10:42:03.118047+00:00",
+  "task_id": "TASK12-20261110-06",
+  "generation_mode": "conversation_model_authored",
+  "review_mode": "conversation_model_cross_review",
+  "external_model_api_called": false,
+  "registered_in_acceptance_library": false,
+  "human_approval_required": false,
+  "data_bound": false,
+  "runtime_executed": false,
+  "spec_hash": "db1f9e7006efbed96ef9aea996dc14bff27d3eb0bccd72fc56eb507b6be89cd1"
+}

@@ -1,0 +1,274 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "单品种真实分合约的放量冲击恢复路径与隔日库存：冲击定位、回摆与延续辨识、T+1库存处置及失效后停用恢复",
+  "family_id": "F02",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_STOCK_TRENDS",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "shock_path_reversion",
+  "decision_object": "shock_event_inventory",
+  "required_decisions": [
+    "range_detection",
+    "shock_detection",
+    "recovery_path",
+    "entry_confirmation",
+    "overnight_inventory",
+    "failure_exit"
+  ],
+  "decision_dependencies": [
+    [
+      "range_detection",
+      "shock_detection"
+    ],
+    [
+      "shock_detection",
+      "recovery_path"
+    ],
+    [
+      "recovery_path",
+      "entry_confirmation"
+    ],
+    [
+      "entry_confirmation",
+      "overnight_inventory"
+    ],
+    [
+      "overnight_inventory",
+      "failure_exit"
+    ],
+    [
+      "failure_exit",
+      "shock_detection"
+    ],
+    [
+      "failure_exit",
+      "range_detection"
+    ],
+    [
+      "shock_detection",
+      "entry_confirmation"
+    ]
+  ],
+  "maintenance_targets": [
+    "reference_drift",
+    "reversion_failure",
+    "signal_execution_gap",
+    "state_compatibility"
+  ],
+  "research_question": "在单个国内商品期货品种的真实分合约日线上，仅使用已完成交易日收盘后可见的分合约日线字段：如何先在已完成数据上界定当前有效区间与有效期，把发生在区间边缘的异常价量冲击与普通波动区分开；冲击后如何判定恢复路径处于回摆、延续还是未决，并据此决定是否等待确认后才参与；参与后无法当日平掉的隔夜库存与已挂未成交换腿如何处置，当冲击路径被证伪时如何定义机制失效、清退库存、暂停事件识别并在冷却后恢复，同时让区间边界与参考水平随合约切换和结构漂移持续更新，使跨段持仓、未完成订单与记忆连续可核？",
+  "research_modules": [
+    {
+      "decision_id": "shock_detection",
+      "description": "仅用已完成交易日收盘后可见的分合约日线（开、高、低、收、结算、成交量、持仓量），在已完成区间内定义异常价量冲击事件：需要把事件定义为相对当时可见的局部成交与波动基线的偏离，并明确冻结窗口、事件去重（同一段冲击不重复计为多次事件）与事件候选被区间证伪后的撤销规则；不以未来数据回填事件。",
+      "interaction": "上游接收 range_detection 给出的有效区间与边界，只在区间边缘附近确认冲击候选；下游向 recovery_path 输出带时点与去重后的事件序列，并向 entry_confirmation 输出事件尚未解除的约束，使确认环节不得脱离事件上下文独立触发。"
+    },
+    {
+      "decision_id": "recovery_path",
+      "description": "对已识别冲击事件，用事件后逐日可见的价格与成交演化判定路径状态为回摆、延续或未决，并给出各状态的转入与退出条件、判定所需的最短已完成样本与状态驻留约束；状态判定不得使用事件后的未来路径回填当时状态。",
+      "interaction": "输入来自 shock_detection 的事件序列与区间边界；输出路径状态及其未决标记给 entry_confirmation，作为是否具备参与资格的前置；路径状态若落入延续，则同时通知 failure_exit 准备回摆假设的失效处置。"
+    },
+    {
+      "decision_id": "entry_confirmation",
+      "description": "在路径状态已明确为回摆倾向且未被 shock_detection 撤销的前提下，定义参与前的等待与确认依据（例如需要连续已完成交易日的路径一致性、区间内位置约束），并把成交可行性纳入确认：以 NextOpen 可成交为前提，确认条件不得假设当日可即时按收盘价成交。",
+      "interaction": "同时受 recovery_path 的路径状态与 shock_detection 的事件存续约束；确认结果决定是否进入 overnight_inventory 的建仓排队，并决定失败后是否不得在原事件上重复确认（回指 failure_exit 的冷却状态）。"
+    },
+    {
+      "decision_id": "overnight_inventory",
+      "description": "处理期货分合约真实有符号整数手数的建仓与隔夜持有：逐腿撮合允许部分成交与残余敞口，未成交部分如何撤单或挂续、部分成交形成的残余敞口如何计量与合并；持仓跨交易日时的保证金占用、结算价与换月如何影响可持有手数，且不得假设原子成交或可当日平掉全部建仓量。",
+      "interaction": "接收 entry_confirmation 的参与许可并给出实际可持有的手数与残余敞口；持仓与敞口状态送交 failure_exit 作为清退输入，同时把实际占用回报给 range_detection 与 shock_detection，使后续区间有效性与事件识别门槛参考真实执行差异。"
+    },
+    {
+      "decision_id": "failure_exit",
+      "description": "定义回摆假设失效的证据：路径转入延续、区间被结构突破、或冲击事件在确认后反复未按回摆路径演化；给出失效优先级与去重规则、已有隔夜库存与残余敞口的清退顺序（先平可平手数、残余敞口如何挂续或对冲）、以及失效后暂停 shock_detection 的冷却条件与恢复证据。",
+      "interaction": "输入来自 overnight_inventory 的实际持仓与残余敞口；清退结果回写 shock_detection 的事件识别门槛与冷却状态，并回写 range_detection 要求重新评估区间有效期或重建边界，形成失效驱动的双向闭环。"
+    },
+    {
+      "decision_id": "range_detection",
+      "description": "仅用已完成日线界定单个品种当前有效区间的上下边界与有效期，并明确分合约切换时的处理：旧区间是延续、在新合约上迁移，还是重建；区间更新与失效条件需显式，不以未来数据确定边界。",
+      "interaction": "向 shock_detection 提供区间位置背景并接收 failure_exit 的重建请求；把区间有效期与边界版本送交 recovery_path 作为回摆判定的参照，使区间识别、事件识别与失效处置共享同一可见信息基线。"
+    }
+  ],
+  "maintenance_rationale": "后续分段揭晓的观察可能来自四个方面：一是区间边界与参考水平随分合约切换与结构漂移，若边界频繁重建而事件识别门槛不变，将出现 reference_drift 与信号执行差异；二是冲击事件被证伪后若冷却与恢复门槛过于宽松，reversion_failure 会重复出现，则需保持或收紧失效判定而非增加过滤指标；三是逐腿撮合下的部分成交与残余敞口会使信号与持仓产生缺口，需对照 signal_execution_gap 检查清退顺序与挂续规则；四是版本更新或合约到期时旧持仓、未完成订单与记忆的承接，需检查 state_compatibility。维护时可能的选择是保持当前规则、调整区间有效期与事件门槛参数、或修改事件去重与失效回写的逻辑结构；不承诺每次维护都会提升收益，也不要求实盘盈利。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "FG",
+      "M",
+      "B",
+      "Y",
+      "SA",
+      "SC",
+      "FU",
+      "LU"
+    ],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅运营方采集规划范围：优先以FG或M的单品种真实分合约为主序列，其余品种作为后续扩展候选；实际分合约月份覆盖与连续可得性待绑定确认。",
+      "数据经Tushare Pro桥接查询，任务包不包含行情文件或data/目录；日期域为虚拟序列，虚拟年份不对应真实历史年份。",
+      "所有事件日期均为虚拟日期，仅标识数据顺序与可见时点；交易日历以桥接返回为准。",
+      "分合约乘数、保证金率、结算、费用、夜盘交易日与到期规则尚未绑定，须在数据绑定时确认。",
+      "区间边界、冲击事件判定、路径状态与确认门槛等由原始字段计算的指标属于研究模块，不列入extra_fields。"
+    ]
+  },
+  "parameter_space": [
+    "区间有效期与边界确认所需的已完成交易天数",
+    "区间边界容差与边界重建触发条件",
+    "冲击事件的偏离倍数与成交量基线窗口",
+    "事件去重的冻结窗口长度",
+    "路径状态判定的最短已完成样本与驻留约束",
+    "回摆与延续状态的转换阈值",
+    "参与确认所需连续一致交易日数",
+    "单次参与的目标手数与单事件最大参与手数",
+    "逐腿部分成交后的撤单或挂续等待时限",
+    "残余敞口允许上限与合并规则",
+    "失效判定中路径延续证据的累计次数",
+    "失效后暂停事件识别的冷却长度与恢复所需证据数"
+  ],
+  "novelty_claim": "与existing_tasks逐项对比：HT02为oversold_rebound / oversold_stock_portfolio，以参考水平与偏离度做单股超跌反弹并管理分批库存，不涉及区间有效期、异常价量冲击事件与恢复路径判定；本任务不选横截面股票组合。TG-20261029-184905-a288f9同为shock_path_reversion / shock_event_inventory，其必需决策为冲击识别、恢复路径、确认、隔夜库存、退出政策，交易对象为股票日线单标的；本任务不沿用统一退出政策，而以failure_exit 承担失效处置并回写 shock_detection 与 range_detection，同时交易对象为单个商品期货品种的真实分合约，需处理有符号整数手数、逐腿部分成交、残余敞口、结算与换月，这使隔日库存与失效清退的可执行性成为实质取舍。TG-20261105-041931-972c77已被判为与 a288f9 重复，本任务与其差异在于：区间检测不只作为冲击位置背景，而是与失效回写共同承担区间有效期重建的责任，且失效清退的结果直接改变后续事件识别门槛与区间版本，而非仅重排依赖边。与TG-20261029-172300-7af535及TG-20261029-184707-5e00a9（range_boundary_reversion / range_position_lifecycle）相比，本任务不含趋势否决与再入场决策，机制与决策对象不同。不声称已获数据、已运行或已实证有效；若实现退化为在 a288f9 上仅更换冲击指标或阈值，应视为该任务变体而非独立新题。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+  "lineage": {
+    "derived_from": [
+      "S04",
+      "HT02",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "kind": "futures_contract_shock_path_and_overnight_inventory_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "FG",
+      "M",
+      "B",
+      "Y",
+      "SA",
+      "SC",
+      "FU",
+      "LU"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "batch_id": "B-20261105-041626-d5ef52",
+    "version": 0,
+    "provenance": "model_api",
+    "pipeline_status": "not_connected",
+    "data_status": "not_bound",
+    "status": "pending_human_review",
+    "model_review_status": "needs_attention",
+    "id": "TG-20261105-042202-a4ef6a",
+    "created_at": "2026-11-05T04:22:02+00:00"
+  }
+}

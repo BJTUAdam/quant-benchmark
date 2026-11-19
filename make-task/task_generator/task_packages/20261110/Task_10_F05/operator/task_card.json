@@ -1,0 +1,297 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "跨品种共享对冲腿的执行调度：组合净额、缺腿敞口与撤退预算",
+  "family_id": "F05",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "multi_product_oil_relative_value",
+  "decision_object": "oil_leg_portfolio",
+  "required_decisions": [
+    "month_selection",
+    "hedge_estimation",
+    "signal_aggregation",
+    "liquidity_filter",
+    "staged_inventory",
+    "margin_budget",
+    "entry_exit",
+    "roll_policy"
+  ],
+  "decision_dependencies": [
+    [
+      "month_selection",
+      "hedge_estimation"
+    ],
+    [
+      "hedge_estimation",
+      "signal_aggregation"
+    ],
+    [
+      "signal_aggregation",
+      "margin_budget"
+    ],
+    [
+      "liquidity_filter",
+      "staged_inventory"
+    ],
+    [
+      "margin_budget",
+      "staged_inventory"
+    ],
+    [
+      "staged_inventory",
+      "entry_exit"
+    ],
+    [
+      "staged_inventory",
+      "margin_budget"
+    ],
+    [
+      "entry_exit",
+      "signal_aggregation"
+    ],
+    [
+      "entry_exit",
+      "roll_policy"
+    ],
+    [
+      "roll_policy",
+      "month_selection"
+    ],
+    [
+      "liquidity_filter",
+      "month_selection"
+    ]
+  ],
+  "maintenance_targets": [
+    "signal_execution_gap",
+    "margin_exposure",
+    "cost_sensitivity",
+    "expiry_roll",
+    "state_compatibility"
+  ],
+  "research_question": "当SC/FU与FU/LU两个相对关系同时给出目标，且共享的FU腿在账户中只能表现为一个净持仓时，如何在价差级意图与真实合约净额之间分配容量、安排逐腿成交及撤退，并防止一组价差的未完成执行占用另一组的对冲资源？",
+  "research_modules": [
+    {
+      "decision_id": "month_selection",
+      "description": "明确每个品种的真实月份集合及配对关系，保证两个研究关系使用同一实际FU合约时才允许讨论共享腿净额。",
+      "interaction": "流动性筛选可以否决月份；换月时要区分同一品种不同合约，不能把旧FU和新FU在账户中错误抵消。"
+    },
+    {
+      "decision_id": "hedge_estimation",
+      "description": "为两条相对关系分别给出可解释的统计或设定对冲口径，并按合约乘数映射为实际手数。",
+      "interaction": "只比较明确计价单位后的货币敞口，不把SC每桶与燃料油每吨直接相除当成固定物理转换；两个比例共同决定共享腿净目标。"
+    },
+    {
+      "decision_id": "signal_aggregation",
+      "description": "将两组关系各自的参与/退出意图保存为可追踪的影子归属，再计算账户真实合约的净目标；明确冲突意图的优先级。 影子归属仅作为策略memory内的解释性账本，不构造可独立成交、开平或结算的虚拟子账户；只有真实合约净订单及系统成交能改变平台账户。",
+      "interaction": "真实净额不等于每组都已完成对冲。成交反馈需回写各组尚未完成的意图，不根据事后收益把同一FU成交重复分配给两组。 当两意图在共享腿恰好抵消时，记录意图变化但不虚构双方成交，也不将理想价差收益用于系统评分。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "用当时已完成成交量、持仓量及已绑定的可交易状态约束单腿当期参与，缺失或不可交易不能视作零成本。",
+      "interaction": "筛选先影响月份资格，再限制本轮执行容量；只凭日线量不能声称知道下一根开盘深度或确定能成交。"
+    },
+    {
+      "decision_id": "staged_inventory",
+      "description": "设计目标到订单的分步调度，明确先减旧风险、补齐缺腿、开新关系与撤未完成单的先后；记录每组意图和真实净持仓的差。",
+      "interaction": "订单/成交回调更新预算占用和剩余动作。多腿不原子成交，若共享腿先成交而另一腿未成交，必须显式处理过渡敞口，不能虚构完整组合。"
+    },
+    {
+      "decision_id": "margin_budget",
+      "description": "按账户真实合约净额和仍可能成交的未完成订单计算预算，并为未完成组合的撤退留出可用余量。",
+      "interaction": "预算逐事件重新约束调度；影子归属用于解释意图，不得把共享腿节约的账面手数重复当成两份可用现金或保证金优惠。"
+    },
+    {
+      "decision_id": "entry_exit",
+      "description": "定义两组关系在完成、部分完成、冲突或超时状态中的保持、撤销和退出动作；说明共同腿何时可以净额抵消、何时必须先完成清理。",
+      "interaction": "真实成交后的归属变化回到信号意图，下一轮不得重复发送已完成部分；退出一组关系不能无解释地摧毁另一组仍需要的对冲。 退出或反向动作先与当前真实净仓、可用数量和仍有效订单对账，不能按两份影子头寸重复发送超过实际库存的平仓；开平与反向语义以绑定SDK验收为准。"
+    },
+    {
+      "decision_id": "roll_policy",
+      "description": "处理各品种月份到期不一致造成的分段移仓，逐合约核对旧仓与新仓，不在换月时重置影子意图。",
+      "interaction": "移仓先改变月份映射，重新计算对冲与共享关系。移仓中途失败或某腿未成交时，剩余敞口和订单仍占用预算。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能出现一组价差的退出吞掉另一组对冲、日线参与率限制导致缺腿库存长期残留、共享腿换月后影子归属漂移，或预算预留使有效机会无法开仓。维护应围绕调度优先级、占用口径和归属状态修正，现金、真实合约仓位、挂单与memory跨段延续，不以影子组合的理想收益替代系统实际成交结果。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "SC",
+      "FU",
+      "LU"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内真实分合约；品种代码是待绑定合约池，实际合约月份、交易所、到期规则和覆盖范围由平台绑定，不用主力连续价格替代可交易合约。",
+      "行情经Tushare桥接查询，不交付行情文件包。真实时间范围、冻结版本及阶段边界尚未绑定；公开时间只为虚拟事件顺序，不依据虚拟年份套用现实事件。",
+      "仅登记fut_daily与fut_basic可提供字段；计算出的价差、残差、流动性度量及影子归属记录由策略在当前已可见信息上构造，不作为上游新字段。",
+      "平台须绑定合约乘数、报价单位、交易时段、结算价、逐日价格限制、保证金和费用。当前引擎不支持的按手收费或差异平今费不得静默设0；规则未齐不能正式运行。",
+      "多腿订单逐腿撮合，可能部分成交、撤单失败或产生临时净敞口；不得依赖原子组合成交、跨腿保证金优惠或未绑定的跨品种转换系数。",
+      "来源仅使用已登记来源卡的主题和目录启发；本题研究问题由本轮助手设计，未引用或读取未提供的全书内容，不是书中现成策略。",
+      "策略的订单/成交通知仅更新JSON memory中的归属、占用及剩余意图；新增订单和撤单只在平台允许的on_bars回调发出。不得假设on_order/on_trade可立即再次发单，也不得将下一根开盘的成交容量提前视为已知。",
+      "平台仅有单一真实账户和逐合约净持仓。影子账本只解释目标意图及真实成交归属，不创建可独立开平、独立结算或独立评分的虚拟多空账户；净额抵消不合成两份成交或价差收益。减仓须以当时真实可用净仓和未完成订单为限；反向目标不得按影子多头/空头数量直接重复平仓，须按本版SDK实际买卖、平仓与反向语义核验。"
+    ]
+  },
+  "parameter_space": [
+    "两组关系的估计窗口与版本更新时间",
+    "各组残差参与门槛与退出门槛",
+    "冲突意图的优先级及同时参与上限",
+    "单腿参与率限制与最低流动性资格",
+    "分步调度的每次最大手数",
+    "未完成组合的超时与撤单节奏",
+    "缺腿敞口容忍度与强制减仓条件",
+    "共享腿净额及影子归属的重算周期",
+    "未完成订单的预算预留规则",
+    "退出/移仓期间允许新意图的条件"
+  ],
+  "novelty_claim": "HT04已经允许SC/FU/LU多腿相对价值，因此品种集合本身不新。本题重点是两个关系共享一个实际对冲腿时的意图归属、账户净额、未成交占用和执行调度闭环；若把这些必需决策简化为一次信号加权后统一下单，应合并回既有多腿题，不能计新。",
+  "lineage": {
+    "derived_from": [
+      "HT04",
+      "S09"
+    ],
+    "kind": "assistant_authored_research_candidate_not_api_screened"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "SC",
+      "FU",
+      "LU"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-10",
+    "task_id": "TASK12-20261110-10",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

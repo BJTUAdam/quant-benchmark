@@ -1,0 +1,79 @@
+{
+  "fingerprint": "f7febbbb5034efdd2521c809948d01201b3fade3d599425495626346d7c3404d",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "TG-20261029-184647-ca78bb",
+      "score": 0.7692,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "趋势回撤中的分层库存与退出维护"
+    },
+    {
+      "task_id": "TG-20261029-185416-8868c8",
+      "score": 0.7143,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "趋势回撤的资格切换与分批库存处置：趋势资格、回撤定位、分批库存与退出维护"
+    },
+    {
+      "task_id": "TG-20261105-041906-253472",
+      "score": 0.7143,
+      "exact_structure": false,
+      "status": "spec_accepted",
+      "title": "期货趋势回撤中的资格复核、回撤定位与分批库存连续维护"
+    },
+    {
+      "task_id": "TG-20261105-042135-678759",
+      "score": 0.7143,
+      "exact_structure": false,
+      "status": "spec_accepted",
+      "title": "期货单品种趋势回撤中的资格复核与预算耦合库存：逐腿撮合下的分批建仓、资格撤回与退出联动"
+    },
+    {
+      "task_id": "TG-20261029-185109-ad8725",
+      "score": 0.6667,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "趋势回撤中的资格复核、回撤定位与分批库存迁移"
+    },
+    {
+      "task_id": "TG-20261029-185249-24341b",
+      "score": 0.6667,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "趋势回撤中的趋势资格撤回、回撤失效辨识与分批库存清退"
+    },
+    {
+      "task_id": "HT02",
+      "score": 0.3333,
+      "exact_structure": false,
+      "status": "historical_package_unrevalidated",
+      "title": "45股短周期超跌反转"
+    },
+    {
+      "task_id": "TASK12-20261110-03",
+      "score": 0.3,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "区间参考漂移下的回归目标：目标更新、趋势否决与隔日退出的联动"
+    },
+    {
+      "task_id": "TG-20261029-184707-5e00a9",
+      "score": 0.3,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "商品区间边缘回归：多品种区间有效期、趋势否决与再入场维护"
+    },
+    {
+      "task_id": "HT01",
+      "score": 0.2778,
+      "exact_structure": false,
+      "status": "historical_package_unrevalidated",
+      "title": "45股短周期趋势追踪"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

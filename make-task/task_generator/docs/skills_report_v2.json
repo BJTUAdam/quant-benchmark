@@ -1,0 +1,22 @@
+{
+  "schema_version": "finlab.skill.verification.v1",
+  "checked_at": "2026-11-10T11:21:17.452608+00:00",
+  "passed": true,
+  "offline": true,
+  "skill_files": 319,
+  "tushare_pro_full_articles": 246,
+  "tushare_page_records": 284,
+  "navigation_or_empty_pages": 15,
+  "akquant_official_documents": 13,
+  "akquant_version": "0.3.76",
+  "source_hashes_verified": 298,
+  "local_links_checked": 444,
+  "template_preflight": true,
+  "template_platform_check": true,
+  "query_scripts_checked": true,
+  "real_tushare_account_tested": false,
+  "new_docker_acceptance_run": true,
+  "runtime_changed": true,
+  "credential_scan": "no matches",
+  "errors": []
+}

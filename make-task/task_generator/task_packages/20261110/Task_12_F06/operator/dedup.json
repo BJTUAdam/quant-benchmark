@@ -1,0 +1,79 @@
+{
+  "fingerprint": "79f0209d1962e93f22080e8810b1579bd824aeaeda5f76978e229c57094332fd",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "TG-20261105-041844-918b61",
+      "score": 0.75,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "同品种多月份期限曲线的斜率变化与动态配对选择：可交易合约对集合、整数手数与到期迁移的联合维护"
+    },
+    {
+      "task_id": "TG-20261029-172301-684a8d",
+      "score": 0.5556,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "FG近远月价差的配对、到期和移仓"
+    },
+    {
+      "task_id": "TG-20261029-185226-a83ad1",
+      "score": 0.5556,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "同品种多月份价差的期限单位、整数手数配对与到期迁移"
+    },
+    {
+      "task_id": "TASK12-20261110-11",
+      "score": 0.4762,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "跨期库存的撤退可行性：流动性枯竭、分腿减仓与到期接续"
+    },
+    {
+      "task_id": "TG-20261029-185356-d4e28b",
+      "score": 0.4737,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "同品种两个到期月份之间的配对选择：剩余期限可比、流动性与到期换腿"
+    },
+    {
+      "task_id": "TG-20261029-185538-ab9792",
+      "score": 0.4737,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "同品种跨期价差的参与规模自适应：交割月流动性衰减下的配对重选与手数再平衡"
+    },
+    {
+      "task_id": "TASK12-20261110-10",
+      "score": 0.4091,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "跨品种共享对冲腿的执行调度：组合净额、缺腿敞口与撤退预算"
+    },
+    {
+      "task_id": "HT03",
+      "score": 0.381,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "国内B/M/Y大豆压榨价差"
+    },
+    {
+      "task_id": "HT04",
+      "score": 0.3636,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "国内SC/FU/LU原油燃料油相对价值"
+    },
+    {
+      "task_id": "TG-20261105-042048-66d9a5",
+      "score": 0.3333,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "B/M/Y加工链条的分项信号冲突裁决与真实腿库存交接"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

@@ -1,0 +1,278 @@
+{
+  "batch_id": "B-20261105-041626-d5ef52",
+  "mode": "automatic",
+  "human_approval_required": false,
+  "accepted": [
+    {
+      "candidate_id": "TG-20261105-041820-c67182",
+      "task_id": "TG-20261105-041820-c67182",
+      "version": 1,
+      "status": "spec_accepted",
+      "approval_method": "automated",
+      "novelty": "duplicate",
+      "counts_new_question": false,
+      "pipeline_candidate_id": "TG-20261105-041820-c67182",
+      "reused": false
+    },
+    {
+      "candidate_id": "TG-20261105-041906-253472",
+      "task_id": "TG-20261105-041906-253472",
+      "version": 1,
+      "status": "spec_accepted",
+      "approval_method": "automated",
+      "novelty": "variant",
+      "counts_new_question": false,
+      "pipeline_candidate_id": "TG-20261105-041906-253472",
+      "reused": false
+    },
+    {
+      "candidate_id": "TG-20261105-041955-cc1583",
+      "task_id": "TG-20261105-041955-cc1583",
+      "version": 1,
+      "status": "spec_accepted",
+      "approval_method": "automated",
+      "novelty": "variant",
+      "counts_new_question": false,
+      "pipeline_candidate_id": "TG-20261105-041955-cc1583",
+      "reused": false
+    },
+    {
+      "candidate_id": "TG-20261105-042021-e6bb50",
+      "task_id": "TG-20261105-042021-e6bb50",
+      "version": 1,
+      "status": "spec_accepted",
+      "approval_method": "automated",
+      "novelty": "variant",
+      "counts_new_question": false,
+      "pipeline_candidate_id": "TG-20261105-042021-e6bb50",
+      "reused": false
+    },
+    {
+      "candidate_id": "TG-20261105-042135-678759",
+      "task_id": "TG-20261105-042135-678759",
+      "version": 1,
+      "status": "spec_accepted",
+      "approval_method": "automated",
+      "novelty": "duplicate",
+      "counts_new_question": false,
+      "pipeline_candidate_id": "TG-20261105-042135-678759",
+      "reused": false
+    },
+    {
+      "candidate_id": "TG-20261105-042202-a4ef6a",
+      "task_id": "TG-20261105-042202-a4ef6a",
+      "version": 1,
+      "status": "spec_accepted",
+      "approval_method": "automated",
+      "novelty": "duplicate",
+      "counts_new_question": false,
+      "pipeline_candidate_id": "TG-20261105-042202-a4ef6a",
+      "reused": false
+    }
+  ],
+  "accepted_count": 6,
+  "blockers": [
+    {
+      "candidate_id": "TG-20261105-041643-7e6569",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-041705-dcbca2",
+      "error": "SPECIFICATION_CHECK_FAILED"
+    },
+    {
+      "candidate_id": "TG-20261105-041728-6227b7",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-041755-b4949b",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-041844-918b61",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-041931-972c77",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-042048-66d9a5",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-042112-504553",
+      "error": "SPECIFICATION_CHECK_FAILED"
+    },
+    {
+      "candidate_id": "TG-20261105-042228-c84215",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-042307-e14bb5",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-042329-afee5f",
+      "error": "MODEL_REVIEW_UNRESOLVED_ISSUES"
+    },
+    {
+      "candidate_id": "TG-20261105-042355-2f1469",
+      "error": "SPECIFICATION_CHECK_FAILED"
+    }
+  ],
+  "new_independent_questions": 0,
+  "data_status": "not_bound",
+  "pipeline_status": "not_connected",
+  "schema_version": "finlab.automatic_acceptance_retry.v1",
+  "checked_at": "2026-11-10T10:06:43.677198+00:00",
+  "release": "v2-automatic-20261110",
+  "real_stored_model_evidence_used": true,
+  "new_model_api_calls": 0,
+  "human_approvals_created": 0,
+  "real_backtest_completed": false,
+  "acceptance_library": {
+    "directory": "examples/accepted",
+    "records": 6,
+    "human_approvals_created": 0,
+    "data_included": false
+  },
+  "immutable_spec_exports": [
+    {
+      "candidate_id": "TG-20261105-041820-c67182",
+      "version": 1,
+      "status": "immutable_spec_exported",
+      "approval_method": "automated",
+      "data_status": "not_bound"
+    },
+    {
+      "candidate_id": "TG-20261105-041906-253472",
+      "version": 1,
+      "status": "immutable_spec_exported",
+      "approval_method": "automated",
+      "data_status": "not_bound"
+    },
+    {
+      "candidate_id": "TG-20261105-041955-cc1583",
+      "version": 1,
+      "status": "immutable_spec_exported",
+      "approval_method": "automated",
+      "data_status": "not_bound"
+    },
+    {
+      "candidate_id": "TG-20261105-042021-e6bb50",
+      "version": 1,
+      "status": "immutable_spec_exported",
+      "approval_method": "automated",
+      "data_status": "not_bound"
+    },
+    {
+      "candidate_id": "TG-20261105-042135-678759",
+      "version": 1,
+      "status": "immutable_spec_exported",
+      "approval_method": "automated",
+      "data_status": "not_bound"
+    },
+    {
+      "candidate_id": "TG-20261105-042202-a4ef6a",
+      "version": 1,
+      "status": "immutable_spec_exported",
+      "approval_method": "automated",
+      "data_status": "not_bound"
+    }
+  ],
+  "delivery_attempts": [
+    {
+      "candidate_id": "TG-20261105-041955-cc1583",
+      "prepare_status": "blocked",
+      "missing_acceptance": false,
+      "blocker_codes": [
+        "BOUND_CONTRACT_REVIEW_REQUIRED",
+        "COVERAGE_REVIEW_REQUIRED",
+        "DATA_POLICY_EVIDENCE_REQUIRED",
+        "FROZEN_DATA_REQUIRED",
+        "POINT_IN_TIME_REQUIRED",
+        "QUERY_PARTITIONS_REQUIRED",
+        "SETUP_REQUIRED",
+        "VISIBILITY_EVIDENCE_REQUIRED"
+      ],
+      "preflight_checks": {
+        "approval": {
+          "status": "passed"
+        },
+        "frozen_dataset": {
+          "status": "blocked",
+          "code": "INVALID_OR_MISSING_ARTIFACT"
+        },
+        "operator_setup": {
+          "status": "blocked",
+          "code": "SETUP_REQUIRED"
+        },
+        "submission": {
+          "status": "passed"
+        },
+        "docker_daemon": {
+          "status": "passed"
+        },
+        "locked_images": {
+          "status": "passed"
+        }
+      },
+      "preflight_blockers": [
+        "INVALID_OR_MISSING_ARTIFACT",
+        "SETUP_REQUIRED"
+      ]
+    },
+    {
+      "candidate_id": "TG-20261105-042021-e6bb50",
+      "prepare_status": "blocked",
+      "missing_acceptance": false,
+      "blocker_codes": [
+        "BOUND_CONTRACT_REVIEW_REQUIRED",
+        "COVERAGE_REVIEW_REQUIRED",
+        "DATA_POLICY_EVIDENCE_REQUIRED",
+        "FROZEN_DATA_REQUIRED",
+        "POINT_IN_TIME_REQUIRED",
+        "QUERY_PARTITIONS_REQUIRED",
+        "SETUP_REQUIRED",
+        "VISIBILITY_EVIDENCE_REQUIRED"
+      ],
+      "preflight_checks": {
+        "approval": {
+          "status": "passed"
+        },
+        "frozen_dataset": {
+          "status": "blocked",
+          "code": "INVALID_OR_MISSING_ARTIFACT"
+        },
+        "operator_setup": {
+          "status": "blocked",
+          "code": "SETUP_REQUIRED"
+        },
+        "submission": {
+          "status": "passed"
+        },
+        "docker_daemon": {
+          "status": "passed"
+        },
+        "locked_images": {
+          "status": "passed"
+        }
+      },
+      "preflight_blockers": [
+        "INVALID_OR_MISSING_ARTIFACT",
+        "SETUP_REQUIRED"
+      ]
+    }
+  ],
+  "batch_preflight_passed": false,
+  "batch_executed": false,
+  "formal_segments_advanced": 0,
+  "current_blockers": [
+    "HISTORICAL_VISIBILITY_NOT_PROVEN",
+    "CORPORATE_ACTIONS_NOT_VERIFIED",
+    "TRADING_RULES_NOT_BOUND",
+    "SETUP_REQUIRED"
+  ],
+  "original_candidate_snapshot_unchanged": true
+}

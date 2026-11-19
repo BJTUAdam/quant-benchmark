@@ -1,0 +1,260 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "横截面相对强弱排名中候选池资格的反向协商：流动性集合边界、留存门槛与现金预算的联合维护",
+  "family_id": "F03",
+  "source_ids": [
+    "SRC_QLIB",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "relative_strength_rotation",
+  "decision_object": "ranked_stock_portfolio",
+  "required_decisions": [
+    "feature_definition",
+    "liquidity_filter",
+    "rank_aggregation",
+    "holding_buffer",
+    "capital_allocation"
+  ],
+  "decision_dependencies": [
+    [
+      "feature_definition",
+      "liquidity_filter"
+    ],
+    [
+      "feature_definition",
+      "rank_aggregation"
+    ],
+    [
+      "liquidity_filter",
+      "rank_aggregation"
+    ],
+    [
+      "rank_aggregation",
+      "holding_buffer"
+    ],
+    [
+      "holding_buffer",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "liquidity_filter"
+    ],
+    [
+      "capital_allocation",
+      "feature_definition"
+    ]
+  ],
+  "maintenance_targets": [
+    "ranking_stability",
+    "cost_sensitivity",
+    "signal_execution_gap",
+    "state_compatibility"
+  ],
+  "research_question": "在国内股票或ETF日线环境中，仅用当时已收盘可见的量价与涨跌停数据：相对强弱特征应如何定义才能与成交活跃度的度量口径一致；成交活跃度不只是入场前的静态筛选，而应由当期资金分配结果（仓位碎片化程度与剩余现金）反向收缩或恢复下一期可参与排名的股票集合；当可参与集合随现金预算逐期增删时，同日排名的分母随之变化，继续持有的门槛必须与变化后的排名重新协商，而不是沿用上一期的留存标准；研究需给出这一闭环在分段维护中可解释、可接续的决策规则。",
+  "research_modules": [
+    {
+      "decision_id": "feature_definition",
+      "description": "定义当日收盘后即可计算的相对强弱特征：在统一的已完成窗口上构造收益与波动标准化量，并让成交活跃度度量使用同一窗口与同一复权口径，避免特征与筛选口径不一致导致的排名漂移。",
+      "interaction": "特征口径确定后，liquidity_filter 才有一致的活跃度输入；capital_allocation 的结果会回指本模块，要求说明现金碎片与持仓权重上限如何约束可用于计算特征的窗口长度与样本完整性。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "用当时已知的成交额与涨跌幅限制状态界定可参与排名的候选集合：排除当日无成交、涨跌停封死或活跃度不足的标的，并记录集合的逐期构成。",
+      "interaction": "集合随 capital_allocation 回指而收缩或恢复：当期现金不足造成持仓碎片时，下一期可用参与集合应相应收窄；集合变化后 rank_aggregation 的排名分母改变，必须重新计算而非沿用缓存排名。"
+    },
+    {
+      "decision_id": "rank_aggregation",
+      "description": "在当期可参与集合上合成相对强弱得分并给出同日排名，明确得分标准化方式与并列处理。",
+      "interaction": "排名分母由 liquidity_filter 决定，排名结果直接决定 holding_buffer 的入选与留存判断；capital_allocation 回指特征口径后，排名需在参数版本更新时重建而非增量修补。"
+    },
+    {
+      "decision_id": "holding_buffer",
+      "description": "分设买入门槛与继续持有门槛，使既有持仓在排名轻微下滑时保留，并给出缓冲宽度随集合规模变化的自适应规则。",
+      "interaction": "缓冲宽度受 capital_allocation 反馈影响：现金碎片化时缓冲不应无限放宽；缓冲结果传给 capital_allocation 作为换仓候选与留存名单的输入。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在留存名单与新增候选之间分配资金，考虑单票权重上限、现金余额、T+1 新增不可卖约束与剩余现金，并把分配结果的碎片化程度回写为下一期集合与特征口径的约束。",
+      "interaction": "本模块回指 liquidity_filter 与 feature_definition：分配造成的碎片化与现金不足改变下一期可参与集合与可用特征窗口；同时接收 holding_buffer 的留存名单，形成资格集合与留存门槛的双向协商，而非单向链。"
+    }
+  ],
+  "maintenance_rationale": "后续正式期揭晓的观察可能显示：可参与集合逐期变化导致排名分母不稳定，留存门槛在集合收缩时过于严苛而频繁换仓，或现金碎片化使特征窗口不可用。这些观察应促使研究者在保持机制不变的前提下调整集合边界规则、缓冲宽度或分配约束，或保留现有逻辑；也可能显示闭环依赖在跨段迁移时使旧持仓与现金不兼容，需修正状态承接规则。维护不保证每次调整都提升收益，也不承诺实盘盈利。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "股票池使用真实代码，当前为空池，待运营方绑定真实股票或ETF代码后再运行；不使用匿名代号。",
+      "接口与字段候选来自 data_profiles.stock_etf_daily：daily、adj_factor、stk_limit、trade_cal、index_daily；授权、冻结与可见性在绑定时确认。",
+      "指数仅用于查询与基准，不下单。",
+      "所有日期为虚拟日期，仅标识数据顺序与可见时点。"
+    ]
+  },
+  "parameter_space": [
+    "特征回看窗口长度",
+    "活跃度阈值分位",
+    "买入排名门槛",
+    "继续持有排名门槛",
+    "缓冲宽度随集合规模的自适应系数",
+    "单票权重上限",
+    "现金留存比例"
+  ],
+  "novelty_claim": "与 existing_tasks 逐项对比：HT06 为 dynamic_constituent_multifactor / constituent_stock_portfolio，核心含动态成分资格与基准超额目标，本题不含成分资格决策。TG-20261029-172300-d78026 与 TG-20261029-184930-be6167 为同机制同对象，依赖链为特征→排名→缓冲→换手→分配（后者仅追加分配回指缓冲一条边），均不含 liquidity_filter。TG-20261029-185132-5120cb 与 TG-20261029-185310-93eea1 已含 liquidity_filter 并由 capital_allocation 回指，最近反馈已将 TG-20261105-041728-6227b7 判为 93eea1 的变体，理由是增加分配→特征回指边属依赖边重排、回指特征口径缺实质取舍。本题据此不再把回指边本身当作新颖性来源：本题实际改变的是必需决策集合——剔除 turnover_budget 而以 capital_allocation 承担换仓可执行性与现金约束，使审查可以明确比较'留存门槛与换仓预算'如何在集合逐期变动下被同一决策反复协商；同时把特征口径与活跃度度量的统一性作为 feature_definition 的前置条件写进模块描述，使分配回指特征体现为窗口可用性与复权口径的实质约束而非标签。与 TG-20261029-185310-93eea1 的差异仍需人工语义审判断是否足够：若实现退化为在 93eea1 上删去换手预算模块，应视为该任务变体而非独立新题。与 S06（cross_sectional_reversal / cross_sectional_reversal_portfolio）机制与决策对象均不同。未引入新 ID，未声称已获数据或已实证有效；书目仅提供方向，未引用章节、页码或最优参数。",
+  "lineage": {
+    "derived_from": [
+      "S05",
+      "HT06",
+      "TG-20261029-185310-93eea1",
+      "TG-20261105-041728-6227b7"
+    ],
+    "kind": "decision_set_rebalance_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "strategy.py",
+      "backtest.py",
+      "params.json",
+      "RESEARCH.md",
+      "CHANGELOG.md"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  }
+}

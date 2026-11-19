@@ -1,0 +1,79 @@
+{
+  "fingerprint": "e0e774a00ce11a9072e6b2315d931dde6b4274d7c1934940cbfbbeae48fd3b3f",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "TG-20261029-172300-ca5a47",
+      "score": 0.5714,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "整理区间突破后的跟踪、失败退出与再入场"
+    },
+    {
+      "task_id": "TG-20261105-041643-7e6569",
+      "score": 0.5333,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "整理区间突破后的确认缺失处置：区间失效与突破未确认的区分、失败退出与再入场预算回压"
+    },
+    {
+      "task_id": "TG-20261029-184839-b184fc",
+      "score": 0.3333,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "整理区间突破的参与控制：切换迟滞、失败处置与预算恢复"
+    },
+    {
+      "task_id": "TASK12-20261110-05",
+      "score": 0.3158,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "多窗口相对强弱分歧下的排名裁决、换仓队列与部分执行维护"
+    },
+    {
+      "task_id": "TASK12-20261110-08",
+      "score": 0.3158,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "回撤风险贡献分解、流动性受限减仓与恢复额度管理"
+    },
+    {
+      "task_id": "HT01",
+      "score": 0.2941,
+      "exact_structure": false,
+      "status": "historical_package_unrevalidated",
+      "title": "45股短周期趋势追踪"
+    },
+    {
+      "task_id": "TASK12-20261110-11",
+      "score": 0.2857,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "跨期库存的撤退可行性：流动性枯竭、分腿减仓与到期接续"
+    },
+    {
+      "task_id": "TG-20261029-185109-ad8725",
+      "score": 0.2632,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "趋势回撤中的资格复核、回撤定位与分批库存迁移"
+    },
+    {
+      "task_id": "TG-20261029-185132-5120cb",
+      "score": 0.2632,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "相对强弱排名下的流动性筛选、留存门槛与现金预算联动"
+    },
+    {
+      "task_id": "TG-20261029-185310-93eea1",
+      "score": 0.2632,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "横截面相对强弱下的可交易性前置筛选、留存门槛与现金预算闭环"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

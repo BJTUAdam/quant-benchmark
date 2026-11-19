@@ -1,0 +1,61 @@
+{
+  "schema_version": "finlab.bridge_contract.v2",
+  "identity_policy": "real_names_and_codes",
+  "date_domain": "virtual",
+  "calendar_semantics": "virtual_sequence_only_not_historical_years",
+  "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+  "url_env": "MARKET_BRIDGE_URL",
+  "token_env": "MARKET_BRIDGE_TOKEN",
+  "virtual_start": null,
+  "virtual_stop": null,
+  "minimum_years": 2,
+  "symbols": [
+    "FG",
+    "M",
+    "B",
+    "Y",
+    "SA",
+    "SC",
+    "FU",
+    "LU"
+  ],
+  "endpoints": [
+    {
+      "api_name": "fut_daily",
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "open",
+        "high",
+        "low",
+        "close",
+        "settle",
+        "vol",
+        "oi"
+      ],
+      "frequency": "daily",
+      "visibility": "available_at_lte_controller_clock"
+    },
+    {
+      "api_name": "fut_basic",
+      "fields": [
+        "ts_code",
+        "name",
+        "list_date",
+        "delist_date"
+      ],
+      "frequency": "daily",
+      "visibility": "available_at_lte_controller_clock"
+    }
+  ],
+  "binding_status": "not_bound",
+  "dataset_id": null,
+  "required_checks": [
+    "point_in_time",
+    "coverage",
+    "calendar",
+    "units",
+    "corporate_actions_or_settlement",
+    "trading_rules"
+  ]
+}

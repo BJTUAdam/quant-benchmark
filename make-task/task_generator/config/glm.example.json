@@ -1,0 +1,14 @@
+{
+  "provider_name": "glm_official",
+  "adapter": "chat_completions",
+  "base_url": "https://open.bigmodel.cn/api/paas/v4",
+  "generation_model": "",
+  "review_model": "",
+  "api_key_env": "GLM_API_KEY",
+  "timeout_seconds": 60,
+  "max_retries": 2,
+  "format_retries": 1,
+  "max_calls_per_batch": 48,
+  "json_mode": "json_object",
+  "provider_plugin": null
+}

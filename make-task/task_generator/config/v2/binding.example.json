@@ -1,0 +1,33 @@
+{
+  "schema_version": "finlab.binding.v2",
+  "frozen_dir": "REPLACE_WITH_PRIVATE_FROZEN_PATH",
+  "candidate_id": null,
+  "approved_spec_hash": null,
+  "contract_review_confirmed": false,
+  "research_fraction": 0.3,
+  "feeds": [
+    {
+      "api_name": "daily",
+      "event_field": "trade_date",
+      "close_time": "16:00",
+      "volume_multiplier": 100,
+      "amount_multiplier": 1000
+    }
+  ],
+  "runtime": {
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "market_rules_status": "requires_binding",
+    "initial_cash": 1000000,
+    "instruments": null,
+    "calendar": null,
+    "sessions": null,
+    "execution_rules": null,
+    "corporate_actions": null,
+    "corporate_actions_verified": false,
+    "benchmark": null,
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {"cpus": 2, "memory_mb": 4096}
+  }
+}

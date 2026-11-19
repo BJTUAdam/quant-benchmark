@@ -1,0 +1,37 @@
+[
+  {
+    "id": "SRC_STOCK_TRENDS",
+    "status": "official_catalog_verified",
+    "url": "https://www.taylorfrancis.com/books/mono/10.4324/9781315115719/technical-analysis-stock-trends-robert-edwards-john-magee-bassetti",
+    "title": "Technical Analysis of Stock Trends，英文第11版",
+    "verified_scope": "仅核验出版社简介与目录：趋势、整理形态、支撑阻力、量价、止损及资金管理。未读取全书；不套用未知中文译本页码。种子为人工形式化改写，不是书中现成策略或盈利结论。"
+  },
+  {
+    "id": "SRC_CHAN",
+    "status": "official_catalog_verified",
+    "url": "https://www.wiley.com/en-us/Algorithmic+Trading%3A+Winning+Strategies+and+Their+Rationale-p-9781118460146",
+    "title": "Ernest P. Chan: Algorithmic Trading: Winning Strategies and Their Rationale",
+    "verified_scope": "仅核验Wiley书页与官方目录，覆盖均值回归、日内/日间动量、执行与风险管理。具体国内规则、多腿/跨期种子为人工设计，不宣称书中原样给出。"
+  },
+  {
+    "id": "SRC_QLIB",
+    "status": "official_source_verified",
+    "url": "https://github.com/microsoft/qlib/blob/main/qlib/contrib/data/loader.py",
+    "title": "Microsoft Qlib Alpha158/Alpha360",
+    "verified_scope": "核验loader.py、handler.py与MIT许可。特征配置并非完整任务；未来收益LABEL不能作为当时特征。官方数据暂时停用，不据此声称已补齐国内历史成分数据。"
+  },
+  {
+    "id": "SRC_ALPHAAGENT",
+    "status": "paper_verified_code_license_unconfirmed",
+    "url": "https://arxiv.org/abs/2502.16789",
+    "title": "AlphaAgent，2025论文",
+    "verified_scope": "核验论文及论文关联仓库。借鉴去重、假设一致性和复杂度控制；2026仓库已重构且未见明确根许可，不复制打包其实现。"
+  },
+  {
+    "id": "SRC_PROJECT_PLAN",
+    "status": "internal_human_design",
+    "url": "",
+    "title": "持续Task生产方案，人工讨论稿v1，2026-10-30",
+    "verified_scope": "内部方案第3—4节的六方向与12种子。来源路径output/持续Task生产方案_20261030.md；具体任务关系、状态控制和验收规则为本项目人工设计，不归因于外部书籍。"
+  }
+]

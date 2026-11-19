@@ -1,0 +1,79 @@
+{
+  "fingerprint": "c2aabdca3962b7ca8c93b9bbefc84e9d58f5258d01fcbce14ba5f63da0b8725c",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "TG-20261029-184707-5e00a9",
+      "score": 0.7333,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "商品区间边缘回归：多品种区间有效期、趋势否决与再入场维护"
+    },
+    {
+      "task_id": "TG-20261029-172300-7af535",
+      "score": 0.7143,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "区间边缘的回归参与与趋势否决"
+    },
+    {
+      "task_id": "HT02",
+      "score": 0.3333,
+      "exact_structure": false,
+      "status": "historical_package_unrevalidated",
+      "title": "45股短周期超跌反转"
+    },
+    {
+      "task_id": "TG-20261105-041931-972c77",
+      "score": 0.3158,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "区间边缘放量冲击的恢复路径：冲击识别、回摆与延续的区分、隔日库存处置与失效停用"
+    },
+    {
+      "task_id": "TG-20261105-042202-a4ef6a",
+      "score": 0.3158,
+      "exact_structure": false,
+      "status": "spec_accepted",
+      "title": "单品种真实分合约的放量冲击恢复路径与隔日库存：冲击定位、回摆与延续辨识、T+1库存处置及失效后停用恢复"
+    },
+    {
+      "task_id": "TASK12-20261110-02",
+      "score": 0.3,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "趋势回撤的参考版本与库存层：口径更新后的退出归因和持仓承接"
+    },
+    {
+      "task_id": "TASK12-20261110-06",
+      "score": 0.2857,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "横截面反转事件的分批入场、隔日退出与换手额度竞争"
+    },
+    {
+      "task_id": "TG-20261029-184905-a288f9",
+      "score": 0.2778,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "放量冲击后的恢复路径与隔日库存维护"
+    },
+    {
+      "task_id": "TASK12-20261110-04",
+      "score": 0.2381,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "重叠冲击的恢复证据：事件归属、重复参与与隔日库存预算"
+    },
+    {
+      "task_id": "HT01",
+      "score": 0.2105,
+      "exact_structure": false,
+      "status": "historical_package_unrevalidated",
+      "title": "45股短周期趋势追踪"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

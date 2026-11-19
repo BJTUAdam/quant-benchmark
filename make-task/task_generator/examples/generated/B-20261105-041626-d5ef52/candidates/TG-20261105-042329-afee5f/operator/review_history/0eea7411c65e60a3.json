@@ -1,0 +1,130 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-041820-c67182",
+  "spec_hash": "e9b7b5d2049fa30489c85c31586f45b9404fd70fa1226995ef727dd98b812eef",
+  "reviewed_at": "2026-11-05T04:23:41+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "核心研究问题与TG-20261105-041820-c67182等价：机制、决策对象、必需决策集、依赖闭环与研究问题逐项对应，仅品种收窄与维护目标微调，不足以构成独立新题",
+    "novelty_claim未说明与TG-20261105-041820-c67182在机制、对象和决策链上的一致性，反而将FG/SA限定作为差异，但该任务本就未预先绑定品种，不构成实质区别"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "7c7c6819b0f2559f7cf844fe3ed5d28f5d6d37bad1fb5f84c9b40d07d845ae65",
+  "content_hash": "561940a5ce324ff01d8b415da0ade9300c287a39077e1dc8687b39c1c67bc696",
+  "rationale": "候选与TG-20261105-041820-c67182在机制、对象、必需决策集及依赖闭环上高度一致：两者均为cross_product_residual与cross_product_leg_portfolio，均含relationship_monitoring→hedge_estimation与state_migration→month_selection两条闭环边，研究问题逐项对应滚动对冲、残差参与、比例漂移区分、保证金缩减和旧腿版本迁移。候选将标的收窄为FG/SA并去掉expiry_roll维护目标，前者只是品种配置变化，后者仍由state_migration承担换月迁移，均不构成实质研究决策变化。与TG-20261029-172301-36425d则仅标的由FU/LU换为FG/SA并细化依赖边，同样不构成独立新题。novelty_claim中关于与HT05差异的论述部分成立（无独立roll_policy），但未覆盖与TG-20261105-041820-c67182核心决策等价这一事实，其自述“若退化为仅调整窗口或阈值则视为变体”反而承认差异边界不足。因此判为duplicate。",
+  "pending_bindings": [
+    "FG与SA具体分合约代码、月份覆盖、乘数、保证金率、费用与夜盘/到期规则待数据绑定后确认",
+    "data_requirements中date_start/date_end与bridge_contract.virtual_start/virtual_stop均为待绑定，正式分段边界未冻结",
+    "runtime_profile.resources为null且resource_status=requires_human_setup，需本人运行finlab setup配置CPU与内存",
+    "market_rules_status=requires_binding，规则未绑定时不能正式运行",
+    "definitions与评分细则待管线绑定，运行难度未实测"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F05、cross_product_residual机制、cross_product_leg_portfolio对象",
+        "必需决策集完全一致：month_selection、hedge_estimation、entry_exit、relationship_monitoring、margin_budget、state_migration",
+        "均要求滚动对冲估计、残差参与、比例漂移与普通波动区分、暂停与重估、逐腿部分成交与残余敞口处理"
+      ],
+      "task_id": "TG-20261029-172301-36425d",
+      "differences": [
+        "该历史项标的为FU/LU，本候选为FG/SA，属标的配置变化而非研究决策变化",
+        "本候选额外加入relationship_monitoring→hedge_estimation回指边及state_migration→month_selection闭环边，但其内容已被该历史项研究问题中的“重估对冲、暂停参与并迁移实际双腿头寸”宽泛覆盖"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05、cross_product_residual、cross_product_leg_portfolio",
+        "必需决策集完全相同且依赖结构一致，包括state_migration→month_selection与relationship_monitoring→hedge_estimation两条闭环边",
+        "研究问题均围绕真实分合约日线、滚动对冲、有符号整数手数、残差参与与退出、比例漂移与残差波动区分、保证金预算缩减、旧腿与版本迁移连续可核",
+        "维护目标hedge_drift、margin_exposure、state_compatibility一致"
+      ],
+      "task_id": "TG-20261105-041820-c67182",
+      "differences": [
+        "候选把标的明确限定为FG/SA，而该任务要求在当时可见条件下不预先绑定产业配对；这属于品种配置收窄",
+        "候选标题强调FG/SA，但决策对象、机制和实现路径无实质变化",
+        "候选去掉expiry_roll维护目标而把换月并入state_migration，该任务同样以state_migration处理旧腿迁移，未改变核心决策语义"
+      ]
+    },
+    {
+      "similarities": [
+        "同样涉及FG/SA与统计对冲关系重估",
+        "共享month_selection、hedge_estimation、entry_exit、relationship_monitoring、margin_budget、state_migration决策"
+      ],
+      "task_id": "HT05",
+      "differences": [
+        "HT05核心机制为glass_soda_residual、对象为glass_soda_leg_portfolio，且含独立roll_policy；本候选机制与对象改为通用cross_product_residual并去掉roll_policy，但功能上把换月并入state_migration，属表述与依赖重排",
+        "HT05为历史对照包，不能作为新生成数据的依据"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05跨品种真实多腿组合与滚动对冲估计",
+        "共享month_selection、hedge_estimation、entry_exit、relationship_monitoring、margin_budget、state_migration等基础决策"
+      ],
+      "task_id": "HT04",
+      "differences": [
+        "HT04机制为multi_product_oil_relative_value、对象oil_leg_portfolio，并含signal_aggregation与独立roll_policy；本候选不含信号汇总与独立移仓模块",
+        "标的从SC/FU/LU改为FG/SA，属配置变化"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05真实多腿期货组合，含保证金预算与跨段状态迁移",
+        "部分决策词表重叠，如month_selection、hedge_estimation、margin_budget、state_migration"
+      ],
+      "task_id": "TG-20261105-042048-66d9a5",
+      "differences": [
+        "该任务机制为crush_component_aggregation、对象crush_leg_portfolio，核心决策是整体加工与分项信号冲突裁决；本候选为跨品种统计残差，无signal_aggregation与加工系数决策"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05真实多腿期货组合与跨段状态迁移"
+      ],
+      "task_id": "HT03",
+      "differences": [
+        "机制为crush_component_aggregation、对象crush_leg_portfolio，依赖固定加工关系与分项信号汇总；本候选为两品种统计残差关系，不使用加工系数"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05、真实分合约、含month_selection与state_migration"
+      ],
+      "task_id": "TG-20261029-185356-d4e28b",
+      "differences": [
+        "该任务属F06 calendar_spread_pairing，对象calendar_pair_inventory，研究同品种不同月份配对与到期换腿；本候选研究FG/SA跨品种残差关系，品种维度与关系估计对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05、含month_selection与margin_budget、真实分合约"
+      ],
+      "task_id": "TG-20261029-172301-684a8d",
+      "differences": [
+        "F06 calendar_spread_pairing同品种近远月价差，核心为pair_selection与roll_policy；本候选为跨品种统计对冲与残差重估"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05、真实分合约、含state_migration与margin_budget"
+      ],
+      "task_id": "TG-20261029-185226-a83ad1",
+      "differences": [
+        "F06日历价差配对，核心为tenor_normalization与pair_selection；本候选核心为跨品种对冲比例估计与残差关系监控"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05、含relationship_monitoring与margin_budget"
+      ],
+      "task_id": "TG-20261029-185538-ab9792",
+      "differences": [
+        "F06同品种跨期价差，监控对象为近腿流动性衰减下的配对有效性与参与规模；本候选为FG/SA跨品种对冲比例漂移与残差关系失效"
+      ]
+    }
+  ]
+}

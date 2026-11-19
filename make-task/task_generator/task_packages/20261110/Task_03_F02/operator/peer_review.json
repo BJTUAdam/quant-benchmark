@@ -1,0 +1,21 @@
+{
+  "spec_filename": "F02_01_range_reference_exit_horizon.json",
+  "spec_hash": "95816768a8986162b50e2128a974e95f23e494e537f36163485c9428d5ef4323",
+  "passed": true,
+  "blocking_issues": [],
+  "review_mode": "conversation_model_cross_review",
+  "reviewer": "spreads_peer",
+  "observations": [
+    "最新修订已明确初次参与由区间边缘、可见偏离与趋势否决形成，不能按未来回归结果筛选。",
+    "创建目标与当前目标分开，否决对目标更新仅下一事件生效，避免同刻循环；日线high/low不追溯假设盘中成交，持有时钟不因版本更新重置。"
+  ],
+  "semantic_independence": "not_guaranteed",
+  "closest_research_overlap": [
+    "S03"
+  ],
+  "data_binding_caveats": [
+    "当前仅为规格；未调用外部模型API，未绑定真实数据、正式阶段边界和交易规则。",
+    "当前股票池为空，运营方需明确固定研究池并核验历史可见复权因子、公司行为、停牌/T+1与逐日价格限制；不能以下载时刻冒充历史可见时点。",
+    "公开时间为虚拟事件顺序；同段数据查询仍受当前事件时钟、累计披露范围与越界整次拒绝约束。"
+  ]
+}

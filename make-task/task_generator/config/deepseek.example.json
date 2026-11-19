@@ -1,0 +1,14 @@
+{
+  "provider_name": "deepseek_official",
+  "adapter": "chat_completions",
+  "base_url": "https://api.deepseek.com",
+  "generation_model": "",
+  "review_model": "",
+  "api_key_env": "DEEPSEEK_API_KEY",
+  "timeout_seconds": 60,
+  "max_retries": 2,
+  "format_retries": 1,
+  "max_calls_per_batch": 48,
+  "json_mode": "json_object",
+  "provider_plugin": null
+}

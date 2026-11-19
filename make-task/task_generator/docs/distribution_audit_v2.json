@@ -1,0 +1,39 @@
+{
+  "schema_version": "finlab.distribution_audit.v2",
+  "checked_at": "2026-11-10T11:24:01.458464+00:00",
+  "passed": true,
+  "archives": [
+    {
+      "file": "akquant_runtime_v2.zip",
+      "files": 736,
+      "hashes_verified": true
+    },
+    {
+      "file": "finlab_v2_complete.zip",
+      "files": 1192,
+      "hashes_verified": true
+    },
+    {
+      "file": "task_production_v2.zip",
+      "files": 1156,
+      "hashes_verified": true
+    },
+    {
+      "file": "tushare_bridge_v2.zip",
+      "files": 725,
+      "hashes_verified": true
+    }
+  ],
+  "candidate_packages": 6,
+  "generated_candidate_packages": 15,
+  "generated_current_independent_review_passed": 0,
+  "automated_library_records": 6,
+  "integrated_task_packages": 12,
+  "individual_task_archives": 12,
+  "patch_application_required": false,
+  "commands_parsed": 107,
+  "html_external_assets": 0,
+  "standalone_skill": "finlab_strategy_skill.zip",
+  "credential_scan": "no matches",
+  "errors": []
+}

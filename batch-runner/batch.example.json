@@ -1,0 +1,21 @@
+{
+  "batch_id": "demo",
+  "runner_root": "../trajectory-runner",
+  "python": "../trajectory-runner/.venv/bin/python",
+  "template": "../trajectory-runner/benchmark/finlab.v2.demo.example.json",
+  "out_dir": "out",
+  "concurrency": 1,
+  "max_attempts": 2,
+  "retry_backoff_seconds": 60,
+  "job_timeout_seconds": null,
+  "launch_interval_seconds": 20,
+  "per_job_memory_mb": 4096,
+  "export_html": true,
+  "jobs": [
+    {
+      "id": "stock",
+      "repeat": 2,
+      "task": {"kind": "synthetic_demo", "asset": "STOCK"}
+    }
+  ]
+}

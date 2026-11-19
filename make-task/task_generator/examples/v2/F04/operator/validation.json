@@ -1,0 +1,2071 @@
+{
+  "passed": true,
+  "errors": [],
+  "warnings": [
+    "仅完成规格检查：数据可得性、长程实际难度及管线执行均未验证"
+  ],
+  "spec_hash": "260423e6de78228e82029d272804461ff685b94329ae3378e222f8006c1142ea",
+  "scope": "specification_only",
+  "context_hash": "5a32e92fa89eb5b2e086f78cb161eaab6d880e65ca5ae3249dd768b0b82056be",
+  "checked_at": "2026-11-04T21:07:17+00:00",
+  "dedup": {
+    "fingerprint": "83407cd5f2d446b6b4249000f6526d1311d2990f794d014b7bb161160d04e288",
+    "classification": "needs_semantic_review",
+    "exact_matches": [],
+    "nearest": [
+      {
+        "task_id": "TG-20261104-210716-3e3231",
+        "score": 0.1,
+        "exact_structure": false,
+        "spec": {
+          "schema_version": "finance_task_spec.v2",
+          "title": "FU/LU相对关系的滚动对冲和暂停重估",
+          "family_id": "F05",
+          "source_ids": [
+            "SRC_CHAN",
+            "SRC_PROJECT_PLAN"
+          ],
+          "core_mechanism": "cross_product_residual",
+          "decision_object": "cross_product_leg_portfolio",
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "entry_exit",
+            "relationship_monitoring",
+            "margin_budget",
+            "state_migration"
+          ],
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "research_question": "FU/LU关系变化时如何重估对冲、暂停参与并迁移实际双腿头寸？",
+          "research_modules": [
+            {
+              "decision_id": "month_selection",
+              "description": "研究FU/LU月份匹配与共同可交易条件。",
+              "interaction": "月份选择改变对冲关系和移仓成本。"
+            },
+            {
+              "decision_id": "hedge_estimation",
+              "description": "仅用历史估计滚动对冲关系并转成整数手数。",
+              "interaction": "残差信号和真实腿名义敞口不能混用。"
+            },
+            {
+              "decision_id": "entry_exit",
+              "description": "研究残差参与、退出、止损和时间限制。",
+              "interaction": "信号变化需落实为真实腿目标，不能买卖负价差本身。"
+            },
+            {
+              "decision_id": "relationship_monitoring",
+              "description": "研究何时判定关系失效、暂停和重估。",
+              "interaction": "重估改变对冲比例，必须明确处置旧腿。"
+            },
+            {
+              "decision_id": "margin_budget",
+              "description": "按乘数、费用和保证金计算组合手数。",
+              "interaction": "预算、逐腿部分成交和残余敞口会改变信号实际实现。"
+            },
+            {
+              "decision_id": "state_migration",
+              "description": "关系版本更新和换月时处理旧仓及memory。",
+              "interaction": "只有未来决策采用新定义，过去正式结果不可重写。"
+            }
+          ],
+          "maintenance_rationale": "对冲关系、残差尺度和月份流动性可能改变；维护需要同时修订估计和迁移真实头寸。现有数据结算/规则质量及新格式适配仍未验收。",
+          "environment_id": "akquant_futures_v2",
+          "data_requirements": {
+            "profile_id": "futures_daily",
+            "symbols": [
+              "FU",
+              "LU"
+            ],
+            "date_start": "2022-01-01",
+            "date_end": "2025-12-31",
+            "minimum_years": 2,
+            "extra_fields": [],
+            "notes": [
+              "2022—2025为申请整理范围，尚未确认已持有；若不足需报告实际覆盖，不能编造补齐。",
+              "至少2年只是数据需求底线；有效交易日/多月份重叠和足够研发、逐段维护样本均待盘点。",
+              "分段边界需数据盘点后冻结；未完成数据或执行器验收。"
+            ]
+          },
+          "parameter_space": [
+            {
+              "name": "hedge_model",
+              "type": "choice",
+              "options": [
+                "fixed_interpretable",
+                "rolling_regression",
+                "robust_rolling"
+              ],
+              "description": "模型选择和估计方法可研究，不调整合约规格。"
+            },
+            {
+              "name": "relationship_lifecycle",
+              "type": "structured",
+              "description": "暂停、重估、恢复、整数手数与旧仓过渡联合研究。"
+            }
+          ],
+          "novelty_claim": "HT04明确允许FU/LU双腿及滚动对冲，本候选只是聚焦暂停/重估的改编，不能计为已确认独立新题；人工可能直接归并HT04。",
+          "lineage": {
+            "derived_from": [
+              "S09",
+              "HT04"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "bridge_contract": {
+            "schema_version": "finlab.bridge_contract.v2",
+            "identity_policy": "real_names_and_codes",
+            "date_domain": "virtual",
+            "calendar_semantics": "virtual_sequence_only_not_historical_years",
+            "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+            "url_env": "MARKET_BRIDGE_URL",
+            "token_env": "MARKET_BRIDGE_TOKEN",
+            "virtual_start": null,
+            "virtual_stop": null,
+            "minimum_years": 2,
+            "symbols": [
+              "FU",
+              "LU"
+            ],
+            "endpoints": [
+              {
+                "api_name": "fut_daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "open",
+                  "high",
+                  "low",
+                  "close",
+                  "settle",
+                  "vol",
+                  "oi"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "fut_basic",
+                "fields": [
+                  "ts_code",
+                  "name",
+                  "list_date",
+                  "delist_date"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              }
+            ],
+            "binding_status": "not_bound",
+            "dataset_id": null,
+            "required_checks": [
+              "point_in_time",
+              "coverage",
+              "calendar",
+              "units",
+              "corporate_actions_or_settlement",
+              "trading_rules"
+            ]
+          },
+          "runtime_profile": {
+            "schema_version": "finlab.runtime.v2",
+            "engine": "akquant",
+            "engine_version": "0.3.76",
+            "strategy_api": "finlab.strategy.v2",
+            "asset_types": [
+              "FUTURES"
+            ],
+            "index_role": "query_and_benchmark_only",
+            "frequency": "daily",
+            "fill_policy": "NextOpen",
+            "initial_cash": 1000000,
+            "currency": "CNY",
+            "formal_segments": 7,
+            "multi_leg_execution": "per_leg_partial_fills_possible",
+            "state_continuity": [
+              "cash",
+              "positions",
+              "open_orders",
+              "memory"
+            ],
+            "resources": null,
+            "resource_status": "requires_human_setup",
+            "resource_recommendations": {
+              "cpus": 2,
+              "memory_mb": 4096
+            },
+            "market_rules_status": "requires_binding",
+            "instruments": null,
+            "benchmark": null
+          },
+          "submission_contract": {
+            "schema_version": "finlab.submission.v2",
+            "required_files": [
+              "CHANGELOG.md",
+              "RESEARCH.md",
+              "backtest.py",
+              "params.json",
+              "strategy.py"
+            ],
+            "strategy_api": "finlab.strategy.v2",
+            "dependencies": [
+              "finlab",
+              "pandas",
+              "numpy"
+            ],
+            "results_generated_by": "platform"
+          },
+          "protocol": {
+            "research_fraction": 0.3,
+            "formal_segments": 7,
+            "release_rule": "completed_segment_only_after_commit",
+            "maintenance": [
+              "hold",
+              "parameters",
+              "logic"
+            ],
+            "boundaries": null
+          },
+          "sample_id": "EX05",
+          "seed_id": "S09",
+          "status": "pending_human_review",
+          "provenance": {
+            "authoring": "assistant_curated_example",
+            "api_called": false,
+            "data_supplied": false,
+            "runtime_verified": false,
+            "human_approved": false
+          },
+          "validation_notes": [
+            "内置示例，由当前助手整理，未调用配置的模型API，未获得人工批准。",
+            "六个方向候选不等于六个独立任务；相似项可能合并或退回。",
+            "原生v2接口规格，尚未绑定真实数据、交易规则、本人资源预算或正式分段。"
+          ]
+        },
+        "status": "pending_human_review"
+      },
+      {
+        "task_id": "TG-20261104-210717-d112ee",
+        "score": 0.1,
+        "exact_structure": false,
+        "spec": {
+          "schema_version": "finance_task_spec.v2",
+          "title": "FG近远月价差的配对、到期和移仓",
+          "family_id": "F06",
+          "source_ids": [
+            "SRC_CHAN",
+            "SRC_PROJECT_PLAN"
+          ],
+          "core_mechanism": "calendar_spread_pairing",
+          "decision_object": "calendar_pair_inventory",
+          "required_decisions": [
+            "pair_selection",
+            "tenor_normalization",
+            "entry_exit",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ],
+          "decision_dependencies": [
+            [
+              "pair_selection",
+              "tenor_normalization"
+            ],
+            [
+              "tenor_normalization",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "curve_stability",
+            "expiry_roll",
+            "margin_exposure",
+            "state_compatibility"
+          ],
+          "research_question": "同品种近远月价差如何随剩余期限、流动性与到期迁移保持可交易？",
+          "research_modules": [
+            {
+              "decision_id": "pair_selection",
+              "description": "按当时可见到期、成交和持仓信息选同品种近远月。",
+              "interaction": "不能用全样本最活跃合约或事后主力映射。"
+            },
+            {
+              "decision_id": "tenor_normalization",
+              "description": "研究期限差和剩余到期变化下价差的可比表达。",
+              "interaction": "同一价差点位在不同期限上不必具有相同意义。"
+            },
+            {
+              "decision_id": "entry_exit",
+              "description": "研究近远月相对关系的参与和退出。",
+              "interaction": "价差只产生信号，交易实际合约手数。"
+            },
+            {
+              "decision_id": "margin_budget",
+              "description": "按实际双腿计算风险和保证金。",
+              "interaction": "不假设跨期保证金优惠，服从固定执行器上限。"
+            },
+            {
+              "decision_id": "roll_policy",
+              "description": "研究配对到期前退出、迁移和新对建立。",
+              "interaction": "必须计入平旧开新成本并处理逐腿部分成交。"
+            },
+            {
+              "decision_id": "state_migration",
+              "description": "配对标识和逻辑更新时迁移旧腿状态。",
+              "interaction": "旧合约不能因新配对选中而从目标头寸中被遗忘。"
+            }
+          ],
+          "maintenance_rationale": "近远月关系受期限缩短、流动性切换和到期迁移影响，维护对象同时包括信号与合约生命周期；同日多月份数据与适配器仍待确认。",
+          "environment_id": "akquant_futures_v2",
+          "data_requirements": {
+            "profile_id": "futures_daily",
+            "symbols": [
+              "FG"
+            ],
+            "date_start": "2022-01-01",
+            "date_end": "2025-12-31",
+            "minimum_years": 2,
+            "extra_fields": [],
+            "notes": [
+              "2022—2025为申请整理范围，尚未确认已持有；若不足需报告实际覆盖，不能编造补齐。",
+              "至少2年只是数据需求底线；有效交易日/多月份重叠和足够研发、逐段维护样本均待盘点。",
+              "分段边界需数据盘点后冻结；未完成数据或执行器验收。"
+            ]
+          },
+          "parameter_space": [
+            {
+              "name": "pair_policy",
+              "type": "structured",
+              "description": "期限区间、可见流动性门槛和配对切换规则联动研究。"
+            },
+            {
+              "name": "spread_and_roll",
+              "type": "structured",
+              "description": "期限表达、进退场、到期缓冲和移仓状态管理可改逻辑。"
+            }
+          ],
+          "novelty_claim": "相对HT05的FG/SA跨品种关系，改为同品种两月份的期限匹配及移仓库存，决策结构有所变化；仍须人工核查并验证数据覆盖，不保证已经是独立可运行题。",
+          "lineage": {
+            "derived_from": [
+              "S11",
+              "HT05"
+            ],
+            "kind": "calendar_structure_candidate_pending_review"
+          },
+          "bridge_contract": {
+            "schema_version": "finlab.bridge_contract.v2",
+            "identity_policy": "real_names_and_codes",
+            "date_domain": "virtual",
+            "calendar_semantics": "virtual_sequence_only_not_historical_years",
+            "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+            "url_env": "MARKET_BRIDGE_URL",
+            "token_env": "MARKET_BRIDGE_TOKEN",
+            "virtual_start": null,
+            "virtual_stop": null,
+            "minimum_years": 2,
+            "symbols": [
+              "FG"
+            ],
+            "endpoints": [
+              {
+                "api_name": "fut_daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "open",
+                  "high",
+                  "low",
+                  "close",
+                  "settle",
+                  "vol",
+                  "oi"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "fut_basic",
+                "fields": [
+                  "ts_code",
+                  "name",
+                  "list_date",
+                  "delist_date"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              }
+            ],
+            "binding_status": "not_bound",
+            "dataset_id": null,
+            "required_checks": [
+              "point_in_time",
+              "coverage",
+              "calendar",
+              "units",
+              "corporate_actions_or_settlement",
+              "trading_rules"
+            ]
+          },
+          "runtime_profile": {
+            "schema_version": "finlab.runtime.v2",
+            "engine": "akquant",
+            "engine_version": "0.3.76",
+            "strategy_api": "finlab.strategy.v2",
+            "asset_types": [
+              "FUTURES"
+            ],
+            "index_role": "query_and_benchmark_only",
+            "frequency": "daily",
+            "fill_policy": "NextOpen",
+            "initial_cash": 1000000,
+            "currency": "CNY",
+            "formal_segments": 7,
+            "multi_leg_execution": "per_leg_partial_fills_possible",
+            "state_continuity": [
+              "cash",
+              "positions",
+              "open_orders",
+              "memory"
+            ],
+            "resources": null,
+            "resource_status": "requires_human_setup",
+            "resource_recommendations": {
+              "cpus": 2,
+              "memory_mb": 4096
+            },
+            "market_rules_status": "requires_binding",
+            "instruments": null,
+            "benchmark": null
+          },
+          "submission_contract": {
+            "schema_version": "finlab.submission.v2",
+            "required_files": [
+              "CHANGELOG.md",
+              "RESEARCH.md",
+              "backtest.py",
+              "params.json",
+              "strategy.py"
+            ],
+            "strategy_api": "finlab.strategy.v2",
+            "dependencies": [
+              "finlab",
+              "pandas",
+              "numpy"
+            ],
+            "results_generated_by": "platform"
+          },
+          "protocol": {
+            "research_fraction": 0.3,
+            "formal_segments": 7,
+            "release_rule": "completed_segment_only_after_commit",
+            "maintenance": [
+              "hold",
+              "parameters",
+              "logic"
+            ],
+            "boundaries": null
+          },
+          "sample_id": "EX06",
+          "seed_id": "S11",
+          "status": "pending_human_review",
+          "provenance": {
+            "authoring": "assistant_curated_example",
+            "api_called": false,
+            "data_supplied": false,
+            "runtime_verified": false,
+            "human_approved": false
+          },
+          "validation_notes": [
+            "内置示例，由当前助手整理，未调用配置的模型API，未获得人工批准。",
+            "六个方向候选不等于六个独立任务；相似项可能合并或退回。",
+            "原生v2接口规格，尚未绑定真实数据、交易规则、本人资源预算或正式分段。"
+          ]
+        },
+        "status": "pending_human_review"
+      },
+      {
+        "task_id": "HT03",
+        "score": 0.0952,
+        "exact_structure": false,
+        "spec": {
+          "core_mechanism": "crush_component_aggregation",
+          "data_requirements": {
+            "date_end": null,
+            "date_start": null,
+            "extra_fields": [],
+            "minimum_years": 2,
+            "notes": [
+              "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+            ],
+            "profile_id": "futures_daily",
+            "symbols": [
+              "B",
+              "M",
+              "Y"
+            ]
+          },
+          "decision_dependencies": [
+            [
+              "hedge_estimation",
+              "signal_aggregation"
+            ],
+            [
+              "signal_aggregation",
+              "month_selection"
+            ],
+            [
+              "month_selection",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "decision_object": "crush_leg_portfolio",
+          "environment_id": "futures_daily_v1",
+          "family_id": "F05",
+          "id": "HT03",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "parameter_space": [
+            {
+              "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。",
+              "name": "historical_open_research_scope",
+              "type": "structured"
+            }
+          ],
+          "required_decisions": [
+            "hedge_estimation",
+            "signal_aggregation",
+            "month_selection",
+            "entry_exit",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ],
+          "research_modules": [
+            {
+              "decision_id": "hedge_estimation",
+              "description": "估计或设定对冲关系，处理计价单位和整数手数",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "signal_aggregation",
+              "description": "整体价差与分项信号的一致性及组合决策",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "month_selection",
+              "description": "按当时已知条件选择实际合约月份",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "entry_exit",
+              "description": "价差/残差参与、退出与持有时限",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "margin_budget",
+              "description": "按真实腿风险、费用与保证金分配手数",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "roll_policy",
+              "description": "到期前平旧开新、迁移旧仓并核算移仓成本",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "state_migration",
+              "description": "更新逻辑时迁移旧持仓和持久化状态",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            }
+          ],
+          "research_question": "研究整体压榨关系、分项信号、实际多腿与资金占用。",
+          "review_notes": [
+            "真实合约及固定生产假设不可作为可调参数；S10与本题高度相邻。",
+            "结算、规则生效及历史到期等口径仍待复核。"
+          ],
+          "schema_version": "finance_task_spec.v1",
+          "source_ids": [
+            "SRC_PROJECT_PLAN"
+          ],
+          "source_path": "demo_packages/a01_soy_crush_v1/TASK.md",
+          "status": "historical_package_quality_pending",
+          "title": "国内B/M/Y大豆压榨价差"
+        },
+        "status": "historical_package_quality_pending"
+      },
+      {
+        "task_id": "HT05",
+        "score": 0.0952,
+        "exact_structure": false,
+        "spec": {
+          "core_mechanism": "glass_soda_residual",
+          "data_requirements": {
+            "date_end": null,
+            "date_start": null,
+            "extra_fields": [],
+            "minimum_years": 2,
+            "notes": [
+              "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+            ],
+            "profile_id": "futures_daily",
+            "symbols": [
+              "FG",
+              "SA"
+            ]
+          },
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "decision_object": "glass_soda_leg_portfolio",
+          "environment_id": "futures_daily_v1",
+          "family_id": "F05",
+          "id": "HT05",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "parameter_space": [
+            {
+              "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。",
+              "name": "historical_open_research_scope",
+              "type": "structured"
+            }
+          ],
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "entry_exit",
+            "relationship_monitoring",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ],
+          "research_modules": [
+            {
+              "decision_id": "month_selection",
+              "description": "按当时已知条件选择实际合约月份",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "hedge_estimation",
+              "description": "估计或设定对冲关系，处理计价单位和整数手数",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "entry_exit",
+              "description": "价差/残差参与、退出与持有时限",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "relationship_monitoring",
+              "description": "监控对冲关系失效，暂停与重新估计",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "margin_budget",
+              "description": "按真实腿风险、费用与保证金分配手数",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "roll_policy",
+              "description": "到期前平旧开新、迁移旧仓并核算移仓成本",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "state_migration",
+              "description": "更新逻辑时迁移旧持仓和持久化状态",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            }
+          ],
+          "research_question": "在允许关系失效前提下研究FG/SA统计对冲与头寸维护。",
+          "review_notes": [
+            "跨品种统计对冲，包含暂停/重估/恢复；不将生产用量强行当唯一手数。",
+            "S11的同品种跨期需要额外确认多月份重叠和生命周期字段。"
+          ],
+          "schema_version": "finance_task_spec.v1",
+          "source_ids": [
+            "SRC_PROJECT_PLAN"
+          ],
+          "source_path": "demo_packages/a04_glass_soda_v1/TASK.md",
+          "status": "historical_package_quality_pending",
+          "title": "FG/SA玻璃纯碱统计价差"
+        },
+        "status": "historical_package_quality_pending"
+      },
+      {
+        "task_id": "HT04",
+        "score": 0.0909,
+        "exact_structure": false,
+        "spec": {
+          "core_mechanism": "multi_product_oil_relative_value",
+          "data_requirements": {
+            "date_end": null,
+            "date_start": null,
+            "extra_fields": [],
+            "minimum_years": 2,
+            "notes": [
+              "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+            ],
+            "profile_id": "futures_daily",
+            "symbols": [
+              "SC",
+              "FU",
+              "LU"
+            ]
+          },
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "signal_aggregation"
+            ],
+            [
+              "signal_aggregation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "decision_object": "oil_leg_portfolio",
+          "environment_id": "futures_daily_v1",
+          "family_id": "F05",
+          "id": "HT04",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "parameter_space": [
+            {
+              "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。",
+              "name": "historical_open_research_scope",
+              "type": "structured"
+            }
+          ],
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "signal_aggregation",
+            "entry_exit",
+            "relationship_monitoring",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ],
+          "research_modules": [
+            {
+              "decision_id": "month_selection",
+              "description": "按当时已知条件选择实际合约月份",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "hedge_estimation",
+              "description": "估计或设定对冲关系，处理计价单位和整数手数",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "signal_aggregation",
+              "description": "整体价差与分项信号的一致性及组合决策",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "entry_exit",
+              "description": "价差/残差参与、退出与持有时限",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "relationship_monitoring",
+              "description": "监控对冲关系失效，暂停与重新估计",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "margin_budget",
+              "description": "按真实腿风险、费用与保证金分配手数",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "roll_policy",
+              "description": "到期前平旧开新、迁移旧仓并核算移仓成本",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "state_migration",
+              "description": "更新逻辑时迁移旧持仓和持久化状态",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            }
+          ],
+          "research_question": "研究国内油品相对价格关系、真实合约腿和对冲模型。",
+          "review_notes": [
+            "原题明确允许SC/FU、SC/LU、FU/LU、双腿或三腿、滚动对冲与状态切换；S09不能仅因少一条SC腿算新。",
+            "SC桶与FU/LU吨不可直接相减称炼化利润。"
+          ],
+          "schema_version": "finance_task_spec.v1",
+          "source_ids": [
+            "SRC_PROJECT_PLAN"
+          ],
+          "source_path": "demo_packages/a03_domestic_oil_spread_v1/TASK.md",
+          "status": "historical_package_quality_pending",
+          "title": "国内SC/FU/LU原油燃料油相对价值"
+        },
+        "status": "historical_package_quality_pending"
+      },
+      {
+        "task_id": "HT01",
+        "score": 0.0526,
+        "exact_structure": false,
+        "spec": {
+          "core_mechanism": "short_horizon_trend",
+          "data_requirements": {
+            "date_end": null,
+            "date_start": null,
+            "extra_fields": [],
+            "minimum_years": 2,
+            "notes": [
+              "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+            ],
+            "profile_id": "stock_minute",
+            "symbols": [
+              "S01",
+              "S02",
+              "S03",
+              "S04",
+              "S05",
+              "S06",
+              "S07",
+              "S08",
+              "S09",
+              "S10",
+              "S11",
+              "S12",
+              "S13",
+              "S14",
+              "S15",
+              "S16",
+              "S17",
+              "S18",
+              "S19",
+              "S20",
+              "S21",
+              "S22",
+              "S23",
+              "S24",
+              "S25",
+              "S26",
+              "S27",
+              "S28",
+              "S29",
+              "S30",
+              "S31",
+              "S32",
+              "S33",
+              "S34",
+              "S35",
+              "S36",
+              "S37",
+              "S38",
+              "S39",
+              "S40",
+              "S41",
+              "S42",
+              "S43",
+              "S44",
+              "S45"
+            ]
+          },
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "decision_object": "stock_trend_portfolio",
+          "environment_id": "stock_minute_v1",
+          "family_id": "F01",
+          "id": "HT01",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "parameter_space": [
+            {
+              "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。",
+              "name": "historical_open_research_scope",
+              "type": "structured"
+            }
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "exit_policy",
+            "reentry_policy",
+            "capital_allocation"
+          ],
+          "research_modules": [
+            {
+              "decision_id": "range_detection",
+              "description": "仅用已完成数据界定区间边界、有效期和更新规则",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "entry_confirmation",
+              "description": "选择确认依据、等待时机与可成交入场",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "exit_policy",
+              "description": "止盈、止损、持有时限和跟踪退出",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "reentry_policy",
+              "description": "失败或退出后的冷却、恢复与再入场",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "capital_allocation",
+              "description": "多个机会间分配资金和现金预算",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            }
+          ],
+          "research_question": "从突破和趋势入手管理数日持仓并持续维护。",
+          "review_notes": [
+            "原题已有突破、均线方向、量价/波动过滤、冷却、排序及仓位；不能把S01的细化直接宣称全新。",
+            "原题479交易日，研发144日，七段；匿名t不反推真实日期。"
+          ],
+          "schema_version": "finance_task_spec.v1",
+          "source_ids": [
+            "SRC_PROJECT_PLAN"
+          ],
+          "source_path": "demo_packages/t01_short_trend_v1/TASK.md",
+          "status": "historical_package_unrevalidated",
+          "title": "45股短周期趋势追踪"
+        },
+        "status": "historical_package_unrevalidated"
+      },
+      {
+        "task_id": "TG-20261104-210715-14b6f5",
+        "score": 0.0526,
+        "exact_structure": false,
+        "spec": {
+          "schema_version": "finance_task_spec.v2",
+          "title": "整理区间突破后的跟踪、失败退出与再入场",
+          "family_id": "F01",
+          "source_ids": [
+            "SRC_STOCK_TRENDS",
+            "SRC_PROJECT_PLAN"
+          ],
+          "core_mechanism": "consolidation_breakout",
+          "decision_object": "breakout_position_state",
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ],
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "research_question": "如何使区间识别、突破确认、失败处置与再次参与形成可维护的状态流程？",
+          "research_modules": [
+            {
+              "decision_id": "range_detection",
+              "description": "研究只使用已完成K线的整理区间、边界更新和失效状态。",
+              "interaction": "边界更新改变确认门槛及失败判断，不可事后重画区间。"
+            },
+            {
+              "decision_id": "entry_confirmation",
+              "description": "比较突破后的等待、量价确认与可成交时点。",
+              "interaction": "等待会改变持有期、T+1库存和机会排序。"
+            },
+            {
+              "decision_id": "failure_exit",
+              "description": "研究突破失败与正常回踩的区别及已有仓位退出。",
+              "interaction": "退出时刻约束再次参与，不能用未来最低价标记假突破。"
+            },
+            {
+              "decision_id": "reentry_policy",
+              "description": "设计失败后冷却与结构重建后的再次参与。",
+              "interaction": "memory保留旧失败状态，与新区间编号和旧持仓兼容。"
+            },
+            {
+              "decision_id": "capital_allocation",
+              "description": "在同时触发的候选间分配现金和权重。",
+              "interaction": "资金竞争与T+1不可卖仓位影响信号实际实现。"
+            }
+          ],
+          "maintenance_rationale": "后续数据可能使区间结构和失败模式变化，需要判断调整结构、确认还是退出；每次维护必须接住已持仓和旧失败状态。这是可维护性假设，尚无轨迹证明长程难度。",
+          "environment_id": "akquant_stock_etf_v2",
+          "data_requirements": {
+            "profile_id": "stock_etf_daily",
+            "symbols": [
+              "000001.SZ",
+              "000002.SZ",
+              "600000.SH",
+              "600036.SH",
+              "600519.SH",
+              "601318.SH"
+            ],
+            "date_start": "2022-01-01",
+            "date_end": "2025-12-31",
+            "minimum_years": 2,
+            "extra_fields": [],
+            "notes": [
+              "2022—2025为申请整理范围，尚未确认已持有；若不足需报告实际覆盖，不能编造补齐。",
+              "至少2年只是数据需求底线；有效交易日/多月份重叠和足够研发、逐段维护样本均待盘点。",
+              "分段边界需数据盘点后冻结；未完成数据或执行器验收。"
+            ]
+          },
+          "parameter_space": [
+            {
+              "name": "range_construction",
+              "type": "choice",
+              "options": [
+                "rolling_boundary",
+                "causal_pivot_zone",
+                "adaptive_consolidation"
+              ],
+              "description": "可替换结构定义，不指定唯一指标。"
+            },
+            {
+              "name": "confirmation_and_reentry",
+              "type": "structured",
+              "description": "确认、失败、冷却及重入规则相互作用；由Agent研究，不给最佳阈值。"
+            }
+          ],
+          "novelty_claim": "从宽泛趋势题聚焦到区间→确认→失败→重入生命周期，但HT01已允许这些方向，不能声称已证实独立；待人工语义审，可能归并为HT01扩展。",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "bridge_contract": {
+            "schema_version": "finlab.bridge_contract.v2",
+            "identity_policy": "real_names_and_codes",
+            "date_domain": "virtual",
+            "calendar_semantics": "virtual_sequence_only_not_historical_years",
+            "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+            "url_env": "MARKET_BRIDGE_URL",
+            "token_env": "MARKET_BRIDGE_TOKEN",
+            "virtual_start": null,
+            "virtual_stop": null,
+            "minimum_years": 2,
+            "symbols": [
+              "000001.SZ",
+              "000002.SZ",
+              "600000.SH",
+              "600036.SH",
+              "600519.SH",
+              "601318.SH"
+            ],
+            "endpoints": [
+              {
+                "api_name": "daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "open",
+                  "high",
+                  "low",
+                  "close",
+                  "vol",
+                  "amount"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "adj_factor",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "adj_factor"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "stk_limit",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "up_limit",
+                  "down_limit"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "trade_cal",
+                "fields": [
+                  "exchange",
+                  "cal_date",
+                  "is_open",
+                  "pretrade_date"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "index_daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "close"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              }
+            ],
+            "binding_status": "not_bound",
+            "dataset_id": null,
+            "required_checks": [
+              "point_in_time",
+              "coverage",
+              "calendar",
+              "units",
+              "corporate_actions_or_settlement",
+              "trading_rules"
+            ]
+          },
+          "runtime_profile": {
+            "schema_version": "finlab.runtime.v2",
+            "engine": "akquant",
+            "engine_version": "0.3.76",
+            "strategy_api": "finlab.strategy.v2",
+            "asset_types": [
+              "STOCK",
+              "FUND"
+            ],
+            "index_role": "query_and_benchmark_only",
+            "frequency": "daily",
+            "fill_policy": "NextOpen",
+            "initial_cash": 1000000,
+            "currency": "CNY",
+            "formal_segments": 7,
+            "multi_leg_execution": "per_leg_partial_fills_possible",
+            "state_continuity": [
+              "cash",
+              "positions",
+              "open_orders",
+              "memory"
+            ],
+            "resources": null,
+            "resource_status": "requires_human_setup",
+            "resource_recommendations": {
+              "cpus": 2,
+              "memory_mb": 4096
+            },
+            "market_rules_status": "requires_binding",
+            "instruments": null,
+            "benchmark": null
+          },
+          "submission_contract": {
+            "schema_version": "finlab.submission.v2",
+            "required_files": [
+              "CHANGELOG.md",
+              "RESEARCH.md",
+              "backtest.py",
+              "params.json",
+              "strategy.py"
+            ],
+            "strategy_api": "finlab.strategy.v2",
+            "dependencies": [
+              "finlab",
+              "pandas",
+              "numpy"
+            ],
+            "results_generated_by": "platform"
+          },
+          "protocol": {
+            "research_fraction": 0.3,
+            "formal_segments": 7,
+            "release_rule": "completed_segment_only_after_commit",
+            "maintenance": [
+              "hold",
+              "parameters",
+              "logic"
+            ],
+            "boundaries": null
+          },
+          "sample_id": "EX01",
+          "seed_id": "S01",
+          "status": "pending_human_review",
+          "provenance": {
+            "authoring": "assistant_curated_example",
+            "api_called": false,
+            "data_supplied": false,
+            "runtime_verified": false,
+            "human_approved": false
+          },
+          "validation_notes": [
+            "内置示例，由当前助手整理，未调用配置的模型API，未获得人工批准。",
+            "六个方向候选不等于六个独立任务；相似项可能合并或退回。",
+            "原生v2接口规格，尚未绑定真实数据、交易规则、本人资源预算或正式分段。"
+          ]
+        },
+        "status": "pending_human_review"
+      },
+      {
+        "task_id": "TG-20261104-210716-1d1d41",
+        "score": 0.0526,
+        "exact_structure": false,
+        "spec": {
+          "schema_version": "finance_task_spec.v2",
+          "title": "相对强弱排名、继续持有门槛与换仓缓冲",
+          "family_id": "F03",
+          "source_ids": [
+            "SRC_QLIB",
+            "SRC_CHAN",
+            "SRC_PROJECT_PLAN"
+          ],
+          "core_mechanism": "relative_strength_rotation",
+          "decision_object": "ranked_stock_portfolio",
+          "required_decisions": [
+            "feature_definition",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ],
+          "decision_dependencies": [
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "state_compatibility"
+          ],
+          "research_question": "同一股票池内如何让选入排名、留存门槛、换仓预算和资金分配协同？",
+          "research_modules": [
+            {
+              "decision_id": "feature_definition",
+              "description": "定义基于已知量价的相对强弱特征并统一比较尺度。",
+              "interaction": "特征尺度影响合成排名和持股集中度。"
+            },
+            {
+              "decision_id": "rank_aggregation",
+              "description": "研究多个强弱尺度如何合成以及候选并列处理。",
+              "interaction": "排名变化不必立即转成交易。"
+            },
+            {
+              "decision_id": "holding_buffer",
+              "description": "分别研究新选入和继续持有门槛。",
+              "interaction": "缓冲影响换手和机会占用。"
+            },
+            {
+              "decision_id": "turnover_budget",
+              "description": "研究单次换仓预算与成本敏感性。",
+              "interaction": "预算下优先替换谁，需要综合旧仓和新排名。"
+            },
+            {
+              "decision_id": "capital_allocation",
+              "description": "决定股票权重、闲置现金和集中度。",
+              "interaction": "实际T+1可卖量与拒单可能使目标组合无法一步达到。"
+            }
+          ],
+          "maintenance_rationale": "市场中强弱持续性、排名稳定性和换手代价可能改变；可维护因子组合、缓冲和资金分配，但不要求每段都修改。",
+          "environment_id": "akquant_stock_etf_v2",
+          "data_requirements": {
+            "profile_id": "stock_etf_daily",
+            "symbols": [
+              "000001.SZ",
+              "000002.SZ",
+              "600000.SH",
+              "600036.SH",
+              "600519.SH",
+              "601318.SH"
+            ],
+            "date_start": "2022-01-01",
+            "date_end": "2025-12-31",
+            "minimum_years": 2,
+            "extra_fields": [],
+            "notes": [
+              "2022—2025为申请整理范围，尚未确认已持有；若不足需报告实际覆盖，不能编造补齐。",
+              "至少2年只是数据需求底线；有效交易日/多月份重叠和足够研发、逐段维护样本均待盘点。",
+              "分段边界需数据盘点后冻结；未完成数据或执行器验收。"
+            ]
+          },
+          "parameter_space": [
+            {
+              "name": "relative_strength_features",
+              "type": "structured",
+              "description": "特征、标准化、组合与方向均可研究；不使用未知基本面。"
+            },
+            {
+              "name": "ranking_policy",
+              "type": "structured",
+              "description": "持股数、选入/留存门槛、换手与权重相互影响。"
+            }
+          ],
+          "novelty_claim": "相对单股信号，核心是同刻跨股票选择和留换；但HT06已含多因子排名和缓冲，改变股票池不能证明独立，本示例保留为待审的研究范围草案。",
+          "lineage": {
+            "derived_from": [
+              "S05",
+              "HT06"
+            ],
+            "kind": "data_and_scope_adaptation_pending_review"
+          },
+          "bridge_contract": {
+            "schema_version": "finlab.bridge_contract.v2",
+            "identity_policy": "real_names_and_codes",
+            "date_domain": "virtual",
+            "calendar_semantics": "virtual_sequence_only_not_historical_years",
+            "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+            "url_env": "MARKET_BRIDGE_URL",
+            "token_env": "MARKET_BRIDGE_TOKEN",
+            "virtual_start": null,
+            "virtual_stop": null,
+            "minimum_years": 2,
+            "symbols": [
+              "000001.SZ",
+              "000002.SZ",
+              "600000.SH",
+              "600036.SH",
+              "600519.SH",
+              "601318.SH"
+            ],
+            "endpoints": [
+              {
+                "api_name": "daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "open",
+                  "high",
+                  "low",
+                  "close",
+                  "vol",
+                  "amount"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "adj_factor",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "adj_factor"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "stk_limit",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "up_limit",
+                  "down_limit"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "trade_cal",
+                "fields": [
+                  "exchange",
+                  "cal_date",
+                  "is_open",
+                  "pretrade_date"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "index_daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "close"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              }
+            ],
+            "binding_status": "not_bound",
+            "dataset_id": null,
+            "required_checks": [
+              "point_in_time",
+              "coverage",
+              "calendar",
+              "units",
+              "corporate_actions_or_settlement",
+              "trading_rules"
+            ]
+          },
+          "runtime_profile": {
+            "schema_version": "finlab.runtime.v2",
+            "engine": "akquant",
+            "engine_version": "0.3.76",
+            "strategy_api": "finlab.strategy.v2",
+            "asset_types": [
+              "STOCK",
+              "FUND"
+            ],
+            "index_role": "query_and_benchmark_only",
+            "frequency": "daily",
+            "fill_policy": "NextOpen",
+            "initial_cash": 1000000,
+            "currency": "CNY",
+            "formal_segments": 7,
+            "multi_leg_execution": "per_leg_partial_fills_possible",
+            "state_continuity": [
+              "cash",
+              "positions",
+              "open_orders",
+              "memory"
+            ],
+            "resources": null,
+            "resource_status": "requires_human_setup",
+            "resource_recommendations": {
+              "cpus": 2,
+              "memory_mb": 4096
+            },
+            "market_rules_status": "requires_binding",
+            "instruments": null,
+            "benchmark": null
+          },
+          "submission_contract": {
+            "schema_version": "finlab.submission.v2",
+            "required_files": [
+              "CHANGELOG.md",
+              "RESEARCH.md",
+              "backtest.py",
+              "params.json",
+              "strategy.py"
+            ],
+            "strategy_api": "finlab.strategy.v2",
+            "dependencies": [
+              "finlab",
+              "pandas",
+              "numpy"
+            ],
+            "results_generated_by": "platform"
+          },
+          "protocol": {
+            "research_fraction": 0.3,
+            "formal_segments": 7,
+            "release_rule": "completed_segment_only_after_commit",
+            "maintenance": [
+              "hold",
+              "parameters",
+              "logic"
+            ],
+            "boundaries": null
+          },
+          "sample_id": "EX03",
+          "seed_id": "S05",
+          "status": "pending_human_review",
+          "provenance": {
+            "authoring": "assistant_curated_example",
+            "api_called": false,
+            "data_supplied": false,
+            "runtime_verified": false,
+            "human_approved": false
+          },
+          "validation_notes": [
+            "内置示例，由当前助手整理，未调用配置的模型API，未获得人工批准。",
+            "六个方向候选不等于六个独立任务；相似项可能合并或退回。",
+            "原生v2接口规格，尚未绑定真实数据、交易规则、本人资源预算或正式分段。"
+          ]
+        },
+        "status": "pending_human_review"
+      },
+      {
+        "task_id": "TG-20261104-210716-b0465e",
+        "score": 0.05,
+        "exact_structure": false,
+        "spec": {
+          "schema_version": "finance_task_spec.v2",
+          "title": "区间边缘的回归参与与趋势否决",
+          "family_id": "F02",
+          "source_ids": [
+            "SRC_STOCK_TRENDS",
+            "SRC_CHAN",
+            "SRC_PROJECT_PLAN"
+          ],
+          "core_mechanism": "range_boundary_reversion",
+          "decision_object": "range_position_lifecycle",
+          "required_decisions": [
+            "range_detection",
+            "reference_estimation",
+            "deviation_measurement",
+            "trend_veto",
+            "exit_policy",
+            "reentry_policy"
+          ],
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "reference_estimation"
+            ],
+            [
+              "reference_estimation",
+              "deviation_measurement"
+            ],
+            [
+              "deviation_measurement",
+              "trend_veto"
+            ],
+            [
+              "trend_veto",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "reentry_policy"
+            ]
+          ],
+          "maintenance_targets": [
+            "reference_drift",
+            "reversion_failure",
+            "state_compatibility"
+          ],
+          "research_question": "何时仍是区间边缘回归，何时应判定结构进入趋势并停止逆势参与？",
+          "research_modules": [
+            {
+              "decision_id": "range_detection",
+              "description": "研究何种历史结构足以认定当前仍在区间内。",
+              "interaction": "结构有效期决定参考水平是否继续适用。"
+            },
+            {
+              "decision_id": "reference_estimation",
+              "description": "研究区间参考水平、边缘及其更新方式。",
+              "interaction": "参考水平改变偏离尺度；更新不能抹掉已经发生的亏损。"
+            },
+            {
+              "decision_id": "deviation_measurement",
+              "description": "比较偏离边界与波动标准化的回归机会。",
+              "interaction": "偏离只有在趋势否决通过时才可参与。"
+            },
+            {
+              "decision_id": "trend_veto",
+              "description": "研究何时否决逆势入场，并处理区间向趋势的失效。",
+              "interaction": "否决应同时考虑旧仓退出，不能只禁止新仓。"
+            },
+            {
+              "decision_id": "exit_policy",
+              "description": "研究回归完成、时间耗尽和失败退出。",
+              "interaction": "T+1限制使退出不能假设当日新仓即时止损。"
+            },
+            {
+              "decision_id": "reentry_policy",
+              "description": "区间失效后何时恢复或重建参考。",
+              "interaction": "旧区间memory与新参考版本需明确兼容。"
+            }
+          ],
+          "maintenance_rationale": "后续阶段可能从区间进入趋势；需要维护参考水平、否决条件和恢复规则。维护是否有效须数据和实际轨迹另验。",
+          "environment_id": "akquant_stock_etf_v2",
+          "data_requirements": {
+            "profile_id": "stock_etf_daily",
+            "symbols": [
+              "000001.SZ",
+              "000002.SZ",
+              "600000.SH",
+              "600036.SH",
+              "600519.SH",
+              "601318.SH"
+            ],
+            "date_start": "2022-01-01",
+            "date_end": "2025-12-31",
+            "minimum_years": 2,
+            "extra_fields": [],
+            "notes": [
+              "2022—2025为申请整理范围，尚未确认已持有；若不足需报告实际覆盖，不能编造补齐。",
+              "至少2年只是数据需求底线；有效交易日/多月份重叠和足够研发、逐段维护样本均待盘点。",
+              "分段边界需数据盘点后冻结；未完成数据或执行器验收。"
+            ]
+          },
+          "parameter_space": [
+            {
+              "name": "reference_family",
+              "type": "choice",
+              "options": [
+                "rolling_range",
+                "robust_center_band",
+                "causal_support_zone"
+              ],
+              "description": "研究参考与边缘的联合定义。"
+            },
+            {
+              "name": "veto_and_recovery",
+              "type": "structured",
+              "description": "否决、持有时限、冷却及恢复条件允许替换逻辑。"
+            }
+          ],
+          "novelty_claim": "相对HT02，以区间有效期和趋势否决为核心，避免仅换一个超跌指标；仍共享回归逻辑，若实现退化为阈值替换应合并。",
+          "lineage": {
+            "derived_from": [
+              "S03",
+              "HT02"
+            ],
+            "kind": "mechanism_refinement_pending_review"
+          },
+          "bridge_contract": {
+            "schema_version": "finlab.bridge_contract.v2",
+            "identity_policy": "real_names_and_codes",
+            "date_domain": "virtual",
+            "calendar_semantics": "virtual_sequence_only_not_historical_years",
+            "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+            "url_env": "MARKET_BRIDGE_URL",
+            "token_env": "MARKET_BRIDGE_TOKEN",
+            "virtual_start": null,
+            "virtual_stop": null,
+            "minimum_years": 2,
+            "symbols": [
+              "000001.SZ",
+              "000002.SZ",
+              "600000.SH",
+              "600036.SH",
+              "600519.SH",
+              "601318.SH"
+            ],
+            "endpoints": [
+              {
+                "api_name": "daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "open",
+                  "high",
+                  "low",
+                  "close",
+                  "vol",
+                  "amount"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "adj_factor",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "adj_factor"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "stk_limit",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "up_limit",
+                  "down_limit"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "trade_cal",
+                "fields": [
+                  "exchange",
+                  "cal_date",
+                  "is_open",
+                  "pretrade_date"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              },
+              {
+                "api_name": "index_daily",
+                "fields": [
+                  "ts_code",
+                  "trade_date",
+                  "close"
+                ],
+                "frequency": "daily",
+                "visibility": "available_at_lte_controller_clock"
+              }
+            ],
+            "binding_status": "not_bound",
+            "dataset_id": null,
+            "required_checks": [
+              "point_in_time",
+              "coverage",
+              "calendar",
+              "units",
+              "corporate_actions_or_settlement",
+              "trading_rules"
+            ]
+          },
+          "runtime_profile": {
+            "schema_version": "finlab.runtime.v2",
+            "engine": "akquant",
+            "engine_version": "0.3.76",
+            "strategy_api": "finlab.strategy.v2",
+            "asset_types": [
+              "STOCK",
+              "FUND"
+            ],
+            "index_role": "query_and_benchmark_only",
+            "frequency": "daily",
+            "fill_policy": "NextOpen",
+            "initial_cash": 1000000,
+            "currency": "CNY",
+            "formal_segments": 7,
+            "multi_leg_execution": "per_leg_partial_fills_possible",
+            "state_continuity": [
+              "cash",
+              "positions",
+              "open_orders",
+              "memory"
+            ],
+            "resources": null,
+            "resource_status": "requires_human_setup",
+            "resource_recommendations": {
+              "cpus": 2,
+              "memory_mb": 4096
+            },
+            "market_rules_status": "requires_binding",
+            "instruments": null,
+            "benchmark": null
+          },
+          "submission_contract": {
+            "schema_version": "finlab.submission.v2",
+            "required_files": [
+              "CHANGELOG.md",
+              "RESEARCH.md",
+              "backtest.py",
+              "params.json",
+              "strategy.py"
+            ],
+            "strategy_api": "finlab.strategy.v2",
+            "dependencies": [
+              "finlab",
+              "pandas",
+              "numpy"
+            ],
+            "results_generated_by": "platform"
+          },
+          "protocol": {
+            "research_fraction": 0.3,
+            "formal_segments": 7,
+            "release_rule": "completed_segment_only_after_commit",
+            "maintenance": [
+              "hold",
+              "parameters",
+              "logic"
+            ],
+            "boundaries": null
+          },
+          "sample_id": "EX02",
+          "seed_id": "S03",
+          "status": "pending_human_review",
+          "provenance": {
+            "authoring": "assistant_curated_example",
+            "api_called": false,
+            "data_supplied": false,
+            "runtime_verified": false,
+            "human_approved": false
+          },
+          "validation_notes": [
+            "内置示例，由当前助手整理，未调用配置的模型API，未获得人工批准。",
+            "六个方向候选不等于六个独立任务；相似项可能合并或退回。",
+            "原生v2接口规格，尚未绑定真实数据、交易规则、本人资源预算或正式分段。"
+          ]
+        },
+        "status": "pending_human_review"
+      },
+      {
+        "task_id": "HT06",
+        "score": 0.0476,
+        "exact_structure": false,
+        "spec": {
+          "core_mechanism": "dynamic_constituent_multifactor",
+          "data_requirements": {
+            "date_end": null,
+            "date_start": null,
+            "extra_fields": [
+              "historical_index_membership",
+              "benchmark_total_return"
+            ],
+            "minimum_years": 2,
+            "notes": [
+              "历史旧题记录；匿名交易日不能反推真实日期，新需求范围不代表旧数据范围。"
+            ],
+            "profile_id": "stock_minute",
+            "symbols": [
+              "CSI500_PIT_UNIVERSE_REQUIRED"
+            ]
+          },
+          "decision_dependencies": [
+            [
+              "constituent_eligibility",
+              "feature_definition"
+            ],
+            [
+              "feature_definition",
+              "rank_aggregation"
+            ],
+            [
+              "rank_aggregation",
+              "holding_buffer"
+            ],
+            [
+              "holding_buffer",
+              "turnover_budget"
+            ],
+            [
+              "turnover_budget",
+              "capital_allocation"
+            ]
+          ],
+          "decision_object": "constituent_stock_portfolio",
+          "environment_id": "stock_minute_v1",
+          "family_id": "F03",
+          "id": "HT06",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "maintenance_rationale": "原题允许逐段不改/调参/改逻辑，并保持持仓、现金和memory连续；登记其设计，不宣称实际维护轨迹已验证。",
+          "maintenance_targets": [
+            "ranking_stability",
+            "cost_sensitivity",
+            "constituent_change",
+            "state_compatibility"
+          ],
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "parameter_space": [
+            {
+              "description": "以原TASK及BACKTEST为准；研究窗口、阈值和规则组合，不反向指定参考答案。",
+              "name": "historical_open_research_scope",
+              "type": "structured"
+            }
+          ],
+          "required_decisions": [
+            "constituent_eligibility",
+            "feature_definition",
+            "rank_aggregation",
+            "holding_buffer",
+            "turnover_budget",
+            "capital_allocation"
+          ],
+          "research_modules": [
+            {
+              "decision_id": "constituent_eligibility",
+              "description": "使用当时有效成分并处置调出持仓",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "feature_definition",
+              "description": "量价特征定义、方向与标准化",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "rank_aggregation",
+              "description": "跨股票得分合成、排名和候选排序",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "holding_buffer",
+              "description": "买入与继续持有门槛、排名缓冲和换仓条件",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "turnover_budget",
+              "description": "换手、成本及单次换仓预算",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            },
+            {
+              "decision_id": "capital_allocation",
+              "description": "多个机会间分配资金和现金预算",
+              "interaction": "历史TASK允许研究此项，须结合其他模块和持续账户；此登记不新增运行验收。"
+            }
+          ],
+          "research_question": "从各时点有效中证500成分中选股并控制换手、风险和基准超额。",
+          "review_notes": [
+            "动态历史成分与可比指数缺失，不可用当前45股冒充。",
+            "原稿日线接口；此catalog的stock_minute_v1仅代表可讨论收盘调用承载，未适配验收。",
+            "本草稿已包含量价因子、排名缓冲、状态调整和换手；S05即使换股票池也不自动独立。"
+          ],
+          "schema_version": "finance_task_spec.v1",
+          "source_ids": [
+            "SRC_PROJECT_PLAN"
+          ],
+          "source_path": "demo_packages/c01_csi500_v1/TASK.md",
+          "status": "draft_data_missing",
+          "title": "中证500动态成分多因子组合草稿"
+        },
+        "status": "draft_data_missing"
+      }
+    ],
+    "guarantee": "仅保证规范结构唯一；语义独立性仍需模型与人工复核"
+  },
+  "content_hash": "2de7d4cda1334fe2ff7fc23d0419062889d5f32379d78df34b23772e524c7054"
+}

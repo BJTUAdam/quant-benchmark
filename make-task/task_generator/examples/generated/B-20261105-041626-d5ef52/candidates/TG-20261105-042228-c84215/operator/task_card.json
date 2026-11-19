@@ -1,0 +1,280 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "相对强弱排名的候选池边界协商：流动性资格集合、留存门槛与换仓预算的联合维护",
+  "family_id": "F03",
+  "source_ids": [
+    "SRC_QLIB",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "relative_strength_rotation",
+  "decision_object": "ranked_stock_portfolio",
+  "required_decisions": [
+    "feature_definition",
+    "liquidity_filter",
+    "rank_aggregation",
+    "holding_buffer",
+    "turnover_budget",
+    "capital_allocation"
+  ],
+  "decision_dependencies": [
+    [
+      "feature_definition",
+      "liquidity_filter"
+    ],
+    [
+      "feature_definition",
+      "rank_aggregation"
+    ],
+    [
+      "liquidity_filter",
+      "rank_aggregation"
+    ],
+    [
+      "rank_aggregation",
+      "holding_buffer"
+    ],
+    [
+      "holding_buffer",
+      "turnover_budget"
+    ],
+    [
+      "turnover_budget",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "liquidity_filter"
+    ],
+    [
+      "capital_allocation",
+      "holding_buffer"
+    ]
+  ],
+  "maintenance_targets": [
+    "ranking_stability",
+    "cost_sensitivity",
+    "state_compatibility"
+  ],
+  "research_question": "在国内股票或ETF日线环境中，仅用当时已收盘的量价与复权数据：如何用同一完成窗口定义可比的相对强弱特征，并先以成交活跃度界定可参与排名的候选集合；当同刻排名触发替换时，买入门槛与继续持有门槛如何分设以保留既有持仓；T+1新买不可卖库存、已挂未成交单、单票权重上限与现金余额如何共同限制本期可换仓额度，而换仓额度与现金碎片化的执行结果又如何反过来收紧或放宽下一期可参与排名的流动性资格集合与留存门槛有效宽度，使留存名单在排名噪声、换仓可执行性与流动性边界之间保持可解释、可跨段接续？",
+  "research_modules": [
+    {
+      "decision_id": "feature_definition",
+      "description": "仅用已完成日线收盘数据与已发布复权因子，定义同一完成窗口内的相对强弱特征：收益口径需统一（复权后价格、相同回看长度与跳空处理），使不同股票在同刻可比；同时明确特征对停牌、缺bar和价格限制日的可见处理规则，不引入未来收益或成分信息。",
+      "interaction": "产出的可比特征向量直接决定 liquidity_filter 的活跃度度量口径与 rank_aggregation 的输入分布；若窗口口径改变，流动性集合与排名分母须同步重建，因此该决策为后续两项排名前输入的共同前置。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "依据排名前已知的成交活跃度与可交易状态（按当时可成交性而非事后信息）界定可参与排名的候选集合，并给出集合成员进出时的过渡规则；须明确该集合由资本分配执行结果反向收缩或恢复的准入条件，而非一次性入池。",
+      "interaction": "与 feature_definition 共享完成窗口口径，向 rank_aggregation 提供排名分母；同时接收 capital_allocation 的反向回指——当期仓位碎片化与剩余现金不足时收缩可参与集合，使排名分母随预算结果变化。"
+    },
+    {
+      "decision_id": "rank_aggregation",
+      "description": "在当前流动性候选集合内合成同日排序得分，明确各特征的方向、标准化方式与合成一致性要求；得分只依赖当日及之前已完成数据，并保留排序不确定度以便后续门槛使用。",
+      "interaction": "输入同时来自 feature_definition 与 liquidity_filter，输出排序与候选队列供 holding_buffer 与 turnover_budget 使用；集合边界一变，同刻排名分母与保留次序随之改变。"
+    },
+    {
+      "decision_id": "holding_buffer",
+      "description": "分别设定买入入选门槛与继续持有门槛，使已持仓在排名下滑时获得留存缓冲；缓冲宽度随时间与当期可换仓能力调整，而非固定名次。",
+      "interaction": "接收 rank_aggregation 的排序结果决定留换；同时受 capital_allocation 回指约束，当现金与权重上限使新买不可执行时，留存门槛的有效宽度被放宽以避免无意义换仓。"
+    },
+    {
+      "decision_id": "turnover_budget",
+      "description": "在已识别候选替换与成本条件下设定单期换手额度与换仓预算，明确T+1新增库存与已挂未成交单占用的额度扣减顺序，以及超额候选的延后机制。",
+      "interaction": "由 holding_buffer 的留换集合决定须执行的换仓量，并受资本分配结果约束实际可动用额度；其可用额度又反馈资本分配，使预算与留存缓冲相互让步。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在多个候选机会间分配资金与现金预算，处理单票权重上限、整数交易单位、现金留存与未完成订单占用；并明确分配执行结果如何回写下一期的流动性资格集合与留存门槛。",
+      "interaction": "接收 turnover_budget 的可执行换仓量决定实际下单，同时向 liquidity_filter 与 holding_buffer 回指：碎片化仓位与现金不足收缩下一期候选集合、放宽留存门槛，形成预算—资格—留存的双向协商闭环。"
+    }
+  ],
+  "maintenance_rationale": "后续分段揭晓的已完成数据可能显示：排名在相邻交易日频繁换位、留存名单变动仍偏高，则需考虑加宽继续持有门槛或调整特征窗口；若已实现换手成本与买卖价差对结果的分摊偏高，则须考虑收紧换仓预算或改变额度扣减顺序；若流动性候选集合成员频繁进出导致名单跳变，则须检查集合过渡规则是否应带迟滞而非直接跟随预算回指。这些观察可能促使保持现有逻辑、仅调参数或改动模块间关系，但不保证每次维护提升收益，也不要求实盘盈利。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅运营方采集范围：股票或ETF真实代码池待绑定，空池表示未指定；不使用匿名代号。",
+      "经Tushare Pro桥接查询daily、adj_factor、stk_limit、trade_cal、index_daily；任务包不带行情文件或data目录。",
+      "相对强弱、活跃度、留存门槛等指标均由原始字段在策略内计算，属研究模块，不放入extra_fields。",
+      "实际授权、冻结版本、可见性与交易规则在数据绑定时确认；接口与字段仅取data_profiles候选。"
+    ],
+    "description": "仅运营方采集需求；真实起止日期不进入公开包。"
+  },
+  "parameter_space": [
+    "特征回看窗口长度与跳空处理选项",
+    "活跃度门槛与候选集合规模上下限",
+    "买入入选名次与继续持有名次之差（留存缓冲宽度）",
+    "单期最大换手比例与换仓候选延后数量",
+    "单票权重上限与最低现金留存比例",
+    "集合收缩或恢复的过渡迟滞长度"
+  ],
+  "novelty_claim": "与existing_tasks逐项对照：HT06为dynamic_constituent_multifactor / constituent_stock_portfolio，核心含constituent_eligibility动态成分资格并设基准超额目标；本任务不含成分资格决策、不设基准超额目标，候选池边界由成交活跃度与资金分配执行结果共同决定。TG-20261029-172300-d78026与TG-20261029-184930-be6167同为relative_strength_rotation / ranked_stock_portfolio，不含liquidity_filter：d78026为特征→排名→缓冲→换手→分配单向链，be6167仅追加分配回指缓冲，二者候选池默认全池可比。TG-20261029-185132-5120cb与TG-20261029-185310-93eea1已把liquidity_filter置于排名前并由capital_allocation回指，形成资格集合与留存门槛的双向闭环，最近反馈据此判定TG-20261105-041728-6227b7与TG-20261105-041955-cc1583为93eea1的变体，理由是仅重排依赖边与删减决策集、回指feature_definition缺乏具体机制。本任务据此把实质取舍改为：turnover_budget保留为必需决策并置于holding_buffer与capital_allocation之间，要求T+1新增库存与未成交单对换手额度的扣减顺序成为可执行性判断，而capital_allocation同时回指liquidity_filter与holding_buffer，使执行结果改变下一期候选集合边界与留存门槛；这与93eea1缺失turnover_budget、6227b7删除turnover_budget的决策配置不同，研究核心从集合边界协商转为换手额度与候选集合、留存宽度的三方让步。与S06（cross_sectional_reversal / cross_sectional_reversal_portfolio）机制与决策对象不同。不声称已证实独立、数据已验收或已实证有效；若实现中流动性筛选或预算回指退化为对全池特征无实质影响的附加过滤，或仅调整门槛与窗口，应视为93eea1/6227b7的变体而非独立新题，需人工语义审。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+  "lineage": {
+    "derived_from": [
+      "S05",
+      "HT06",
+      "TG-20261029-185310-93eea1",
+      "TG-20261105-041728-6227b7"
+    ],
+    "kind": "turnover_budget_in_pool_boundary_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "strategy.py",
+      "backtest.py",
+      "params.json",
+      "RESEARCH.md",
+      "CHANGELOG.md"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "batch_id": "B-20261105-041626-d5ef52",
+    "version": 0,
+    "provenance": "model_api",
+    "pipeline_status": "not_connected",
+    "data_status": "not_bound",
+    "status": "pending_human_review",
+    "model_review_status": "needs_attention",
+    "id": "TG-20261105-042228-c84215",
+    "created_at": "2026-11-05T04:22:28+00:00"
+  }
+}

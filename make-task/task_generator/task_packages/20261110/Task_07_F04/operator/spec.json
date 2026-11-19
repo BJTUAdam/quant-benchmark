@@ -1,0 +1,295 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "股票池广度与指数趋势分歧时的参与模式和旧仓过渡",
+  "family_id": "F04",
+  "source_ids": [
+    "SRC_STOCK_TRENDS",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "regime_participation_control",
+  "decision_object": "participation_controller",
+  "required_decisions": [
+    "state_identification",
+    "switch_hysteresis",
+    "participation_policy",
+    "staged_inventory",
+    "risk_budget",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "state_identification",
+      "switch_hysteresis"
+    ],
+    [
+      "switch_hysteresis",
+      "participation_policy"
+    ],
+    [
+      "participation_policy",
+      "risk_budget"
+    ],
+    [
+      "risk_budget",
+      "staged_inventory"
+    ],
+    [
+      "staged_inventory",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "participation_policy"
+    ]
+  ],
+  "maintenance_targets": [
+    "regime_transition",
+    "signal_execution_gap",
+    "risk_recovery",
+    "state_compatibility"
+  ],
+  "research_question": "当固定研究股票池的上涨广度、分化程度与冻结指数趋势相互冲突时，如何识别未决状态、控制状态切换，并将参与模式的变更分期落实到实际旧仓？研究对象是证据冲突到参与模式及过渡库存的控制流程，不能把指数上涨直接视作所有股票均可增加暴露。",
+  "research_modules": [
+    {
+      "decision_id": "state_identification",
+      "description": "基于已完成的固定池收益、涨跌比例或分化统计，以及当时可见指数序列，研究一致、冲突、样本不足等证据状态。",
+      "interaction": "广度只描述已绑定研究池，不声称全市场广度；证据快照传给switch_hysteresis，缺失标的对分母的处理须固定且可追踪。"
+    },
+    {
+      "decision_id": "switch_hysteresis",
+      "description": "研究确认长度、最短驻留和冲突状态的切换迟滞，保留当前有效状态与待确认状态。",
+      "interaction": "只在当日证据冻结后更新一次候选状态，参与模式先使用已生效状态；不得在同日反复重判并重复切换。"
+    },
+    {
+      "decision_id": "participation_policy",
+      "description": "研究状态映射到趋势参与、回归参与、降低参与或停用的规则，明确冲突与样本不足时是否允许新建仓及存量处置。",
+      "interaction": "先读取state_migration恢复的旧模式和未完成过渡，再结合新状态产生目标模式；不得把更换模式视作账户重置。"
+    },
+    {
+      "decision_id": "risk_budget",
+      "description": "将目标参与模式映射为总暴露、各标的上限和新增额度，研究目标与已有库存不一致时的过渡上限。",
+      "interaction": "预算输出给staged_inventory；旧库存超出目标时不能同时把未完成减仓额度再发给新模式新增。"
+    },
+    {
+      "decision_id": "staged_inventory",
+      "description": "研究模式切换时先减旧、同时缓慢调整或等待旧仓退出等过渡方式，考虑T+1、涨跌停及部分成交。",
+      "interaction": "按实际成交更新过渡进度；剩余旧仓和未成交单进入state_migration，新模式信号不得重复占用同一笔资金。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "保存证据版本、当前与候选状态、驻留计数、目标模式、过渡库存和订单占用；参数或逻辑更新时明确兼容和失效条件。",
+      "interaction": "每根行情先从账户及旧memory恢复状态，再由participation_policy裁决新增；迁移只改变未来规则，不改历史证据或历史持仓。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能发生指数趋势与研究池广度长期背离、状态切换密集，或旧模式退出速度跟不上目标模式变化。维护需要区分证据不可靠、迟滞不适当和库存过渡过慢，并选择保持或修改相应模块。所有阶段沿用账户、未成交单和状态memory，保留未决状态及过渡进度。长程复杂度是待验证假设，不承诺每次切换有利。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内A股真实代码；该代码清单为待绑定的固定研究池，数据覆盖、可交易状态和费用尚未验收，不宣称具有全市场代表性。",
+      "通过任务桥接查询daily、adj_factor、stk_limit、trade_cal、index_daily；不提供行情data目录，不将真实采集范围、映射或原始缓存交给策略。",
+      "运营方须确认至少连续两年的实际覆盖、复权因子历史可见版本、现金分红和送转等公司行为、逐日价格限制、停牌与T+1规则；缺失行情不能直接视作停牌。",
+      "需要指数基准时由平台另行绑定实际指数代码及冻结index_daily；不交易指数。所有特征仅用当时已可见历史字段计算，未来收益LABEL不作为特征。",
+      "公开日期是虚拟事件标签，日期起止和七段边界均待数据绑定。运行预算由本人首次配置，题目不预填CPU、内存或时限。",
+      "来源卡只提供已核验的简介、目录或开源特征设计范围，本题为本轮模型形式化设计，不宣称摘录原书策略或具有盈利证明。",
+      "股票仅允许现货多头、新增买入和对实际可卖持仓减仓，不做融券卖空；指数只查询和作为基准，不下单。不得把卖出尚未成交所得提前计入现金。"
+    ]
+  },
+  "parameter_space": [
+    "股票池广度、分化和指数趋势的特征定义",
+    "缺失样本、未上市或停牌对广度分母的处理",
+    "一致与冲突证据的合成和优先级",
+    "冲突状态的持续性及降级规则",
+    "状态确认长度与最短驻留",
+    "趋势、回归、降低参与、停用模式的准入条件",
+    "参与模式内基础入场和退出表达",
+    "目标总暴露、单票上限和现金保留",
+    "旧仓超目标时的新建仓限制",
+    "模式过渡的分批方式和完成条件",
+    "T+1或涨跌停造成过渡欠账的处理",
+    "待确认状态及过渡库存的JSON持久化",
+    "逻辑改版时证据与计数器的兼容判据"
+  ],
+  "novelty_claim": "相对S07，本题要求固定池广度与指数趋势的证据分歧形成明确的未决状态，并把模式切换展开为与旧库存兼容的分期过渡；state_migration反馈的是未完成过渡约束，而不是重新定义风险档位或以回撤恢复信号回改特征窗口。仍属状态控制家族中的候选设计，尚未证明语义独立。",
+  "lineage": {
+    "derived_from": [
+      "S07"
+    ],
+    "kind": "new_conversation_authored_candidate_pending_semantic_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  }
+}
