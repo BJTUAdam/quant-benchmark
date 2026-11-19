@@ -1,0 +1,79 @@
+{
+  "fingerprint": "4442bd393fb36cd7bbc9cf265e319d8331c385f59fb92806194def39a8ed4550",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "TG-20261029-172301-36425d",
+      "score": 0.5882,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "FU/LU相对关系的滚动对冲和暂停重估"
+    },
+    {
+      "task_id": "TG-20261105-041820-c67182",
+      "score": 0.5882,
+      "exact_structure": false,
+      "status": "spec_accepted",
+      "title": "跨品种加工链条的关系重估与残差腿组合：月份选择、对冲比例、分项信号汇总与保证金预算的联合维护"
+    },
+    {
+      "task_id": "TG-20261105-042329-afee5f",
+      "score": 0.5294,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "FG/SA跨品种关系重估中的残差参与与保证金预算维护"
+    },
+    {
+      "task_id": "HT05",
+      "score": 0.4737,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "FG/SA玻璃纯碱统计价差"
+    },
+    {
+      "task_id": "HT04",
+      "score": 0.45,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "国内SC/FU/LU原油燃料油相对价值"
+    },
+    {
+      "task_id": "HT03",
+      "score": 0.4,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "国内B/M/Y大豆压榨价差"
+    },
+    {
+      "task_id": "TG-20261105-042048-66d9a5",
+      "score": 0.35,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "B/M/Y加工链条的分项信号冲突裁决与真实腿库存交接"
+    },
+    {
+      "task_id": "TASK12-20261110-10",
+      "score": 0.3043,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "跨品种共享对冲腿的执行调度：组合净额、缺腿敞口与撤退预算"
+    },
+    {
+      "task_id": "TG-20261029-185356-d4e28b",
+      "score": 0.2857,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "同品种两个到期月份之间的配对选择：剩余期限可比、流动性与到期换腿"
+    },
+    {
+      "task_id": "TG-20261029-172301-684a8d",
+      "score": 0.2273,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "FG近远月价差的配对、到期和移仓"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

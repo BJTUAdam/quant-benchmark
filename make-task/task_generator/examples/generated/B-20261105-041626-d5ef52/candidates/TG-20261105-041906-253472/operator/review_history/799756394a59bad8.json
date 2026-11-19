@@ -1,0 +1,128 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-185416-8868c8",
+  "spec_hash": "2cb977bedd054495428e2d97bda6b259266fc23dba722778c2555571dfa604a2",
+  "reviewed_at": "2026-11-05T04:19:16+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "variant",
+  "status": "needs_attention",
+  "issues": [
+    "候选research_question声称在“单个品种上”研究，但data_requirements列出8个期货品种且环境支持多品种；需明确究竟是单品种逐一测试还是多品种组合，否则核心问题边界模糊。",
+    "environment_id=akquant_futures_v2支持多腿逐腿撮合与残余敞口，但研究决策中未明确多空方向、保证金占用与加减仓的具体撮合/资金冻结逻辑；单品种决策与多品种数据之间的执行语义未对齐，存在接口与数据标准矛盾。",
+    "候选未设定failure_exit决策，但research_question提及“趋势资格被撤回”与“退出条件触发”；需确认资格撤回信号是并入exit_policy还是仅作为退出触发条件，避免与已有任务TG-20261029-185249-24341b的failure_exit职责边界不清。"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "a74fd2bb3ca6da554bfd1127db0a55d6e0bc4c25a736c82dc19bbca7d1e949bc",
+  "content_hash": "b4e249dea93475de1db3412fa339704750524b1a8e0e7a70036d6504eb22083f",
+  "rationale": "候选与最近任务TG-20261029-185416-8868c8共享相同的trend_pullback机制、trend_pullback_inventory决策对象及几乎相同的必需决策集合，核心研究问题均为趋势资格确认、回撤定位、分批库存、退出和预算回压的闭环维护。候选的主要变化在于将场景从股票教学环境换为期货真实分合约，执行约束改为逐腿撮合与残余敞口，并省略了state_migration/entry_confirmation/failure_exit等已有变体的可选模块，同时强化capital_allocation对trend_qualification和staged_inventory的双向约束。这些变化属于标的、执行配置与决策依赖表述的调整，未实质改变核心研究决策；根据审查要求，无实质核心机制变化而下调至variant。候选的novelty_claim已自我承认反退化风险并请求人工审，未提供证据证明独立于其他trend_pullback候选。",
+  "pending_bindings": [
+    "真实数据起止日期、分合约覆盖、乘数、保证金、结算、费用、夜盘交易日与到期规则需在数据绑定时确认。",
+    "资源预算需由本人运行finlab setup配置，当前resources=null与resource_status=requires_human_setup为预期待办。",
+    "formal_segments=7的具体分段边界与评分配置需在正式开始前固定。"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F01家族、trend_pullback机制、trend_pullback_inventory决策对象。",
+        "必需决策集合几乎一致，均包含trend_qualification、pullback_location、staged_inventory、exit_policy、capital_allocation。",
+        "均要求capital_allocation回指trend_qualification形成预算回压闭环。",
+        "维护目标均包含structure_validity、signal_execution_gap、risk_recovery、state_compatibility。"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "候选将交易标的从股票教学环境改为国内期货真实分合约，执行约束为逐腿撮合、部分成交与残余敞口。",
+        "候选数据要求包含多个期货品种及夜盘交易日、保证金、乘数、到期等规则。",
+        "候选不涉及T+1不可卖库存，改为处理真实多头/空头整数手数与保证金占用。"
+      ]
+    },
+    {
+      "similarities": [
+        "同为trend_pullback机制与trend_pullback_inventory决策对象。",
+        "均关注趋势资格撤回、回撤定位、分批库存与预算回压。",
+        "均将capital_allocation回指trend_qualification，使预算改变资格有效宽度。"
+      ],
+      "task_id": "TG-20261029-185249-24341b",
+      "differences": [
+        "候选未设独立的failure_exit决策，而将失效信号并入exit_policy的优先与去重规则。",
+        "候选的场景为国内期货真实分合约，而非股票日线+分钟教学环境。"
+      ]
+    },
+    {
+      "similarities": [
+        "同在趋势回撤母题下处理分层/分批库存与退出政策。",
+        "均要求趋势资格与回撤定位的依赖关系。"
+      ],
+      "task_id": "TG-20261029-184647-ca78bb",
+      "differences": [
+        "候选不设state_migration，而由capital_allocation同时回指trend_qualification与staged_inventory。",
+        "候选环境为期货真实分合约，执行约束包含逐腿撮合与残余敞口。"
+      ]
+    },
+    {
+      "similarities": [
+        "均为趋势回撤中分批库存与退出维护的研究。",
+        "均要求趋势资格、回撤定位与分批库存的依赖链。"
+      ],
+      "task_id": "TG-20261029-185109-ad8725",
+      "differences": [
+        "候选不设entry_confirmation，也不设state_migration，而强化预算对资格宽度与批次手数的双向约束。",
+        "候选为期货真实分合约，执行约束与股票环境不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "机构层面均涉及趋势捕捉与资金分配。"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01为股票短周期趋势追踪，决策对象为stock_trend_portfolio，聚焦突破确认与再入场；候选聚焦趋势内回撤与分批库存管理。"
+      ]
+    },
+    {
+      "similarities": [
+        "均包含capital_allocation回指前序决策的预算回压结构。"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "核心机制不同：该题为consolidation_breakout，决策对象为breakout_position_state，研究区间突破确认缺失与失效证据合并；候选为trend_pullback下的趋势资格与回撤分批库存。"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F01家族，均涉及失败退出与资金分配。"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "该题为整理区间突破后的跟踪、失败退出与再入场，决策对象为breakout_position_state；候选为趋势回撤库存，不以再入场为核心。"
+      ]
+    },
+    {
+      "similarities": [
+        "均包含分批库存与退出政策模块。"
+      ],
+      "task_id": "HT02",
+      "differences": [
+        "HT02为短线超跌反转，决策对象为oversold_stock_portfolio；候选为趋势回撤中的分批库存维护，机制与决策对象均不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均关注状态切换与预算恢复对参与决策的影响。"
+      ],
+      "task_id": "TG-20261029-184839-b184fc",
+      "differences": [
+        "该题聚焦整理区间突破的参与控制，含state_identification与switch_hysteresis；候选为趋势回撤资格与分批库存，不设状态辨识与切换迟滞。"
+      ]
+    },
+    {
+      "similarities": [
+        "均在期货环境运行，需处理真实分合约与保证金。"
+      ],
+      "task_id": "TG-20261029-184707-5e00a9",
+      "differences": [
+        "该题为区间边缘回归及趋势否决，决策对象为range_position_lifecycle；候选为趋势回撤库存管理，机制与决策对象不同。"
+      ]
+    }
+  ]
+}

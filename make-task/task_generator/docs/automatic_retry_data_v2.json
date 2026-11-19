@@ -1,0 +1,170 @@
+{
+  "schema_version": "finlab.automatic_retry_data.v1",
+  "checked_at": "2026-11-10T09:59:14.204911+00:00",
+  "scope": "private_actual_source_rows_not_formal_frozen_data",
+  "source_exists": true,
+  "source_sqlite_bytes": 4997120,
+  "symbols": 3,
+  "range_days": "2024-2025 selected for this retry only",
+  "queries": [
+    {
+      "api_name": "daily",
+      "symbol": "000001.SZ",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "daily",
+      "symbol": "600000.SH",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "daily",
+      "symbol": "600036.SH",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "adj_factor",
+      "symbol": "000001.SZ",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "adj_factor",
+      "symbol": "600000.SH",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "adj_factor",
+      "symbol": "600036.SH",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "stk_limit",
+      "symbol": "000001.SZ",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "stk_limit",
+      "symbol": "600000.SH",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "stk_limit",
+      "symbol": "600036.SH",
+      "status": "collected",
+      "inserted": 485
+    },
+    {
+      "api_name": "trade_cal",
+      "symbol": null,
+      "status": "collected",
+      "inserted": 731
+    },
+    {
+      "api_name": "index_daily",
+      "symbol": "000300.SH",
+      "status": "collected",
+      "inserted": 485
+    }
+  ],
+  "freeze": {
+    "status": "blocked",
+    "error_code": "HISTORICAL_VISIBILITY_NOT_PROVEN",
+    "message": "daily"
+  },
+  "historical_visibility_proven": false,
+  "coverage_proven": true,
+  "corporate_actions_verified": false,
+  "credentials_included": false,
+  "selected_calendar_open_days": 485,
+  "calendar_coverage_checks": [
+    {
+      "api_name": "daily",
+      "symbol": "000001.SZ",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "daily",
+      "symbol": "600000.SH",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "daily",
+      "symbol": "600036.SH",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "adj_factor",
+      "symbol": "000001.SZ",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "adj_factor",
+      "symbol": "600000.SH",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "adj_factor",
+      "symbol": "600036.SH",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "stk_limit",
+      "symbol": "000001.SZ",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "stk_limit",
+      "symbol": "600000.SH",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "stk_limit",
+      "symbol": "600036.SH",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    },
+    {
+      "api_name": "index_daily",
+      "symbol": "000300.SH",
+      "trading_dates": 485,
+      "matches_frozen_selection_calendar": true,
+      "missing_count": 0,
+      "outside_count": 0
+    }
+  ],
+  "visibility_note": "Captured at download time. No historical observation/revision evidence supplied. Calendar-aligned coverage does not prove point-in-time validity or corporate actions."
+}

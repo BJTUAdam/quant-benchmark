@@ -1,0 +1,122 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-185515-8f94f2",
+  "spec_hash": "71e00e94753232cc5c68797f790434634fb8fcf29b415ed1bb99cc562e6820f2",
+  "reviewed_at": "2026-11-05T04:20:33+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "variant",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "209b0edb276c16cb557c58bbc84718e450647c66a614b0541238ec54d25914ad",
+  "content_hash": "81e296f2ca9f728852f10675c261c870e7e16292fb4f9567cd9edba820d18260",
+  "rationale": "候选与最近任务 TG-20261029-185515-8f94f2 共享同一核心问题：多源回撤证据的合并去重、预算档位映射、受限缩减执行与基于独立证据的恢复准入，且均要求缩减结果回写状态识别。两者的实质差异仅在于用 capital_allocation 替代 participation_policy，并将证据可信等级与占用碎片反馈写得更显式。8f94f2 的研究决策已宽泛覆盖证据合并与去重、预算档位与执行可行性约束；候选增加资金分配占用回指和证据等级描述属于在旧宽泛允许的方法范围内细化依赖边与输出表达，未改变核心研究决策与触发机制。因此判为 variant。",
+  "pending_bindings": [
+    "数据绑定：stock_etf_daily 的标的池、日期范围、数据版本与分段边界尚未冻结，需在桥接绑定后确认",
+    "交易规则绑定：T+1、涨跌停、费用及交易单位须在绑定时确认，当前 market_rules_status=requires_binding",
+    "评分细则须在管线接入阶段绑定具体指标和计算方式",
+    "资源预算须由本人运行 finlab setup 配置，草案 resources=null 属正常预期待办",
+    "运行时引擎与实际分段未冻结，pipeline_status=not_connected"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为 drawdown_risk_budget 机制、portfolio_risk_controller 对象，核心围绕风险预算的缩减执行与逐级恢复",
+        "均要求处理T+1不可卖库存、未成交挂单和现金不足下的分步减仓",
+        "均包含证据识别去重、预算档位、缩减执行、恢复准入和资金分配的研究链条"
+      ],
+      "task_id": "TG-20261029-185155-f10be3",
+      "differences": [
+        "f10be3 必需决策为 state_migration 而非 capital_allocation，回写路径是缩减执行经状态迁移回指状态识别；候选以 capital_allocation 替代 state_migration，并要求资金分配直接回指证据读取口径",
+        "候选新增了证据可信等级与占用碎片反馈的明确要求，但证据去重与优先级在 f10be3 的 state_identification 中同样宽泛允许，属于同一决策语义下的实现细化"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 drawdown_risk_budget 机制、portfolio_risk_controller 对象，包含 state_identification→risk_budget→drawdown_response→recovery_policy 的主干依赖",
+        "均关注缩减执行后的实际占用如何影响恢复准入，且要求跨段现金、持仓、未完成订单连续"
+      ],
+      "task_id": "TG-20261029-185000-a26d12",
+      "differences": [
+        "a26d12 含 participation_policy 与 state_migration，把参与方式与持久化迁移纳入核心闭环；候选不含参与方式决策和状态迁移，以资金分配占用反馈替代",
+        "候选把证据可信等级与同源去重作为 state_identification 的明确输出，a26d12 仅将已识别风险映射为预算上限，未将证据分级去重独立提出"
+      ]
+    },
+    {
+      "similarities": [
+        "同族同机制同对象，研究问题几乎同源：风险证据的多源合并与去重、预算档位映射、受限缩减执行、恢复准入的独立证据",
+        "均要求 drawdown_response 回写 state_identification，使缩减后的实际占用改变下一段证据读取口径",
+        "均不含 switch_hysteresis，且均把执行可行性约束嵌入预算档位映射"
+      ],
+      "task_id": "TG-20261029-185515-8f94f2",
+      "differences": [
+        "8f94f2 含 participation_policy，将参与方式档位与预算档位并列并纳入证据口径反馈；候选删去 participation_policy，以 capital_allocation 承担资金分配与占用碎片回指",
+        "候选在 8f94f2 宽泛允许的证据合并与去重语义下，将可信等级和占用碎片反馈描述得更显式，但核心决策问题仍为同一风险预算档位映射与恢复准入闭环"
+      ]
+    },
+    {
+      "similarities": [
+        "同属风险控制器家族，涉及降压执行、恢复准入与未成交待办清理"
+      ],
+      "task_id": "TG-20261029-185333-ed0ecc",
+      "differences": [
+        "ed0ecc 核心机制为 regime_participation_control，对象为 participation_controller，控制量是参与方式档位语义而非组合风险预算刻度；候选为 drawdown_risk_budget/portfolio_risk_controller，控制量是预算档位与占用口径"
+      ]
+    },
+    {
+      "similarities": [
+        "同属 F04 风险控制器家族，均涉及状态识别到风险预算的映射"
+      ],
+      "task_id": "TG-20261029-172300-e01b9a",
+      "differences": [
+        "e01b9a 核心机制为 regime_participation_control，对象为 participation_controller，以 switch_hysteresis 为关键决策；候选为 drawdown_risk_budget，无切换迟滞，核心是证据等级与恢复准入"
+      ]
+    },
+    {
+      "similarities": [
+        "均为国内股票ETF日线环境，均含 capital_allocation 回指前序决策的闭环"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "8868c8 为 F01 trend_pullback 机制，研究趋势资格与回撤定位的分批库存处置；候选为组合层面的风险预算档位与恢复准入，决策对象与核心机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及失败处置、预算缩减与证据合并的结构"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "7e6569 为 F01 consolidation_breakout，研究区间识别与突破确认失败后的退出再入场；候选为组合风险预算控制器，不涉及区间突破的入场确认"
+      ]
+    },
+    {
+      "similarities": [
+        "均为趋势回撤/风险控制方向，均含资金分配对前序决策的回压"
+      ],
+      "task_id": "TG-20261105-041906-253472",
+      "differences": [
+        "253472 为 F01 trend_pullback 机制、期货环境，研究单品种趋势资格与分批库存；候选为股票ETF组合级风险预算，不含趋势资格与分批库存"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及风险预算缩减与恢复，且 maintenance_targets 包含 risk_recovery 与 structure_validity 等"
+      ],
+      "task_id": "TG-20261029-184839-b184fc",
+      "differences": [
+        "b184fc 为 F01 consolidation_breakout，核心是区间突破的切换迟滞与失败处置；候选为 drawdown_risk_budget 的预算档位与证据等级，无区间识别与突破确认"
+      ]
+    },
+    {
+      "similarities": [
+        "均包含失效信号吸收、预算缩减与资金分配的闭环"
+      ],
+      "task_id": "TG-20261029-185249-24341b",
+      "differences": [
+        "24341b 为 F01 trend_pullback，研究趋势资格撤回与回撤失效对分批库存的清退；候选为组合风险预算的证据等级与恢复准入，决策对象为 portfolio_risk_controller"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "finance-long-horizon-task-generator"
+version = "2.0.0"
+description = "Local financial task specification generator with human approval"
+requires-python = ">=3.10"
+dependencies = ["pandas==2.3.3", "numpy==2.2.6"]
+
+[project.optional-dependencies]
+tushare = ["tushare==1.4.29"]
+
+[project.scripts]
+taskgen = "taskgen.cli:main"
+finlab = "finlab.cli:main"
+
+[tool.setuptools]
+packages = ["taskgen", "finlab"]

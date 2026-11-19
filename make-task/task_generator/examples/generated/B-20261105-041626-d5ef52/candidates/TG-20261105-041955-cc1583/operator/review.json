@@ -1,0 +1,149 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-041728-6227b7",
+  "spec_hash": "0e2f76ffa23e68584738d97d460520a1d7357176166f9d2678c840eb1a643b8d",
+  "reviewed_at": "2026-11-05T04:29:30+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "variant",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "1745c4626fa697691811eec19ad0cb5f3483f16671cdce4453af4c4316cd6a2b",
+  "content_hash": "ace1f0939ff350a15de330258e8eee36c663284c1dee685146aab2f389629ad9",
+  "rationale": "候选与最接近的TG-20261105-041728-6227b7在机制、决策对象、必需决策集合、依赖链结构及维护目标上完全一致：均以liquidity_filter前置排名、capital_allocation回指liquidity_filter与feature_definition，形成资格集合与留存门槛的双向协商。候选新增的涨跌停封死筛选与同窗口同复权口径要求，属于对既有liquidity_filter与feature_definition决策内的配置细化和描述强化，未改变核心触发机制与必需研究决策。与其余F03历史任务的差异（是否保留turnover_budget、是否增加回指边、是否含涨跌停约束）均为同一主干上的模块增删或依赖边重排；按审查要求，增加依赖边、删减决策集或细化旧允许解法不自动构成独立新题。候选novelty_claim也承认回指边本身不构成新颖性，并自述若退化为在93eea1上删去换手预算模块应视为变体，这与本判断一致。因此判为variant而非distinct；因存在与6227b7的结构等价，也不宜判uncertain。",
+  "pending_bindings": [
+    "股票池symbols为空，待运营方绑定真实股票或ETF代码",
+    "bridge_contract.binding_status=not_bound，dataset_id为null，授权、冻结与可见性待绑定时确认",
+    "runtime_profile.market_rules_status=requires_binding，交易单位、T+1、费用、价格限制与公司行为待绑定",
+    "runtime_profile.resources=null且resource_status=requires_human_setup，资源预算由本人运行finlab setup配置",
+    "runtime_profile.formal_segments=7但实际虚拟时间范围与分段边界待绑定时冻结",
+    "评分配置待正式运行前固定并绑定管线"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同属F03 relative_strength_rotation，决策对象同为ranked_stock_portfolio",
+        "必需决策集合相同：feature_definition、liquidity_filter、rank_aggregation、holding_buffer、capital_allocation",
+        "决策依赖链完全相同，均含liquidity_filter→rank_aggregation、capital_allocation→liquidity_filter及capital_allocation→feature_definition回指",
+        "研究目标均是集合边界、留存门槛与现金预算的双向协商，maintenance_targets一致"
+      ],
+      "task_id": "TG-20261105-041728-6227b7",
+      "differences": [
+        "本题在模块描述中明确要求特征口径与成交活跃度度量共用同一窗口与同一复权口径，并要求处理涨跌停状态，这是对同一回指边的语义细化",
+        "本题数据需求声明使用stk_limit字段以处理涨跌停封死，前题只笼统写量价数据",
+        "标题与lineage kind不同，但核心机制与必需决策结果等价，细化属于同一决策内的配置与表述变化，不构成新的研究取舍"
+      ]
+    },
+    {
+      "similarities": [
+        "同为relative_strength_rotation / ranked_stock_portfolio",
+        "均含liquidity_filter、holding_buffer与capital_allocation",
+        "均研究流动性筛选改变排名分母后留存门槛的重新协商"
+      ],
+      "task_id": "TG-20261029-185132-5120cb",
+      "differences": [
+        "5120cb保留turnover_budget并要求holding_buffer→turnover_budget→capital_allocation，本题剔除turnover_budget，以capital_allocation直接承接换仓可执行性",
+        "5120cb依赖链不含capital_allocation→liquidity_filter及capital_allocation→feature_definition的双回指，本题把这些回指作为必需依赖",
+        "5120cb未明确涨跌停封死筛选，本题把stk_limit作为流动性集合边界的一部分"
+      ]
+    },
+    {
+      "similarities": [
+        "同为relative_strength_rotation / ranked_stock_portfolio",
+        "均含liquidity_filter前置排名、capital_allocation回指liquidity_filter与holding_buffer的闭环",
+        "maintenance_targets与排名稳定性、成本敏感性、状态兼容一致"
+      ],
+      "task_id": "TG-20261029-185310-93eea1",
+      "differences": [
+        "93eea1保留turnover_budget并置于holding_buffer与capital_allocation之间，本题移除该必需决策",
+        "93eea1未要求capital_allocation→feature_definition回指现金碎片对特征窗口可用性的约束，本题将其列为必需依赖与模块交互",
+        "本题明确要求特征与流动性度量同窗口同复权口径，并纳入涨跌停状态，前题未将此作为必需前置条件"
+      ]
+    },
+    {
+      "similarities": [
+        "同为relative_strength_rotation / ranked_stock_portfolio",
+        "均含liquidity_filter、holding_buffer、turnover_budget与capital_allocation",
+        "均研究分配结果收缩候选集合并改变排名分母"
+      ],
+      "task_id": "TG-20261029-185451-316d9a",
+      "differences": [
+        "316d9a保留turnover_budget并要求换手额度不足与缓冲执行在同一时点联合求解，本题剔除该模块",
+        "316d9a核心新增点为守门性排除与排名性掉出的区分及既有持仓的不同处置，本题不要求该排除语义决策",
+        "本题额外要求capital_allocation回指feature_definition以约束特征窗口可用性，316d9a未作为必需依赖"
+      ]
+    },
+    {
+      "similarities": [
+        "同为relative_strength_rotation / ranked_stock_portfolio",
+        "均含liquidity_filter、capital_allocation回指liquidity_filter与holding_buffer",
+        "均研究候选集合逐期变动下留存门槛与现金约束的协商"
+      ],
+      "task_id": "TG-20261105-042228-c84215",
+      "differences": [
+        "c84215保留turnover_budget作为必需决策并要求T+1新增库存与未成交单的扣减顺序，本题不含turnover_budget",
+        "本题增加capital_allocation→feature_definition回指现金碎片对特征窗口的约束，c84215未列该依赖",
+        "本题把涨跌停封死作为流动性集合边界的显式条件，c84215只提活跃度集合"
+      ]
+    },
+    {
+      "similarities": [
+        "同为relative_strength_rotation / ranked_stock_portfolio",
+        "均含feature_definition、rank_aggregation、holding_buffer、capital_allocation",
+        "均关注排名稳定性与换仓成本"
+      ],
+      "task_id": "TG-20261029-172300-d78026",
+      "differences": [
+        "d78026不含liquidity_filter，候选池默认为全池可比，本题把流动性资格集合作为独立必需决策",
+        "d78026依赖链为特征→排名→缓冲→换手→分配的单向链，无分配回指集合或特征口径的闭环",
+        "d78026保留turnover_budget，本题移除该决策"
+      ]
+    },
+    {
+      "similarities": [
+        "同为relative_strength_rotation / ranked_stock_portfolio",
+        "均含holding_buffer与capital_allocation，并让分配结果约束留存门槛宽度",
+        "均关注T+1库存与现金对换仓的约束"
+      ],
+      "task_id": "TG-20261029-184930-be6167",
+      "differences": [
+        "be6167不含liquidity_filter，候选池为全池，本题把流动性集合边界作为必需决策",
+        "be6167仅有capital_allocation→holding_buffer一条回指边，本题增加回指liquidity_filter与feature_definition",
+        "be6167保留turnover_budget，本题移除该决策"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F03家族，涉及多因子横截面选股与持有缓冲",
+        "均含feature_definition、rank_aggregation、holding_buffer、capital_allocation"
+      ],
+      "task_id": "HT06",
+      "differences": [
+        "HT06核心机制为dynamic_constituent_multifactor，决策对象为constituent_stock_portfolio，含constituent_eligibility动态成分资格与基准超额目标",
+        "本题不含成分资格决策、不设基准超额目标，候选池边界由流动性资格与现金预算共同决定",
+        "HT06无liquidity_filter与分配回指集合的闭环"
+      ]
+    },
+    {
+      "similarities": [
+        "同为历史股票组合类任务，涉及资金分配决策"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01为F01 short_horizon_trend / stock_trend_portfolio，研究单标的趋势追踪与区间突破，决策对象与机制均不同",
+        "本题为横截面相对强弱排名与流动性资格集合，不涉及趋势追踪或突破"
+      ]
+    },
+    {
+      "similarities": [
+        "同为历史股票任务，含资金分配决策"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "ca5a47为F01 consolidation_breakout / breakout_position_state，研究整理区间突破后的跟踪、失败退出与再入场",
+        "本题为F03横截面相对强弱排名，决策对象与触发机制均不同，不涉及区间识别或失败退出"
+      ]
+    }
+  ]
+}

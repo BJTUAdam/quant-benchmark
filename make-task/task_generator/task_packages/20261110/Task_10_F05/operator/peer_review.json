@@ -1,0 +1,25 @@
+{
+  "spec_filename": "10_shared_hedge_execution.json",
+  "spec_hash": "c98d0e6412e5098842d6d80ef72d5eaf239eafce8bdc2f10fe05baba180e19dd",
+  "passed": true,
+  "blocking_issues": [],
+  "review_mode": "conversation_model_cross_review",
+  "reviewer": "strength_risk_peer",
+  "observations": [
+    "仅在两个关系使用同一实际FU合约时讨论共享腿，旧月与新月不得抵消，SC与燃料油的桶/吨不被当作固定物理换算。",
+    "补强后明确单一真实净账户，影子归属仅解释意图；共享腿净额抵消不虚构两份成交或理想价差收益。",
+    "退出先核对真实净仓和仍有效订单，禁止依影子数量重复平仓；回调只更新记账，下单撤单限on_bars，未承诺SDK未提供的子账户/原子成交。"
+  ],
+  "semantic_independence": "not_guaranteed",
+  "closest_research_overlap": [
+    "HT04：SC/FU/LU多腿相对关系",
+    "S09：对冲比例与保证金预算",
+    "本批12：共享实际合约的意图/净仓账本问题相似，市场机制与期限结构不同"
+  ],
+  "data_binding_caveats": [
+    "行情、信息可见时点和逐接口覆盖尚未绑定；下载时间不能冒充历史已知时间，省略日期或分页不能越过阶段披露边界。",
+    "品种代码仅为合约池占位。须绑定真实分合约、足够的同刻重叠行情、合约乘数、报价单位、夜盘交易日、到期及逐日交易限制。",
+    "当前引擎不支持的按手费用、差异平今费率、动态保证金或交易所组合抵扣须明确阻止正式启动，不能静默假设为0或已支持。",
+    "未执行真实数据回测、容器或策略代码验收；当前仍为数据未绑定、运行未接入的任务规格。"
+  ]
+}

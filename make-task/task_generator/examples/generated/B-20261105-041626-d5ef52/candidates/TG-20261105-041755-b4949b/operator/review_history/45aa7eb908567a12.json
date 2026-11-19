@@ -1,0 +1,137 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-185155-f10be3",
+  "spec_hash": "4d599eb859897ce29b5c4b1abc04fd0b4bcb57d6d23808c05ea3b2d6ef1505b0",
+  "reviewed_at": "2026-11-05T04:28:39+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "核心问题与TG-20261029-185155-f10be3在决策集、依赖边和研究问题上实质等价，候选所述‘显式化执行约束’和‘恢复读取占用差额’已被f10be3覆盖，不构成独立新题，应合并或重设为变体。"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "240a3bb82931935460de985c40c3c8c67998b172e84f29371d27b533af278b7e",
+  "content_hash": "2e2143d1d63d74a7f3a26093f7f885a7a4893ac3b4aa872a8f349ac0acbf8c5b",
+  "rationale": "候选与最近任务TG-20261029-185155-f10be3在机制、决策对象、五个必需决策、六条依赖边和维护目标上完全一致；研究问题中的预算刻度表达取舍、缩减时T+1/挂单/现金不足约束下的档位与顺延、逐级恢复读取预算占用差额、缩减未完成与恢复进行中状态跨段承接，均已被f10be3的研究问题和决策描述明确覆盖。候选所强调的‘显式化执行可行性约束’和‘恢复读取占用差额与残余敞口’是对f10be3已允许研究范围的细化描述，属同一职责的同义展开，未引入新的研究决策或决策语义改变；参数空间差异仅为窗口、档位数量、阈值等配置变化。novelty_claim自述‘必需决策集合与f10be3相同，在基础上述显式化’，其差异描述实为同一决策的细化而非新增独立取舍，未构成事实支撑的实质新题。其余最近任务在机制、决策对象或必需决策上均存在明确不同的研究决策，候选与其差异更大，不改变与f10be3的等价判断。",
+  "pending_bindings": [
+    "股票/ETF池未绑定（symbols为空，需实际代码或notes待绑定）",
+    "数据实际授权、冻结和可见性在数据绑定时确认（binding_status=not_bound）",
+    "交易日历以桥接返回的trade_cal为准，实际分段边界未冻结",
+    "交易单位、T+0/T+1、费用、公司行为、价格限制按runtime_profile绑定（market_rules_status=requires_binding）",
+    "资源预算由本人运行finlab setup配置（resources=null，resource_status=requires_human_setup），CPU/内存建议非生效值",
+    "评分配置在正式开始前固定，当前待管线绑定",
+    "运行难度与实际可执行性未实测"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同机制 drawdown_risk_budget、同决策对象 portfolio_risk_controller",
+        "必需决策集合完全相同：state_identification、risk_budget、drawdown_response、recovery_policy、state_migration",
+        "决策依赖边逐条一致：状态→预算→缩减→恢复→预算回指，缩减→迁移，迁移→状态回指",
+        "维护目标均为 risk_recovery、signal_execution_gap、state_compatibility 的组合",
+        "研究问题均围绕预算刻度表达取舍、缩减时T+1/挂单/现金约束与未完成减仓顺延、逐级恢复回指预算、跨段承接差额"
+      ],
+      "task_id": "TG-20261029-185155-f10be3",
+      "differences": [
+        "候选把缩减可成交约束、恢复读取预算占用差额与残余敞口、迁移回指状态识别写得更为显式，但这些均已被f10be3研究问题中‘T+1不可卖新买库存、已挂未成交单、现金不足以一次性合规减仓的处置’‘预算占用与目标预算差额在逐级恢复中被识别’‘状态迁移回指状态识别’覆盖",
+        "候选删去分钟教学环境表述、把交易域限定日线并改变局部措辞，属表述层面差异",
+        "参数空间与档位、窗口、阈值相关项与f10be3同类，仅为配置层面的调整"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制、同决策对象",
+        "共享state_identification、risk_budget、drawdown_response、recovery_policy、state_migration",
+        "都处理T+1、单票权重、现金约束下的缩减与状态迁移"
+      ],
+      "task_id": "TG-20261029-185000-a26d12",
+      "differences": [
+        "a26d12含participation_policy并以参与方式联动为主线，决策链恢复→参与→状态，候选不含参与政策",
+        "候选的恢复回指risk_budget与缩减顺延承接是f10be3闭环，而非a26d12的参与映射闭环"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制、同对象，均围绕预算档位下调、缩减可行性约束与分步恢复准入",
+        "都要求预算占用差额与残余敞口进入恢复判定"
+      ],
+      "task_id": "TG-20261105-042021-e6bb50",
+      "differences": [
+        "e6bb50以capital_allocation替代state_migration，并以证据等级去重及缩减回写证据读取口径为差异来源",
+        "候选保留state_migration并回指state_identification，不含capital_allocation与证据可信等级主线"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制、同对象，都处理多源风险证据、预算档位、缩减可行性与恢复准入",
+        "都含drawdown_response回写状态识别的依赖"
+      ],
+      "task_id": "TG-20261029-185515-8f94f2",
+      "differences": [
+        "8f94f2含participation_policy，核心是参与档位与预算档位两套状态交接",
+        "候选不含参与档位，核心仍是预算表达与恢复回指预算"
+      ]
+    },
+    {
+      "similarities": [
+        "同家族F04，都涉及档位、缩减与恢复"
+      ],
+      "task_id": "TG-20261029-185333-ed0ecc",
+      "differences": [
+        "决策对象为participation_controller，核心是参与方式逐档准入与退出",
+        "候选控制量为组合风险预算而非参与档位"
+      ]
+    },
+    {
+      "similarities": [
+        "同家族，均涉及降档待办清理与分步回升"
+      ],
+      "task_id": "TG-20261105-042307-e14bb5",
+      "differences": [
+        "对象为participation_controller，核心为参与档位与回撤档位双档位交接与switch_hysteresis",
+        "候选不含参与政策与迟滞，以预算刻度与恢复回指预算为控制量"
+      ]
+    },
+    {
+      "similarities": [
+        "同家族F04控制器类任务"
+      ],
+      "task_id": "TG-20261029-172300-e01b9a",
+      "differences": [
+        "机制为regime_participation_control，核心为状态切换迟滞与参与映射，风险预算只是末端",
+        "候选以回撤预算缩减与逐级恢复为核心"
+      ]
+    },
+    {
+      "similarities": [
+        "同有state_migration与T+1库存维护"
+      ],
+      "task_id": "TG-20261029-184647-ca78bb",
+      "differences": [
+        "机制为trend_pullback，对象为趋势回撤库存，核心为趋势资格、回撤定位、分批建仓与退出",
+        "不涉及组合预算表达与恢复准入"
+      ]
+    },
+    {
+      "similarities": [
+        "同有分批库存与退出、资金回压"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "机制为trend_pullback，对象为趋势回撤库存，以趋势资格与回撤定位为核心",
+        "候选为组合层面风险预算控制器"
+      ]
+    },
+    {
+      "similarities": [
+        "同家族，涉及资本预算回压与待办处置"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "机制为consolidation_breakout，对象为突破候选状态，核心为区间失效与突破未确认区分及再入场预算回压",
+        "候选为组合风险预算缩减与恢复，无突破与区间语义"
+      ]
+    }
+  ]
+}

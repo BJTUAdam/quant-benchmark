@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "release": "v2-integrated-task12-20261110",
+  "image_ids": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  },
+  "image_archive": {
+    "file": "images/finlab_images_v2.tar",
+    "sha256": "1a0db71c99073ba04f13fa1408ec07528bb18eea7355885c1dba8bd5826d22e7",
+    "bytes": 233158144
+  },
+  "source_toolkit_sha256": "2d739107ef106fcf70afc370fa899fc6028eddd027c1c3440ed8c14a881df09d",
+  "strategy_skill": {
+    "file": "finlab_strategy_skill.zip",
+    "sha256": "4479f52a780fda25cc0f4f8e2512c5947910d51651c80c0990c251ee3dc745ce",
+    "files": 319,
+    "standalone_archive_included": false,
+    "directory": "task_generator/skills/finlab-strategy"
+  },
+  "nested_source_toolkits": false,
+  "task_packages": {
+    "directory": "task_generator/task_packages/20261110",
+    "count": 12,
+    "index_sha256": "ef08f29d4be89ec1323782f97db613f870916c4a128b08ea3e06bb6942050a00",
+    "individual_archives": 12,
+    "expanded_packages": 12,
+    "patch_application_required": false
+  },
+  "fixes_merged": true,
+  "patch_application_required": false
+}

@@ -1,0 +1,311 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "回撤风险贡献分解、流动性受限减仓与恢复额度管理",
+  "family_id": "F04",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_STOCK_TRENDS",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "drawdown_risk_budget",
+  "decision_object": "portfolio_risk_controller",
+  "required_decisions": [
+    "state_identification",
+    "risk_budget",
+    "drawdown_response",
+    "liquidity_filter",
+    "turnover_budget",
+    "recovery_policy",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "state_identification",
+      "risk_budget"
+    ],
+    [
+      "risk_budget",
+      "drawdown_response"
+    ],
+    [
+      "liquidity_filter",
+      "drawdown_response"
+    ],
+    [
+      "drawdown_response",
+      "turnover_budget"
+    ],
+    [
+      "turnover_budget",
+      "recovery_policy"
+    ],
+    [
+      "recovery_policy",
+      "risk_budget"
+    ],
+    [
+      "drawdown_response",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "recovery_policy"
+    ]
+  ],
+  "maintenance_targets": [
+    "risk_recovery",
+    "signal_execution_gap",
+    "cost_sensitivity",
+    "state_compatibility"
+  ],
+  "research_question": "组合出现回撤时，如何区分风险集中于少数持仓与普遍恶化，决定按风险贡献、流动性或持仓比例分解减仓目标，并维护受T+1和交易限制影响的未完成减仓欠账？恢复额度必须同时考虑新的风险证据和旧减仓任务是否完成，不能仅因净值反弹就重开全部预算。 同一行情事件依次读取上次恢复授权、形成预算与减仓需求、核对实际执行结果、登记下次恢复授权，禁止在同刻循环重算。",
+  "research_modules": [
+    {
+      "decision_id": "state_identification",
+      "description": "仅使用已知账户、历史价格和当时持仓，研究组合回撤、波动与个股损益贡献集中度的联合证据。",
+      "interaction": "区分风险来源分散与集中后交给risk_budget；已卖出持仓的贡献与当前持仓敞口须分开，不把事后最低点当风险发生时点。"
+    },
+    {
+      "decision_id": "risk_budget",
+      "description": "先选择并记录一个仅用当前可见桥接数据、能够产生现货多头目标的可执行基础参与规则及其版本，作为被控组合；不提供最佳选股公式。再将风险证据映射为组合目标暴露、单标的风险上限与允许新增额度，明确高水位和风险观察窗口。跨段若改变基础规则，须记录并与风险控制改动分开解释。",
+      "interaction": "本次预算只读取上一已完成行情事件记录并核销的恢复授权，随后向drawdown_response生成减仓目标；当前事件的新恢复判定不得反向重算本次预算，也不能抹除尚未完成的减仓责任。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "根据已知成交容量、可卖数量和逐日交易限制描述各持仓可实现的减仓能力，缺失数据单独标记。",
+      "interaction": "向drawdown_response提供容量约束；可卖性差不代表风险更低，不能只卖容易成交的仓位后宣称目标风险已达成。"
+    },
+    {
+      "decision_id": "drawdown_response",
+      "description": "研究按损益贡献、当前敞口、流动性或组合规则分配减仓需求，并处理不可卖库存和受限委托。",
+      "interaction": "减仓需求传给turnover_budget形成执行优先级；目标减仓与已实现减仓分开存储，残余需求写入state_migration。"
+    },
+    {
+      "decision_id": "turnover_budget",
+      "description": "研究在减仓紧急程度、可成交容量和费用约束之间安排分批执行，同时明确风险退出与新增交易的预算关系。",
+      "interaction": "只用实际成交减少欠账；仍有未执行减仓时由recovery_policy决定能否恢复及最多恢复多少，不以挂单数量视作完成。"
+    },
+    {
+      "decision_id": "recovery_policy",
+      "description": "研究净值、风险集中度、实际暴露和减仓欠账何时共同满足恢复条件，选择整体恢复或按来源分步恢复。",
+      "interaction": "从state_migration读取减仓欠账和已用授权，先核对截至本次事件的实际成交，再根据本次证据登记至下一次已完成行情事件才生效的恢复授权；同一触发序号不重复授权，本次不再回调risk_budget求解。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "用JSON保存风险证据版本、目标暴露、各标的剩余减仓需求、订单占用、已用恢复额度和触发序号。",
+      "interaction": "跨段和改版时先对齐真实账户与存量订单，再让recovery_policy处理新增恢复；不能因参数变更删除旧欠账或重置组合高水位。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能出现风险由单一持仓向多标的扩散、流动性降低导致减仓迟迟未成，或反弹先于欠账完成。维护需要判断应改变风险归因、减仓分解、执行预算还是恢复授权，并解释这些改变对存量库存的影响。七段共享组合高水位及未完成减仓记录，不能重置后只统计恢复段表现。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内A股真实代码；该代码清单为待绑定的固定研究池，数据覆盖、可交易状态和费用尚未验收，不宣称具有全市场代表性。",
+      "通过任务桥接查询daily、adj_factor、stk_limit、trade_cal、index_daily；不提供行情data目录，不将真实采集范围、映射或原始缓存交给策略。",
+      "运营方须确认至少连续两年的实际覆盖、复权因子历史可见版本、现金分红和送转等公司行为、逐日价格限制、停牌与T+1规则；缺失行情不能直接视作停牌。",
+      "需要指数基准时由平台另行绑定实际指数代码及冻结index_daily；不交易指数。所有特征仅用当时已可见历史字段计算，未来收益LABEL不作为特征。",
+      "公开日期是虚拟事件标签，日期起止和七段边界均待数据绑定。运行预算由本人首次配置，题目不预填CPU、内存或时限。",
+      "来源卡只提供已核验的简介、目录或开源特征设计范围，本题为本轮模型形式化设计，不宣称摘录原书策略或具有盈利证明。",
+      "股票仅允许现货多头、新增买入和对实际可卖持仓减仓，不做融券卖空；指数只查询和作为基准，不下单。不得把卖出尚未成交所得提前计入现金。"
+    ]
+  },
+  "parameter_space": [
+    "被控基础多头参与规则的选择、目标组合生成及版本冻结方式",
+    "组合高水位、回撤和风险观察窗口口径",
+    "个股损益贡献与当前敞口的分解方法",
+    "风险贡献集中度及证据等级",
+    "组合和单标的预算映射方式",
+    "减仓目标在各持仓之间的分配准则",
+    "容量、涨跌停及可卖库存估计",
+    "风险减仓排序和分批执行时效",
+    "风险退出与新增交易额度之间的关系",
+    "未完成减仓欠账的结转和取消条件",
+    "恢复触发条件与证据确认长度",
+    "恢复时按标的或按组合额度发放方式",
+    "欠账尚存时的恢复上限",
+    "同一风险事件的去重键和恢复额度核销",
+    "维护版本迁移时高水位、欠账和订单的兼容规则"
+  ],
+  "novelty_claim": "相对S08及既有组合预算降档恢复题，本题把风险贡献分解、流动性受限时减仓目标如何分摊、实际未完成减仓如何约束恢复预算列为必需研究决策。执行欠账是控制对象，不把两个风险信号简单并列成双档位。其研究边界更具体，但与宽泛风险管理题仍可能存在包含关系，应按候选而非已证实独立母题交付。",
+  "lineage": {
+    "derived_from": [
+      "S08"
+    ],
+    "kind": "new_conversation_authored_candidate_pending_semantic_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  }
+}

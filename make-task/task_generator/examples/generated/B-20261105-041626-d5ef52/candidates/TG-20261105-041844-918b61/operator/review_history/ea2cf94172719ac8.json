@@ -1,0 +1,128 @@
+{
+  "validation_errors": [
+    "closest_task_id必须指向真实对照题"
+  ],
+  "closest_task_id": "TG-20261029-185024-c3f04e",
+  "spec_hash": "a814457c9689001193b83afc6c664c7b9a668dfc8a7574025e92814e39a52a70",
+  "reviewed_at": "2026-11-05T04:28:57+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "核心问题与已有term_curve_rotation/term_curve_pair_selection任务（如TG-20261029-185024-c3f04e）语义等价，新增curve_signal仅为旧题宽泛允许的多月份选腿方法的具体化，不构成实质独立研究决策",
+    "research_modules中entry_exit的interaction提及margin_budget，但required_decisions未列margin_budget且决策依赖链无其位置，模块与决策词表不一致"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "2e9cd61f167344c5bd576bb2011c726c82f9db8b6aba42acc33fa19ae2f900b8",
+  "content_hash": "0d9d865ad027302115884150155fd24b23ef3539abab2fa27733d90f697913c6",
+  "rationale": "候选与最近的F06任务同属同品种不同到期月份配对，维护目标集合一致；其差异主要是在pair_selection前增设curve_signal，使配对排序由多月份曲线斜率/形态决定。但catalog中term_curve_rotation机制即定义为“同品种多月份曲线斜率与动态配对”，且候选novelty_claim自承derived_from含TG-20261029-172301-684a8d，并声明若退化为在684a8d上仅增加斜率过滤则为变体。比较可见，tenor_normalization、pair_selection、entry_exit、roll_policy、state_migration的职责与d4e28b/a83ad1高度重叠，curve_signal只是把旧题宽泛允许的“多月份选腿”细化为一种排序规则，未改变核心问题（同品种期限配对与移仓维护）及决策语义；相对于c3f04e系列（term_curve_rotation/term_curve_pair_selection），候选的机制与对象完全一致，属同一核心问题的再次表述。故判duplicate。",
+  "pending_bindings": [
+    "正式起止、dataset_id与边界均为null，binding_status=not_bound",
+    "FG/M多月份真实分合约数据覆盖待绑定确认",
+    "乘数、保证金率、费用、夜盘交易日与到期规则待绑定",
+    "runtime_profile.resources=null、resource_status=requires_human_setup，需本人运行finlab setup配置",
+    "评分配置待管线绑定"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F06同品种不同到期月份配对，维护目标均为curve_stability、expiry_roll、margin_exposure、state_compatibility",
+        "均需tenor_normalization、pair_selection、entry_exit、roll_policy、state_migration的联合维护"
+      ],
+      "task_id": "TG-20261029-172301-684a8d",
+      "differences": [
+        "候选以多月份曲线斜率/形态信号驱动配对并新增curve_signal必需决策，684a8d以近远月价差为配对核心、无curve_signal",
+        "候选的state_migration回指curve_signal，684a8d的迁移不回指信号生成"
+      ]
+    },
+    {
+      "similarities": [
+        "同品种多月份期限可比化与真实整数手数配对",
+        "均需tenor_normalization、pair_selection、entry_exit、roll_policy、state_migration",
+        "均处理乘数、价格刻度与整数手数导致的配对约束"
+      ],
+      "task_id": "TG-20261029-185226-a83ad1",
+      "differences": [
+        "a83ad1明确不以曲线斜率信号为配对依据，pair_selection由期限单位与手数配对驱动；候选将curve_signal设为配对排序的必需输入",
+        "a83ad1含margin_budget决策，候选未列margin_budget为必需决策"
+      ]
+    },
+    {
+      "similarities": [
+        "同品种多月份选择实际参与月份对，tenor_normalization→选择→entry_exit→roll→state_migration的链条",
+        "均要求迁移时处置已确认期限口径版本与未完成换腿"
+      ],
+      "task_id": "TG-20261029-185356-d4e28b",
+      "differences": [
+        "d4e28b用month_selection承担多月份选腿且不含curve_signal，候选用curve_signal驱动pair_selection",
+        "候选将曲线形态变化作为配对动态变化的触发，d4e28b仅以可比表达与换腿时点为目的"
+      ]
+    },
+    {
+      "similarities": [
+        "同品种跨期配对、期限口径、配对重选与到期迁移的联合维护",
+        "均强调状态迁移承接口径版本与未完成换腿"
+      ],
+      "task_id": "TG-20261029-185538-ab9792",
+      "differences": [
+        "ab9792以relationship_monitoring为回指配对选择的枢纽，据流动性衰减判定关系可信度并缩减/暂停；候选以curve_signal为配对排序输入",
+        "ab9792含margin_budget且预算随可信度调整，候选未列margin_budget"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及B/M/Y等品种与多腿真实手数执行"
+      ],
+      "task_id": "HT03",
+      "differences": [
+        "HT03为crush_component_aggregation跨品种加工链条与分项信号汇总，候选为同品种不同月份期限曲线，不涉及加工系数"
+      ]
+    },
+    {
+      "similarities": [
+        "均关注价差关系监控与移仓"
+      ],
+      "task_id": "HT05",
+      "differences": [
+        "HT05为FG/SA跨品种统计对冲，候选两腿来自同一品种不同月份，不涉及跨品种对冲估计"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及多腿真实合约与保证金维护"
+      ],
+      "task_id": "HT04",
+      "differences": [
+        "HT04为SC/FU/LU油品跨品种相对价值，候选为同品种期限结构曲线"
+      ]
+    },
+    {
+      "similarities": [
+        "均含关系监控与状态迁移的闭环边"
+      ],
+      "task_id": "TG-20261029-172301-36425d",
+      "differences": [
+        "36425d为FU/LU跨品种残差与滚动对冲，候选为同品种期限曲线斜率配对，决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "均将关系失效/形态变化回指重估或重选"
+      ],
+      "task_id": "TG-20261105-041820-c67182",
+      "differences": [
+        "该题为cross_product_residual跨品种对冲比例重估，候选为同品种term_curve_rotation，标的与决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "均维护真实腿库存与跨段迁移"
+      ],
+      "task_id": "TG-20261105-042048-66d9a5",
+      "differences": [
+        "该题为B/M/Y加工链条分项信号冲突裁决，候选为同品种多月份期限曲线信号，机制与决策对象不同"
+      ]
+    }
+  ]
+}

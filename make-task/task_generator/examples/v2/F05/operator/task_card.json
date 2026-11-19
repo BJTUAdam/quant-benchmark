@@ -1,0 +1,264 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "FU/LU相对关系的滚动对冲和暂停重估",
+  "family_id": "F05",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "cross_product_residual",
+  "decision_object": "cross_product_leg_portfolio",
+  "required_decisions": [
+    "month_selection",
+    "hedge_estimation",
+    "entry_exit",
+    "relationship_monitoring",
+    "margin_budget",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "month_selection",
+      "hedge_estimation"
+    ],
+    [
+      "hedge_estimation",
+      "entry_exit"
+    ],
+    [
+      "entry_exit",
+      "relationship_monitoring"
+    ],
+    [
+      "relationship_monitoring",
+      "margin_budget"
+    ],
+    [
+      "margin_budget",
+      "state_migration"
+    ]
+  ],
+  "maintenance_targets": [
+    "hedge_drift",
+    "margin_exposure",
+    "expiry_roll",
+    "state_compatibility"
+  ],
+  "research_question": "FU/LU关系变化时如何重估对冲、暂停参与并迁移实际双腿头寸？",
+  "research_modules": [
+    {
+      "decision_id": "month_selection",
+      "description": "研究FU/LU月份匹配与共同可交易条件。",
+      "interaction": "月份选择改变对冲关系和移仓成本。"
+    },
+    {
+      "decision_id": "hedge_estimation",
+      "description": "仅用历史估计滚动对冲关系并转成整数手数。",
+      "interaction": "残差信号和真实腿名义敞口不能混用。"
+    },
+    {
+      "decision_id": "entry_exit",
+      "description": "研究残差参与、退出、止损和时间限制。",
+      "interaction": "信号变化需落实为真实腿目标，不能买卖负价差本身。"
+    },
+    {
+      "decision_id": "relationship_monitoring",
+      "description": "研究何时判定关系失效、暂停和重估。",
+      "interaction": "重估改变对冲比例，必须明确处置旧腿。"
+    },
+    {
+      "decision_id": "margin_budget",
+      "description": "按乘数、费用和保证金计算组合手数。",
+      "interaction": "预算、逐腿部分成交和残余敞口会改变信号实际实现。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "关系版本更新和换月时处理旧仓及memory。",
+      "interaction": "只有未来决策采用新定义，过去正式结果不可重写。"
+    }
+  ],
+  "maintenance_rationale": "对冲关系、残差尺度和月份流动性可能改变；维护需要同时修订估计和迁移真实头寸。现有数据结算/规则质量及新格式适配仍未验收。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "FU",
+      "LU"
+    ],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "2022—2025为申请整理范围，尚未确认已持有；若不足需报告实际覆盖，不能编造补齐。",
+      "至少2年只是数据需求底线；有效交易日/多月份重叠和足够研发、逐段维护样本均待盘点。",
+      "分段边界需数据盘点后冻结；未完成数据或执行器验收。"
+    ]
+  },
+  "parameter_space": [
+    {
+      "name": "hedge_model",
+      "type": "choice",
+      "options": [
+        "fixed_interpretable",
+        "rolling_regression",
+        "robust_rolling"
+      ],
+      "description": "模型选择和估计方法可研究，不调整合约规格。"
+    },
+    {
+      "name": "relationship_lifecycle",
+      "type": "structured",
+      "description": "暂停、重估、恢复、整数手数与旧仓过渡联合研究。"
+    }
+  ],
+  "novelty_claim": "HT04明确允许FU/LU双腿及滚动对冲，本候选只是聚焦暂停/重估的改编，不能计为已确认独立新题；人工可能直接归并HT04。",
+  "lineage": {
+    "derived_from": [
+      "S09",
+      "HT04"
+    ],
+    "kind": "focused_adaptation_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "FU",
+      "LU"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "sample_id": "EX05",
+  "seed_id": "S09",
+  "status": "pending_human_review",
+  "provenance": {
+    "authoring": "assistant_curated_example",
+    "api_called": false,
+    "data_supplied": false,
+    "runtime_verified": false,
+    "human_approved": false
+  },
+  "validation_notes": [
+    "内置示例，由当前助手整理，未调用配置的模型API，未获得人工批准。",
+    "六个方向候选不等于六个独立任务；相似项可能合并或退回。",
+    "原生v2接口规格，尚未绑定真实数据、交易规则、本人资源预算或正式分段。"
+  ],
+  "production_state": {
+    "id": "TG-20261104-210716-3e3231",
+    "batch_id": "B-20261104-210715-33960d",
+    "status": "pending_automatic_review",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "version": 0,
+    "provenance": "curated_example",
+    "model_review_status": "not_run",
+    "created_at": "2026-11-04T21:07:16+00:00",
+    "historical_state": "pending_human_review"
+  }
+}

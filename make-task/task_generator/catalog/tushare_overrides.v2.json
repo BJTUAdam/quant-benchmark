@@ -1,0 +1,232 @@
+{
+  "cn_gdp": {
+    "params": {"q": "quarter"},
+    "fields": {"quarter": "quarter"},
+    "query_time_rules": {"q": {"role": "select", "target": "quarter"}}
+  },
+  "etf_mins": {
+    "fields": {
+      "trade_time": "datetime"
+    },
+    "params": {
+      "start_date": "datetime",
+      "end_date": "datetime"
+    }
+  },
+  "ft_mins": {
+    "fields": {
+      "trade_time": "datetime"
+    },
+    "params": {
+      "start_date": "datetime",
+      "end_date": "datetime"
+    }
+  },
+  "hk_mins": {
+    "fields": {
+      "trade_time": "datetime"
+    },
+    "params": {
+      "start_date": "datetime",
+      "end_date": "datetime"
+    }
+  },
+  "idx_mins": {
+    "fields": {
+      "trade_time": "datetime"
+    },
+    "params": {
+      "start_date": "datetime",
+      "end_date": "datetime"
+    }
+  },
+  "opt_mins": {
+    "fields": {
+      "trade_time": "datetime"
+    },
+    "params": {
+      "start_date": "datetime",
+      "end_date": "datetime"
+    }
+  },
+  "stk_mins": {
+    "fields": {
+      "trade_time": "datetime"
+    },
+    "params": {
+      "start_date": "datetime",
+      "end_date": "datetime"
+    }
+  },
+  "sw_mins": {
+    "fields": {
+      "trade_time": "datetime"
+    },
+    "params": {
+      "start_date": "datetime",
+      "end_date": "datetime"
+    }
+  },
+  "fut_basic": {
+    "fields": {
+      "d_month": "month",
+      "last_ddate": "date",
+      "trade_time_desc": "text"
+    }
+  },
+  "anns_d": {
+    "fields": {
+      "rec_time": "temporal"
+    }
+  },
+  "bc_otcqt": {
+    "fields": {
+      "qt_time": "temporal"
+    }
+  },
+  "dc_hot": {
+    "fields": {
+      "rank_time": "temporal"
+    }
+  },
+  "eco_cal": {
+    "fields": {
+      "time": "temporal"
+    }
+  },
+  "fx_obasic": {
+    "fields": {
+      "break_time": "temporal"
+    }
+  },
+  "irm_qa_sh": {
+    "fields": {
+      "pub_time": "temporal"
+    }
+  },
+  "irm_qa_sz": {
+    "fields": {
+      "pub_time": "temporal"
+    }
+  },
+  "kpl_list": {
+    "fields": {
+      "lu_time": "temporal",
+      "ld_time": "temporal",
+      "open_time": "temporal",
+      "last_time": "temporal"
+    }
+  },
+  "limit_list_d": {
+    "fields": {
+      "first_time": "temporal",
+      "last_time": "temporal"
+    }
+  },
+  "limit_list_ths": {
+    "fields": {
+      "first_lu_time": "temporal",
+      "last_lu_time": "temporal",
+      "first_ld_time": "temporal",
+      "last_ld_time": "temporal"
+    }
+  },
+  "major_news": {
+    "fields": {
+      "pub_time": "temporal"
+    }
+  },
+  "p_get": {
+    "fields": {
+      "create_time": "temporal",
+      "update_time": "temporal"
+    }
+  },
+  "p_list": {
+    "fields": {
+      "create_time": "temporal",
+      "update_time": "temporal"
+    }
+  },
+  "p_save": {
+    "fields": {
+      "create_time": "temporal",
+      "update_time": "temporal"
+    }
+  },
+  "report_rc": {
+    "fields": {
+      "create_time": "temporal"
+    }
+  },
+  "rt_etf_k": {
+    "fields": {
+      "trade_time": "temporal"
+    }
+  },
+  "rt_etf_min": {
+    "fields": {
+      "time": "temporal"
+    }
+  },
+  "rt_etf_min_daily": {
+    "fields": {
+      "time": "temporal"
+    }
+  },
+  "rt_etf_sz_iopv": {
+    "fields": {
+      "trade_time": "temporal"
+    }
+  },
+  "rt_fut_min": {
+    "fields": {
+      "time": "temporal"
+    }
+  },
+  "rt_idx_k": {
+    "fields": {
+      "trade_time": "temporal"
+    }
+  },
+  "rt_idx_min": {
+    "fields": {
+      "time": "temporal"
+    }
+  },
+  "rt_k": {
+    "fields": {
+      "trade_time": "temporal"
+    }
+  },
+  "rt_min": {
+    "fields": {
+      "time": "temporal"
+    }
+  },
+  "rt_min_daily": {
+    "fields": {
+      "time": "temporal"
+    }
+  },
+  "rt_sw_k": {
+    "fields": {
+      "trade_time": "temporal"
+    }
+  },
+  "sge_basic": {
+    "fields": {
+      "trade_time": "temporal"
+    }
+  },
+  "stk_nineturn": {
+    "params": {
+      "trade_date": "temporal"
+    }
+  },
+  "ths_hot": {
+    "fields": {
+      "rank_time": "temporal"
+    }
+  }
+}

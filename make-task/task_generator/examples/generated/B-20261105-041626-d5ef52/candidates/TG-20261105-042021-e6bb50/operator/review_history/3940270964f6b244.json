@@ -1,0 +1,133 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-185515-8f94f2",
+  "spec_hash": "71e00e94753232cc5c68797f790434634fb8fcf29b415ed1bb99cc562e6820f2",
+  "reviewed_at": "2026-11-05T04:26:09+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "核心问题与 TG-20261029-185515-8f94f2 高度重合，仅以 capital_allocation 替换 participation_policy 并重排回指边，未产生新的必需研究决策，novelty_claim 的差异化主张缺乏事实支撑"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "c2e0eca1cf1018aba78e59bc1441e2786c8fcd1140dc329048f3e0165b773b2e",
+  "content_hash": "81e296f2ca9f728852f10675c261c870e7e16292fb4f9567cd9edba820d18260",
+  "rationale": "候选与 TG-20261029-185515-8f94f2 在核心问题、研究问题和必需执行语义上逐句对应：多源风险证据合并与去重、预算档位映射、缩减触发时按 T+1/权重上限/现金约束决定下调档位与失效待办、缩减后占用改变下一段证据读取口径、恢复准入读取调整后占用而非被覆盖前的记忆。候选把 8f94f2 的 participation_policy 替换为 capital_allocation 并让后者回指 state_identification，但资金分配对证据读取口径与预算可达性的回压已被 8f94f2 的‘参与方式改变下一段风险证据读取口径’和‘缩减后占用反馈’宽泛覆盖，属于替换模块名称与回指对象，未产生新的必需研究决策。对 f10be3 而言，候选增加占用回写边、删除 state_migration、显式化证据等级，均属在旧题宽泛允许范围内的细化与依赖重排；f10be3 已要求预算占用与目标差额在恢复中被识别并回退，已覆盖缩减结果回压恢复的语义。因此判 duplicate，最接近为 8f94f2。novelty_claim 中‘以 capital_allocation 替代 participation_policy 即构成实质研究决策变化’缺乏事实支撑，其自述已承认若退化为仅调整档位或阈值应视为变体，而实际差异也正是模块替换与回指边重排。未发现未来信息泄露或答案实现：任务目标、公开接口、成本与评分方法本身不属答案，虚拟日期仅表顺序。长程维护有实质分段反馈、状态连续与可持续维护决策，不属单次固定指标。",
+  "pending_bindings": [
+    "股票池真实代码与 symbols 待绑定",
+    "真实冻结数据版本与分段边界未确定",
+    "T+1 规则、交易单位、涨跌停、费用与公司行为须在绑定时确认",
+    "评分细则与评分配置待管线绑定",
+    "resources=null 与 resource_status=requires_human_setup，运行资源须由本人运行 finlab setup 配置",
+    "运行难度与行为表现未实测"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为 drawdown_risk_budget / portfolio_risk_controller",
+        "均含 state_identification、risk_budget、drawdown_response、recovery_policy 四个核心决策及相同主干依赖链",
+        "均研究预算档位表达选择（名义暴露上限、现金留存、单票集中度）与缩减执行的可成交约束",
+        "均要求分步恢复与跨段现金、持仓、未成交订单、memory 连续"
+      ],
+      "task_id": "TG-20261029-185155-f10be3",
+      "differences": [
+        "候选把第五个决策由 state_migration 换成 capital_allocation，并用 capital_allocation 回指 state_identification 与 risk_budget，但 f10be3 的 risk_budget 与 recovery_policy 双向链已在原题宽泛允许范围内覆盖了‘缩减后剩余占用回压恢复与预算’的语义，仅增加一条占用回写边属于细化旧允许解法",
+        "候选删除 state_migration，但旧题 state_migration 只承担跨段持久化，其职责在候选的 maintenance_rationale 与状态连续要求中同样被要求，未形成新的研究决策",
+        "证据等级与去重表述在候选更显式，但 f10be3 已要求‘预算占用与目标预算的差额如何被识别并回退’，属于同义细化"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F04 组合风险控制器，核心机制 drawdown_risk_budget",
+        "均含回撤触发、缩减执行、恢复准入与未成交待办清理",
+        "均要求 T+1 不可卖库存、单票权重上限与现金不足下的处置顺序"
+      ],
+      "task_id": "TG-20261029-185000-a26d12",
+      "differences": [
+        "a26d12 额外含 participation_policy 与 state_migration，候选以 capital_allocation 替代参与政策；但候选并不研究参与方式映射，主要研究预算档位与恢复，实质决策重心仍落在旧题主干上",
+        "候选的‘缩减结果回写证据读取口径’对应 a26d12 中 participation_policy 回指 state_identification 的闭环，只是把回指对象换成预算占用，属于等价闭环的改写"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 drawdown_risk_budget / portfolio_risk_controller",
+        "研究问题几乎逐句对应：多源风险证据合并去重、预算档位映射、缩减触发时按 T+1/权重上限/现金约束决定下调档位与失效待办、缩减后占用改变下一段证据读取口径、恢复准入读取调整后占用",
+        "均不含 participation_policy，均把 drawdown_response 直接回写 state_identification",
+        "parameter_space 与 maintenance_targets 高度重合（risk_recovery、state_compatibility、signal_execution_gap）"
+      ],
+      "task_id": "TG-20261029-185515-8f94f2",
+      "differences": [
+        "8f94f2 以 participation_policy 作为第五决策并使其回指 state_identification；候选以 capital_allocation 替代，但候选并未提出与参与方式不同的研究问题，capital_allocation 的分配与碎片反馈在 8f94f2 的‘参与方式改变下一段风险证据读取口径’与‘缩减后占用’中已被宽泛覆盖",
+        "候选 novelty_claim 自述与 8f94f2 差异在于‘不含参与方式、改为资金分配闭环’，但资金分配对证据口径的回压与 8f94f2 的占用反馈闭环在决策语义上等价，仅替换了回指模块名称，未构成新的必需研究决策",
+        "候选的证据可信等级措辞更显式，但 8f94f2 的‘各证据优先与去重关系’已包含同一要求"
+      ]
+    },
+    {
+      "similarities": [
+        "同属 F04 控制器研究，均含回撤响应、恢复策略与待办清理",
+        "均要求分步回升与档位语义"
+      ],
+      "task_id": "TG-20261029-185333-ed0ecc",
+      "differences": [
+        "ed0ecc 机制为 regime_participation_control、对象为 participation_controller，以参与档位为一等状态，候选以组合预算档位与证据等级为核心，决策对象不同",
+        "ed0ecc 以档位进出证据门槛与待办失效集合为主，不要求风险预算表达选择；候选的预算档位表达与恢复准入是其主干，与 ed0ecc 的研究取舍不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同属 F04，均涉及证据分级、降档待办清理与分步回升",
+        "均要求避免同一回撤被重复计档"
+      ],
+      "task_id": "TG-20261105-042307-e14bb5",
+      "differences": [
+        "e14bb5 机制为 regime_participation_control、对象为 participation_controller，含 switch_hysteresis 与 state_migration，研究双档位交接与冲突优先级；候选为 portfolio_risk_controller 的预算档位表达，不含参与档位与迟滞，决策重心不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同属 F04 控制器家族，均含状态识别与风险预算"
+      ],
+      "task_id": "TG-20261029-172300-e01b9a",
+      "differences": [
+        "e01b9a 机制为 regime_participation_control、对象为 participation_controller，以切换迟滞与参与方式映射为核心，不研究预算表达选择、缩减执行与恢复的独立决策；候选不研究参与方式与迟滞，决策对象与核心问题不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同属 F04 附近的风险恢复与资金分配维护主题，均要求预算回压与跨段连续"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "8868c8 机制为 trend_pullback、对象为 trend_pullback_inventory，研究趋势资格、回撤定位与分批库存；候选研究组合预算档位与恢复准入，决策对象与触发机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及失败证据合并、预算回压与跨段维护"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "7e6569 机制为 consolidation_breakout、对象为 breakout_position_state，研究区间突破确认缺失与再入场；候选研究组合风险预算与恢复，决策对象与核心机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "均含预算回压与跨段连续，均涉及库存处置"
+      ],
+      "task_id": "TG-20261105-041906-253472",
+      "differences": [
+        "253472 机制为 trend_pullback、对象为 trend_pullback_inventory，期货单品种趋势回撤分批库存；候选为股票 ETF 组合风险控制器，决策对象与机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及风险恢复与预算缩减"
+      ],
+      "task_id": "TG-20261029-184839-b184fc",
+      "differences": [
+        "b184fc 机制为 consolidation_breakout、对象为 breakout_position_state，含 switch_hysteresis 与再入场；候选不研究区间突破与迟滞，决策对象不同"
+      ]
+    }
+  ]
+}

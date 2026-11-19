@@ -1,0 +1,616 @@
+{
+  "checked_at": "2026-11-05T04:41:31+00:00",
+  "warnings": [
+    "仅完成规格检查：数据可得性、长程实际难度及管线执行均未验证"
+  ],
+  "spec_hash": "55767b14f3b381797a5d75cc3c71df0310ba245d0d5546ba5f281c78e2ea89e8",
+  "passed": true,
+  "context_hash": "1506f385a1c3ad20251f913df12b4ef3560404f3e51eb64a672d62e2aa145a84",
+  "errors": [],
+  "content_hash": "5dd585f682a8db2d5675e47ef8322eaec8b661ead7b6fb91e1c64ff64d3f88d4",
+  "scope": "specification_only",
+  "dedup": {
+    "exact_matches": [],
+    "guarantee": "仅保证规范结构唯一；语义独立性仍需模型与人工复核",
+    "fingerprint": "88702a22ee4f291ed581e34be68c94200a14c2aed1f5dd532ce95a80ae140d50",
+    "classification": "needs_semantic_review",
+    "nearest": [
+      {
+        "task_id": "TG-20261105-042202-a4ef6a",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 1.0,
+        "spec": {
+          "decision_object": "shock_event_inventory",
+          "core_mechanism": "shock_path_reversion",
+          "title": "单品种真实分合约的放量冲击恢复路径与隔日库存：冲击定位、回摆与延续辨识、T+1库存处置及失效后停用恢复",
+          "novelty_claim": "与existing_tasks逐项对比：HT02为oversold_rebound / oversold_stock_portfolio，以参考水平与偏离度做单股超跌反弹并管理分批库存，不涉及区间有效期、异常价量冲击事件与恢复路径判定；本任务不选横截面股票组合。TG-20261029-184905-a288f9同为shock_path_reversion / shock_event_inventory，其必需决策为冲击识别、恢复路径、确认、隔夜库存、退出政策，交易对象为股票日线单标的；本任务不沿用统一退出政策，而以failure_exit 承担失效处置并回写 shock_detection 与 range_detection，同时交易对象为单个商品期货品种的真实分合约，需处理有符号整数手数、逐腿部分成交、残余敞口、结算与换月，这使隔日库存与失效清退的可执行性成为实质取舍。TG-20261105-041931-972c77已被判为与 a288f9 重复，本任务与其差异在于：区间检测不只作为冲击位置背景，而是与失效回写共同承担区间有效期重建的责任，且失效清退的结果直接改变后续事件识别门槛与区间版本，而非仅重排依赖边。与TG-20261029-172300-7af535及TG-20261029-184707-5e00a9（range_boundary_reversion / range_position_lifecycle）相比，本任务不含趋势否决与再入场决策，机制与决策对象不同。不声称已获数据、已运行或已实证有效；若实现退化为在 a288f9 上仅更换冲击指标或阈值，应视为该任务变体而非独立新题。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+          "family_id": "F02",
+          "lineage": {
+            "derived_from": [
+              "S04",
+              "HT02",
+              "SRC_CHAN",
+              "SRC_PROJECT_PLAN"
+            ],
+            "kind": "futures_contract_shock_path_and_overnight_inventory_pending_review"
+          },
+          "research_question": "在单个国内商品期货品种的真实分合约日线上，仅使用已完成交易日收盘后可见的分合约日线字段：如何先在已完成数据上界定当前有效区间与有效期，把发生在区间边缘的异常价量冲击与普通波动区分开；冲击后如何判定恢复路径处于回摆、延续还是未决，并据此决定是否等待确认后才参与；参与后无法当日平掉的隔夜库存与已挂未成交换腿如何处置，当冲击路径被证伪时如何定义机制失效、清退库存、暂停事件识别并在冷却后恢复，同时让区间边界与参考水平随合约切换和结构漂移持续更新，使跨段持仓、未完成订单与记忆连续可核？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "shock_detection"
+            ],
+            [
+              "shock_detection",
+              "recovery_path"
+            ],
+            [
+              "recovery_path",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "overnight_inventory"
+            ],
+            [
+              "overnight_inventory",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "shock_detection"
+            ],
+            [
+              "failure_exit",
+              "range_detection"
+            ],
+            [
+              "shock_detection",
+              "entry_confirmation"
+            ]
+          ],
+          "maintenance_targets": [
+            "reference_drift",
+            "reversion_failure",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "shock_detection",
+            "recovery_path",
+            "entry_confirmation",
+            "overnight_inventory",
+            "failure_exit"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-184905-a288f9",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.6923,
+        "spec": {
+          "decision_object": "shock_event_inventory",
+          "core_mechanism": "shock_path_reversion",
+          "title": "放量冲击后的恢复路径与隔日库存维护",
+          "novelty_claim": "与最近待审候选 TG-20261029-172300-7af535（区间边缘回归）及历史 HT02（超跌反弹）相比，本任务的核心决策对象是冲击事件后的恢复路径与隔日库存，必须解决冲击识别、路径状态判定、入场确认与T+1库存约束的相互依赖，而非区间边界回归或一般超跌反弹。与 S03 不同，不以区间有效期和趋势否决为必需决策；与 S04 种子一致但需实际实现验证。本任务沿用既有机制与决策词表，未引入新ID；若实现退化为仅更换偏离指标或阈值，应视为已有题目的变体。",
+          "family_id": "F02",
+          "lineage": {
+            "derived_from": [
+              "S04",
+              "HT02"
+            ],
+            "kind": "seed_refinement_pending_review"
+          },
+          "research_question": "在国内股票日线教学中，能否仅用当时可见的价量数据识别异常冲击事件，区分冲击后的回摆与延续，并据此决定是否入场、何时入场，同时处理T+1隔日库存约束与退出条件？",
+          "decision_dependencies": [
+            [
+              "shock_detection",
+              "recovery_path"
+            ],
+            [
+              "recovery_path",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "overnight_inventory"
+            ],
+            [
+              "overnight_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "shock_detection"
+            ]
+          ],
+          "maintenance_targets": [
+            "reversion_failure",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "shock_detection",
+            "recovery_path",
+            "entry_confirmation",
+            "overnight_inventory",
+            "exit_policy"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-172300-ca5a47",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.2941,
+        "spec": {
+          "decision_object": "breakout_position_state",
+          "core_mechanism": "consolidation_breakout",
+          "title": "整理区间突破后的跟踪、失败退出与再入场",
+          "novelty_claim": "从宽泛趋势题聚焦到区间→确认→失败→重入生命周期，但HT01已允许这些方向，不能声称已证实独立；待人工语义审，可能归并为HT01扩展。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "如何使区间识别、突破确认、失败处置与再次参与形成可维护的状态流程？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-041643-7e6569",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 0.2778,
+        "spec": {
+          "decision_object": "breakout_position_state",
+          "core_mechanism": "consolidation_breakout",
+          "title": "整理区间突破后的确认缺失处置：区间失效与突破未确认的区分、失败退出与再入场预算回压",
+          "novelty_claim": "与 existing_tasks 中最近的 TG-20261029-172300-ca5a47（同为 consolidation_breakout / breakout_position_state，必需决策为区间识别、突破确认、失败退出、再入场、资金分配）相比：该候选把失败处置当作单一入口，突破确认到失败退出为单向链，资金分配只位于链末端承担分配，不反向影响区间识别与确认宽度。本任务的实际研究取舍是 failure_exit 同时接收“区间结构失效”与“突破未确认”两路证据并须给出优先级与去重规则，且 capital_allocation 回指 entry_confirmation 与 range_detection，使预算缩减直接改变确认等待宽度与可接受区间宽度；维护目标也由 signal_execution_gap 主导扩展为加入 risk_recovery 与 structure_validity 的双重检验。与 TG-20261029-184839-b184fc 相比，该候选以 state_identification 与 switch_hysteresis 作为差异来源，本任务不含状态辨识与切换迟滞，差异来自失效证据合并与预算回压而非参与控制。与历史 HT01 宽泛短周期趋势相比，本任务不以宽泛突破跟踪为目标，而聚焦区间→确认→两路失效→冷却→预算回压的闭环。沿用既有机制、对象与决策词表，未引入新 ID，未声称已获数据、已运行或已实证有效；若实现退化为在 ca5a47 上仅增加一个撤销挂单步骤或调整阈值，应视为该候选的变体而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01",
+              "TG-20261029-172300-ca5a47",
+              "TG-20261029-184839-b184fc"
+            ],
+            "kind": "failure_evidence_merge_and_budget_feedback_pending_review"
+          },
+          "research_question": "在国内股票或ETF日线环境中，仅用当时已收盘数据界定整理区间并给出突破信号；当突破后价格未能完成确认、又退回区间内部时，如何把“区间本身被证伪（结构失效）”与“区间仍有效但突破未获确认”两路证据区分并去重，转化为对已有候选持仓的退出与对已挂未成交单的撤销，而不是把两种情况都当成普通止损；退出与撤销造成的预算缩减与现金碎片，又如何反过来收窄下一段区间识别的有效边界与突破确认的等待宽度，使整个状态生命周期在跨段维护中连续可核？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "failure_exit"
+            ],
+            [
+              "range_detection",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "entry_confirmation"
+            ],
+            [
+              "capital_allocation",
+              "range_detection"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-184707-5e00a9",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.25,
+        "spec": {
+          "decision_object": "range_position_lifecycle",
+          "core_mechanism": "range_boundary_reversion",
+          "title": "商品区间边缘回归：多品种区间有效期、趋势否决与再入场维护",
+          "novelty_claim": "与 nearest 待审候选 TG-20261029-172300-7af535（同为 range_boundary_reversion、同一决策对象）及历史 HT02 相比，本任务的实际差异在于：作用对象从单一股池的区间边缘转为多品种真实分合约组合，必须处理合约月份选择导致区间边界与参考水平的重建或迁移，这使区间判定与参考漂移的维护压力实质不同；同时把资金分配明确纳入必需决策，并要求趋势否决与退出政策共享失效触发源时的优先级与去重，而7af535与HT02均以单标的头寸生命周期为主、未包含多品种预算再分配。本任务沿用区间回归母题与既有决策词表，未引入新机制ID；若实际实现退化为仅改阈值或窗口的变体，应视为7af535的扩展而非独立新题，人工审可据此归并。",
+          "family_id": "F02",
+          "lineage": {
+            "derived_from": [
+              "S03",
+              "HT02",
+              "TG-20261029-172300-7af535"
+            ],
+            "kind": "multi_instrument_extension_pending_review"
+          },
+          "research_question": "在多个国内商品期货品种上，如何用仅当时可见的分合约日线界定区间边界与有效期，估计可更新的参考水平和偏离尺度，并在结构转为趋势时否决逆势参与；被否决或止损后如何冷却、恢复与再入场，同时与真实合约月份、保证金和跨段持仓状态相容？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "reference_estimation"
+            ],
+            [
+              "reference_estimation",
+              "deviation_measurement"
+            ],
+            [
+              "deviation_measurement",
+              "trend_veto"
+            ],
+            [
+              "trend_veto",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ],
+            [
+              "range_detection",
+              "deviation_measurement"
+            ]
+          ],
+          "maintenance_targets": [
+            "reference_drift",
+            "reversion_failure",
+            "state_compatibility",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "reference_estimation",
+            "deviation_measurement",
+            "trend_veto",
+            "exit_policy",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "HT01",
+        "exact_structure": false,
+        "status": "historical_package_unrevalidated",
+        "score": 0.2222,
+        "spec": {
+          "decision_object": "stock_trend_portfolio",
+          "core_mechanism": "short_horizon_trend",
+          "title": "45股短周期趋势追踪",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "从突破和趋势入手管理数日持仓并持续维护。",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "entry_confirmation",
+            "exit_policy",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "HT02",
+        "exact_structure": false,
+        "status": "historical_package_unrevalidated",
+        "score": 0.2105,
+        "spec": {
+          "decision_object": "oversold_stock_portfolio",
+          "core_mechanism": "oversold_rebound",
+          "title": "45股短周期超跌反转",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F02",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "研究短期超跌后的反弹机会及T+1退出。",
+          "decision_dependencies": [
+            [
+              "reference_estimation",
+              "deviation_measurement"
+            ],
+            [
+              "deviation_measurement",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "capital_allocation"
+            ]
+          ],
+          "maintenance_targets": [
+            "reference_drift",
+            "reversion_failure",
+            "signal_execution_gap"
+          ],
+          "required_decisions": [
+            "reference_estimation",
+            "deviation_measurement",
+            "entry_confirmation",
+            "staged_inventory",
+            "exit_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-172300-7af535",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.2105,
+        "spec": {
+          "decision_object": "range_position_lifecycle",
+          "core_mechanism": "range_boundary_reversion",
+          "title": "区间边缘的回归参与与趋势否决",
+          "novelty_claim": "相对HT02，以区间有效期和趋势否决为核心，避免仅换一个超跌指标；仍共享回归逻辑，若实现退化为阈值替换应合并。",
+          "family_id": "F02",
+          "lineage": {
+            "derived_from": [
+              "S03",
+              "HT02"
+            ],
+            "kind": "mechanism_refinement_pending_review"
+          },
+          "research_question": "何时仍是区间边缘回归，何时应判定结构进入趋势并停止逆势参与？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "reference_estimation"
+            ],
+            [
+              "reference_estimation",
+              "deviation_measurement"
+            ],
+            [
+              "deviation_measurement",
+              "trend_veto"
+            ],
+            [
+              "trend_veto",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "reentry_policy"
+            ]
+          ],
+          "maintenance_targets": [
+            "reference_drift",
+            "reversion_failure",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "reference_estimation",
+            "deviation_measurement",
+            "trend_veto",
+            "exit_policy",
+            "reentry_policy"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-184839-b184fc",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.1429,
+        "spec": {
+          "decision_object": "breakout_position_state",
+          "core_mechanism": "consolidation_breakout",
+          "title": "整理区间突破的参与控制：切换迟滞、失败处置与预算恢复",
+          "novelty_claim": "与nearest候选 TG-20261029-172300-ca5a47（同为consolidation_breakout、breakout_position_state）相比：该候选的必需决策为区间识别、突破确认、失败退出、再入场与资金分配，状态辨识与迟滞不在其中，决策依赖链以突破确认为枢纽。本任务把state_identification与switch_hysteresis设为必需决策并让迟滞成为失败退出与再入场的前置条件，使依赖结构形成闭环（资金分配回馈状态识别），维护目标也从signal_execution_gap转向regime_transition与risk_recovery。相对历史HT01宽泛短周期趋势，本任务明确引入状态参与控制与预算恢复，而非仅调整窗口或阈值。仍复用既有机制与决策词表，未引入新ID；若实现退化为在HT01或ca5a47上增加一个过滤阈值，应视作原题扩展而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S01",
+              "HT01",
+              "TG-20261029-172300-ca5a47",
+              "TG-20261029-172300-e01b9a"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "在国内股票日线与分钟教学环境中，如何仅用当时已收盘数据界定整理区间并识别趋势/震荡状态，用切换迟滞控制突破后的参与程度；当突破失败时如何退出、冷却与再入场，并在回撤或连续失败后缩减或恢复资金预算，同时让已建仓、T+1 不可卖库存与跨段状态连续兼容？",
+          "decision_dependencies": [
+            [
+              "range_detection",
+              "state_identification"
+            ],
+            [
+              "state_identification",
+              "switch_hysteresis"
+            ],
+            [
+              "switch_hysteresis",
+              "failure_exit"
+            ],
+            [
+              "failure_exit",
+              "reentry_policy"
+            ],
+            [
+              "reentry_policy",
+              "capital_allocation"
+            ],
+            [
+              "capital_allocation",
+              "state_identification"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "regime_transition",
+            "risk_recovery",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "range_detection",
+            "state_identification",
+            "switch_hysteresis",
+            "failure_exit",
+            "reentry_policy",
+            "capital_allocation"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185109-ad8725",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.1429,
+        "spec": {
+          "decision_object": "trend_pullback_inventory",
+          "core_mechanism": "trend_pullback",
+          "title": "趋势回撤中的资格复核、回撤定位与分批库存迁移",
+          "novelty_claim": "与给定最近候选 TG-20261029-184647-ca78bb（同为trend_pullback、trend_pullback_inventory，必需决策含趋势资格、回撤定位、分批库存、退出政策、状态迁移）相比，本任务的实际差异在于：把entry_confirmation设为必需决策，使回撤定位到分批库存之间存在显式的可成交确认环节，并要求退出政策回指趋势资格形成复核反馈边，以及趋势资格直接约束状态迁移的承接规则；依赖结构从近似链式变为含两条回指边的闭环，维护目标新增regime_transition以覆盖资格撤回后的状态衔接。与同家族冲突题 TG-20261029-172300-ca5a47（整理区间突破、失败退出与再入场）相比，决策对象由突破候选状态改为趋势回撤库存，不以突破确认和再入场为核心；与历史 HT01 宽泛短周期趋势相比，明确增加了分批库存与状态迁移决策。本任务复用既有机制与决策词表，未引入新ID，也未声称已证实独立或已实证有效；若实现退化为在 ca78bb 上仅调整回撤阈值或增加一个过滤器，应视为该候选的变体而非独立新题，需人工语义审。",
+          "family_id": "F01",
+          "lineage": {
+            "derived_from": [
+              "S02",
+              "HT01",
+              "TG-20261029-184647-ca78bb"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "在国内股票日线与分钟教学环境中，如何仅用当时已收盘数据确认既有上升趋势仍然适用，并把回撤深度与回撤结束的判定转化为可成交的入场确认；入场后如何分批建仓以满足T+1不可卖库存约束，退出条件触发或趋势资格被撤回时如何承接已建批次与未决状态，使趋势资格、回撤定位、分批库存和退出在跨段维护中保持一致？",
+          "decision_dependencies": [
+            [
+              "trend_qualification",
+              "pullback_location"
+            ],
+            [
+              "pullback_location",
+              "entry_confirmation"
+            ],
+            [
+              "entry_confirmation",
+              "staged_inventory"
+            ],
+            [
+              "staged_inventory",
+              "exit_policy"
+            ],
+            [
+              "exit_policy",
+              "trend_qualification"
+            ],
+            [
+              "staged_inventory",
+              "state_migration"
+            ],
+            [
+              "trend_qualification",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "structure_validity",
+            "signal_execution_gap",
+            "state_compatibility",
+            "regime_transition"
+          ],
+          "required_decisions": [
+            "trend_qualification",
+            "pullback_location",
+            "entry_confirmation",
+            "staged_inventory",
+            "exit_policy",
+            "state_migration"
+          ]
+        }
+      }
+    ]
+  }
+}

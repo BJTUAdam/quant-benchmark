@@ -1,0 +1,618 @@
+[
+  {
+    "id": "S01",
+    "family_id": "F01",
+    "title": "整理区间突破后的跟踪、失败退出与再入场",
+    "source_ids": [
+      "SRC_STOCK_TRENDS",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "consolidation_breakout",
+    "decision_object": "breakout_position_state",
+    "required_decisions": [
+      "range_detection",
+      "entry_confirmation",
+      "failure_exit",
+      "reentry_policy",
+      "capital_allocation"
+    ],
+    "decision_dependencies": [
+      [
+        "range_detection",
+        "entry_confirmation"
+      ],
+      [
+        "entry_confirmation",
+        "failure_exit"
+      ],
+      [
+        "failure_exit",
+        "reentry_policy"
+      ],
+      [
+        "reentry_policy",
+        "capital_allocation"
+      ]
+    ],
+    "maintenance_targets": [
+      "structure_validity",
+      "signal_execution_gap",
+      "state_compatibility"
+    ],
+    "research_question": "如何使区间识别、突破确认、失败处置与再次参与形成可维护的状态流程？",
+    "related_historical_ids": [
+      "HT01"
+    ],
+    "novelty_watchouts": "与HT01趋势旧题明显相邻，旧题已经允许突破、过滤、冷却和再入场；细化生命周期不自动证明独立新题，需人工语义审或登记原题扩展。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S02",
+    "family_id": "F01",
+    "title": "已有趋势中的回撤入场与分批退出",
+    "source_ids": [
+      "SRC_STOCK_TRENDS",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "trend_pullback",
+    "decision_object": "trend_pullback_inventory",
+    "required_decisions": [
+      "trend_qualification",
+      "pullback_location",
+      "entry_confirmation",
+      "staged_inventory",
+      "exit_policy"
+    ],
+    "decision_dependencies": [
+      [
+        "trend_qualification",
+        "pullback_location"
+      ],
+      [
+        "pullback_location",
+        "entry_confirmation"
+      ],
+      [
+        "entry_confirmation",
+        "staged_inventory"
+      ],
+      [
+        "staged_inventory",
+        "exit_policy"
+      ]
+    ],
+    "maintenance_targets": [
+      "structure_validity",
+      "signal_execution_gap",
+      "state_compatibility"
+    ],
+    "research_question": "如何在既有趋势回撤中进入，并将趋势否定与T+1分批持仓退出衔接？",
+    "related_historical_ids": [
+      "HT01",
+      "HT02"
+    ],
+    "novelty_watchouts": "应区别突破创新高与逆势超跌，不能只将入场阈值改名为回撤。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S03",
+    "family_id": "F02",
+    "title": "区间边缘的回归参与与趋势否决",
+    "source_ids": [
+      "SRC_STOCK_TRENDS",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "range_boundary_reversion",
+    "decision_object": "range_position_lifecycle",
+    "required_decisions": [
+      "range_detection",
+      "reference_estimation",
+      "deviation_measurement",
+      "trend_veto",
+      "exit_policy",
+      "reentry_policy"
+    ],
+    "decision_dependencies": [
+      [
+        "range_detection",
+        "reference_estimation"
+      ],
+      [
+        "reference_estimation",
+        "deviation_measurement"
+      ],
+      [
+        "deviation_measurement",
+        "trend_veto"
+      ],
+      [
+        "trend_veto",
+        "exit_policy"
+      ],
+      [
+        "exit_policy",
+        "reentry_policy"
+      ]
+    ],
+    "maintenance_targets": [
+      "reference_drift",
+      "reversion_failure",
+      "state_compatibility"
+    ],
+    "research_question": "何时仍是区间边缘回归，何时应判定结构进入趋势并停止逆势参与？",
+    "related_historical_ids": [
+      "HT02"
+    ],
+    "novelty_watchouts": "与超跌反弹共享回归思想；候选应以区间有效期和趋势否决作为决策对象，若最终仅换偏离指标则合并。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S04",
+    "family_id": "F02",
+    "title": "放量冲击后的回摆、延续判断与隔日持仓",
+    "source_ids": [
+      "SRC_CHAN",
+      "SRC_QLIB",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "shock_path_reversion",
+    "decision_object": "shock_event_inventory",
+    "required_decisions": [
+      "shock_detection",
+      "recovery_path",
+      "entry_confirmation",
+      "overnight_inventory",
+      "exit_policy"
+    ],
+    "decision_dependencies": [
+      [
+        "shock_detection",
+        "recovery_path"
+      ],
+      [
+        "recovery_path",
+        "entry_confirmation"
+      ],
+      [
+        "entry_confirmation",
+        "overnight_inventory"
+      ],
+      [
+        "overnight_inventory",
+        "exit_policy"
+      ]
+    ],
+    "maintenance_targets": [
+      "reversion_failure",
+      "signal_execution_gap",
+      "state_compatibility"
+    ],
+    "research_question": "能否区分异常价量冲击后的回摆与延续，并约束不能当日卖出的隔夜库存？",
+    "related_historical_ids": [
+      "HT02"
+    ],
+    "novelty_watchouts": "HT02已含价量和反转确认；只有事件定义、恢复路径及隔日库存共同成为核心研究对象时才可能构成不同模板。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S05",
+    "family_id": "F03",
+    "title": "相对强弱排名、继续持有门槛与换仓缓冲",
+    "source_ids": [
+      "SRC_QLIB",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "relative_strength_rotation",
+    "decision_object": "ranked_stock_portfolio",
+    "required_decisions": [
+      "feature_definition",
+      "rank_aggregation",
+      "holding_buffer",
+      "turnover_budget",
+      "capital_allocation"
+    ],
+    "decision_dependencies": [
+      [
+        "feature_definition",
+        "rank_aggregation"
+      ],
+      [
+        "rank_aggregation",
+        "holding_buffer"
+      ],
+      [
+        "holding_buffer",
+        "turnover_budget"
+      ],
+      [
+        "turnover_budget",
+        "capital_allocation"
+      ]
+    ],
+    "maintenance_targets": [
+      "ranking_stability",
+      "cost_sensitivity",
+      "state_compatibility"
+    ],
+    "research_question": "同一股票池内如何让选入排名、留存门槛、换仓预算和资金分配协同？",
+    "related_historical_ids": [
+      "HT06",
+      "HT01"
+    ],
+    "novelty_watchouts": "HT06草稿已含排名缓冲和换手；改用45股只算数据实例，不能独自证明新任务。本题需人工决定为草稿改编还是独立模板。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S06",
+    "family_id": "F03",
+    "title": "短期反转与成交活跃度联合选股",
+    "source_ids": [
+      "SRC_QLIB",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "cross_sectional_reversal",
+    "decision_object": "cross_sectional_reversal_portfolio",
+    "required_decisions": [
+      "deviation_measurement",
+      "liquidity_filter",
+      "rank_aggregation",
+      "turnover_budget",
+      "capital_allocation"
+    ],
+    "decision_dependencies": [
+      [
+        "deviation_measurement",
+        "rank_aggregation"
+      ],
+      [
+        "liquidity_filter",
+        "rank_aggregation"
+      ],
+      [
+        "rank_aggregation",
+        "turnover_budget"
+      ],
+      [
+        "turnover_budget",
+        "capital_allocation"
+      ]
+    ],
+    "maintenance_targets": [
+      "ranking_stability",
+      "cost_sensitivity",
+      "reversion_failure"
+    ],
+    "research_question": "如何跨股票比较反转强度，并将成交活跃度和换仓成本纳入同一选择？",
+    "related_historical_ids": [
+      "HT02",
+      "HT06"
+    ],
+    "novelty_watchouts": "应区别单只股票超跌触发；不能仅给HT02候选做既有排序就计独立任务。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S07",
+    "family_id": "F04",
+    "title": "趋势/震荡切换下的策略参与控制",
+    "source_ids": [
+      "SRC_STOCK_TRENDS",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "regime_participation_control",
+    "decision_object": "participation_controller",
+    "required_decisions": [
+      "state_identification",
+      "switch_hysteresis",
+      "participation_policy",
+      "risk_budget",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "state_identification",
+        "switch_hysteresis"
+      ],
+      [
+        "switch_hysteresis",
+        "participation_policy"
+      ],
+      [
+        "participation_policy",
+        "risk_budget"
+      ],
+      [
+        "risk_budget",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "regime_transition",
+      "risk_recovery",
+      "state_compatibility"
+    ],
+    "research_question": "状态辨识与切换控制如何决定策略参与和预算，并接住旧状态和未清仓头寸？",
+    "related_historical_ids": [
+      "HT01",
+      "HT02"
+    ],
+    "novelty_watchouts": "复用趋势/回归思路但研究对象为控制器；若只在HT01加同一波动过滤，应退回扩展项。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S08",
+    "family_id": "F04",
+    "title": "波动与回撤触发的减仓、暂停和恢复",
+    "source_ids": [
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "drawdown_risk_budget",
+    "decision_object": "portfolio_risk_controller",
+    "required_decisions": [
+      "state_identification",
+      "risk_budget",
+      "drawdown_response",
+      "recovery_policy",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "state_identification",
+        "risk_budget"
+      ],
+      [
+        "risk_budget",
+        "drawdown_response"
+      ],
+      [
+        "drawdown_response",
+        "recovery_policy"
+      ],
+      [
+        "recovery_policy",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "risk_recovery",
+      "signal_execution_gap",
+      "state_compatibility"
+    ],
+    "research_question": "在固定公开风险目标下，何时缩减或暂停风险预算，何时以及以何速度恢复？",
+    "related_historical_ids": [
+      "HT01",
+      "HT02"
+    ],
+    "novelty_watchouts": "与S07可能重叠；须预先固定风险目标，区分市场状态参与控制与组合损失预算控制。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S09",
+    "family_id": "F05",
+    "title": "FU/LU相对关系的滚动对冲和暂停重估",
+    "source_ids": [
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "cross_product_residual",
+    "decision_object": "cross_product_leg_portfolio",
+    "required_decisions": [
+      "month_selection",
+      "hedge_estimation",
+      "entry_exit",
+      "relationship_monitoring",
+      "margin_budget",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "month_selection",
+        "hedge_estimation"
+      ],
+      [
+        "hedge_estimation",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "relationship_monitoring"
+      ],
+      [
+        "relationship_monitoring",
+        "margin_budget"
+      ],
+      [
+        "margin_budget",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "hedge_drift",
+      "margin_exposure",
+      "expiry_roll",
+      "state_compatibility"
+    ],
+    "research_question": "FU/LU关系变化时如何重估对冲、暂停参与并迁移实际双腿头寸？",
+    "related_historical_ids": [
+      "HT04",
+      "HT05"
+    ],
+    "novelty_watchouts": "HT04已允许FU/LU双腿、滚动对冲与状态切换；不能因为去掉SC就称新题。优先登记现有题的聚焦改编，待人工语义判定。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S10",
+    "family_id": "F05",
+    "title": "B/M/Y联合价差与分项信号的组合管理",
+    "source_ids": [
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "crush_component_aggregation",
+    "decision_object": "crush_leg_portfolio",
+    "required_decisions": [
+      "hedge_estimation",
+      "signal_aggregation",
+      "month_selection",
+      "entry_exit",
+      "margin_budget",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "hedge_estimation",
+        "signal_aggregation"
+      ],
+      [
+        "month_selection",
+        "signal_aggregation"
+      ],
+      [
+        "signal_aggregation",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "margin_budget"
+      ],
+      [
+        "margin_budget",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "hedge_drift",
+      "margin_exposure",
+      "expiry_roll",
+      "state_compatibility"
+    ],
+    "research_question": "整体加工关系与分项信号冲突时如何配置实际手数并处理旧组合？",
+    "related_historical_ids": [
+      "HT03"
+    ],
+    "novelty_watchouts": "与HT03大豆压榨题高度重叠，不能默认新增独立题；保留为家族覆盖/改编测试种子。固定生产系数不能作为可调答案。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S11",
+    "family_id": "F06",
+    "title": "FG近远月价差的配对、到期和移仓",
+    "source_ids": [
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "calendar_spread_pairing",
+    "decision_object": "calendar_pair_inventory",
+    "required_decisions": [
+      "pair_selection",
+      "tenor_normalization",
+      "entry_exit",
+      "margin_budget",
+      "roll_policy",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "pair_selection",
+        "tenor_normalization"
+      ],
+      [
+        "tenor_normalization",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "margin_budget"
+      ],
+      [
+        "margin_budget",
+        "roll_policy"
+      ],
+      [
+        "roll_policy",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "curve_stability",
+      "expiry_roll",
+      "margin_exposure",
+      "state_compatibility"
+    ],
+    "research_question": "同品种近远月价差如何随剩余期限、流动性与到期迁移保持可交易？",
+    "related_historical_ids": [
+      "HT05"
+    ],
+    "novelty_watchouts": "HT05的FG/SA跨品种与本题同品种跨期在腿关系和期限决策上不同；但仍需检查同日多月份覆盖及执行器支持，不能据此宣称已可运行。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  },
+  {
+    "id": "S12",
+    "family_id": "F06",
+    "title": "M期限曲线的斜率变化与滚动配对",
+    "source_ids": [
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "core_mechanism": "term_curve_rotation",
+    "decision_object": "term_curve_pair_selection",
+    "required_decisions": [
+      "curve_signal",
+      "tenor_normalization",
+      "pair_selection",
+      "entry_exit",
+      "roll_policy",
+      "state_migration"
+    ],
+    "decision_dependencies": [
+      [
+        "tenor_normalization",
+        "curve_signal"
+      ],
+      [
+        "curve_signal",
+        "pair_selection"
+      ],
+      [
+        "pair_selection",
+        "entry_exit"
+      ],
+      [
+        "entry_exit",
+        "roll_policy"
+      ],
+      [
+        "roll_policy",
+        "state_migration"
+      ]
+    ],
+    "maintenance_targets": [
+      "curve_stability",
+      "expiry_roll",
+      "margin_exposure",
+      "state_compatibility"
+    ],
+    "research_question": "多月份曲线变化如何决定选哪一对合约，而非固定近远月对？",
+    "related_historical_ids": [
+      "HT03"
+    ],
+    "novelty_watchouts": "若仅把S11换成豆粕或换门槛，合并为同模板实例；只有多月份曲线→动态配对确实改变决策结构才保留候选。",
+    "status": "curated_seed_unvalidated",
+    "source_interpretation": "仅以来源概念为启发，经整理转化为研究问题；未规定最优方法或参数。"
+  }
+]

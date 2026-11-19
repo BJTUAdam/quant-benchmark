@@ -1,0 +1,24 @@
+{
+  "schema_version": "finance_task_input.draft.v2",
+  "task_id": "TG-20261105-041906-253472",
+  "candidate_id": "TG-20261105-041906-253472",
+  "task_version": 0,
+  "initial_message": {
+    "role": "user",
+    "content_file": "public/TASK.md"
+  },
+  "expected_outputs": [
+    "CHANGELOG.md",
+    "RESEARCH.md",
+    "backtest.py",
+    "params.json",
+    "strategy.py"
+  ],
+  "dataset_id": null,
+  "formal_intervals": null,
+  "spec_status": "variant_candidate",
+  "data_status": "not_bound",
+  "runtime_status": "not_connected",
+  "binding_contract": "bridge_contract.json",
+  "runtime_profile": "runtime_profile.json"
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Finlab 策略与离线接口手册"
+  short_description: "按任务契约查阅离线Tushare文档，生成并检查AKQuant平台策略提交"
+  default_prompt: "使用 $finlab-strategy，读取当前任务契约和所需离线接口文档，生成可提交的策略五文件并执行静态预检。"

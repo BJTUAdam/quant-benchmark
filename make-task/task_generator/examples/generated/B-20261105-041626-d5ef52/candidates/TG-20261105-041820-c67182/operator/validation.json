@@ -1,0 +1,644 @@
+{
+  "checked_at": "2026-11-05T04:41:29+00:00",
+  "warnings": [
+    "仅完成规格检查：数据可得性、长程实际难度及管线执行均未验证"
+  ],
+  "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1",
+  "passed": true,
+  "context_hash": "38d2d465548e4ad2eff33950a839456b94d04158ea4a7ebe1fd3e688df4067d6",
+  "errors": [],
+  "content_hash": "73d4ccd3ead8c741d30117c788eaef567c2e6a6f1833700dc37f5c65b5092d76",
+  "scope": "specification_only",
+  "dedup": {
+    "exact_matches": [],
+    "guarantee": "仅保证规范结构唯一；语义独立性仍需模型与人工复核",
+    "fingerprint": "83c6eb644a24572c8581ca3bf16ae4687e8145998c69c02aa65aa17ef1f9e3d5",
+    "classification": "needs_semantic_review",
+    "nearest": [
+      {
+        "task_id": "TG-20261029-172301-36425d",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 1.0,
+        "spec": {
+          "decision_object": "cross_product_leg_portfolio",
+          "core_mechanism": "cross_product_residual",
+          "title": "FU/LU相对关系的滚动对冲和暂停重估",
+          "novelty_claim": "HT04明确允许FU/LU双腿及滚动对冲，本候选只是聚焦暂停/重估的改编，不能计为已确认独立新题；人工可能直接归并HT04。",
+          "family_id": "F05",
+          "lineage": {
+            "derived_from": [
+              "S09",
+              "HT04"
+            ],
+            "kind": "focused_adaptation_pending_review"
+          },
+          "research_question": "FU/LU关系变化时如何重估对冲、暂停参与并迁移实际双腿头寸？",
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "entry_exit",
+            "relationship_monitoring",
+            "margin_budget",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-042329-afee5f",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 0.9167,
+        "spec": {
+          "decision_object": "cross_product_leg_portfolio",
+          "core_mechanism": "cross_product_residual",
+          "title": "FG/SA跨品种关系重估中的残差参与与保证金预算维护",
+          "novelty_claim": "与existing_tasks逐项对比：HT04为multi_product_oil_relative_value/oil_leg_portfolio，覆盖SC/FU/LU油品多腿相对价值，本任务限定FG/SA并采用cross_product_residual且以关系重估回指对冲估计为核心；HT05为glass_soda_residual/glass_soda_leg_portfolio，虽同样涉及FG/SA，但其决策链以month_selection→hedge_estimation→entry_exit→relationship_monitoring→margin_budget→roll_policy→state_migration为主，roll_policy独立承担换月，本任务不含roll_policy而把换月与口径失效并入state_migration，并要求relationship_monitoring→hedge_estimation形成重估闭环、state_migration→month_selection形成腿集合重建，研究核心是比例版本与残差口径在迁移时不得自动沿用；HT03为B/M/Y加工关系，不使用加工系数；最近反馈判定的同机制重复项TG-20261105-041820-c67182与TG-20261029-172301-36425d均以FU/LU及更宽品种池为对象且不含本任务的FG/SA腿对与换月并入迁移的取舍。若实现退化为仅调整窗口或阈值、或退化为HT05的标的微调，应视为变体而非独立新题，需人工语义审。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+          "family_id": "F05",
+          "lineage": {
+            "derived_from": [
+              "S09",
+              "HT05",
+              "SRC_PROJECT_PLAN"
+            ],
+            "kind": "fg_sa_relationship_reestimation_pending_review"
+          },
+          "research_question": "在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段：如何在FG与SA两条真实合约腿上估计当时可见的滚动对冲关系并转成有符号整数手数；当残差偏离触发参与条件时如何推进建仓与退出，而当对冲比例本身漂移时又如何把它与普通残差波动区分开，暂停参与并重新估计；重新估计与合约换月后旧腿、未成交残余敞口与已确认的对冲比例版本如何迁移，使分段研发中的头寸与状态连续可核？",
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "state_migration"
+            ],
+            [
+              "state_migration",
+              "month_selection"
+            ],
+            [
+              "relationship_monitoring",
+              "hedge_estimation"
+            ]
+          ],
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "entry_exit",
+            "relationship_monitoring",
+            "margin_budget",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "HT05",
+        "exact_structure": false,
+        "status": "historical_package_quality_pending",
+        "score": 0.6667,
+        "spec": {
+          "decision_object": "glass_soda_leg_portfolio",
+          "core_mechanism": "glass_soda_residual",
+          "title": "FG/SA玻璃纯碱统计价差",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F05",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "在允许关系失效前提下研究FG/SA统计对冲与头寸维护。",
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "entry_exit",
+            "relationship_monitoring",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "HT04",
+        "exact_structure": false,
+        "status": "historical_package_quality_pending",
+        "score": 0.625,
+        "spec": {
+          "decision_object": "oil_leg_portfolio",
+          "core_mechanism": "multi_product_oil_relative_value",
+          "title": "国内SC/FU/LU原油燃料油相对价值",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F05",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "研究国内油品相对价格关系、真实合约腿和对冲模型。",
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "signal_aggregation"
+            ],
+            [
+              "signal_aggregation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "signal_aggregation",
+            "entry_exit",
+            "relationship_monitoring",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261105-042048-66d9a5",
+        "exact_structure": false,
+        "status": "pending_human_review",
+        "score": 0.6,
+        "spec": {
+          "decision_object": "crush_leg_portfolio",
+          "core_mechanism": "crush_component_aggregation",
+          "title": "B/M/Y加工链条的分项信号冲突裁决与真实腿库存交接",
+          "novelty_claim": "与existing_tasks逐项对照：HT03为crush_component_aggregation / crush_leg_portfolio，其研究问题已允许整体压榨关系、分项信号、实际多腿与资金占用，因此本任务不能以“同机制同对象”本身声称独立；本任务的实际研究取舍是：signal_aggregation被要求对整体与分项信号冲突给出显式裁决与降级规则（冲突未裁决不得新增参与），而HT03的决策链为hedge_estimation→signal_aggregation→month_selection→entry_exit，未把冲突裁决作为必须解决的决策；同时state_migration回指month_selection，要求迁移时旧腿集合下的系数与候选腿不得自动沿用，使系数版本与实际腿的对应关系成为可核对象。与最近被判duplicate的TG-20261105-041820-c67182相比，该候选机制为cross_product_residual，本任务为crush_component_aggregation且不使用固定加工系数作为答案；与HT04油品跨品种腿、HT05的FG/SA统计价差相比，本任务限定B/M/Y加工链条而非任意两品种统计对冲。本任务沿用既有机制、对象与决策词表，未引入新ID；不声称已获数据、已运行或已实证有效；若实现中信号冲突裁决退化为固定权重平均，或迁移仅重排字段而不改变腿与系数的对应，应视为HT03的变体而非独立新题，需人工语义审。",
+          "family_id": "F05",
+          "lineage": {
+            "derived_from": [
+              "S10",
+              "HT03"
+            ],
+            "kind": "signal_conflict_arbitration_and_leg_state_migration_pending_review"
+          },
+          "research_question": "在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段：如何当时可见地选定B、M、Y三条实际合约腿并估计加工关系下的整体系数与整数手数；当整体加工价差信号与分项（豆油/豆粕相对豆粕等分项偏离）信号彼此冲突时，如何裁决一致性并转化为真实有符号手数的参与、退出与持有时限；当双腿或多腿保证金占用、费用与价格变动使预算收紧时，如何决定各腿手数、缩减与残余敞口的处置；版本更新或合约临近到期时，如何把已确认的系数版本、候选腿集合与未完成部分成交状态迁移到下一段，使分段研发与跨段记忆连续可核？",
+          "decision_dependencies": [
+            [
+              "month_selection",
+              "hedge_estimation"
+            ],
+            [
+              "hedge_estimation",
+              "signal_aggregation"
+            ],
+            [
+              "month_selection",
+              "signal_aggregation"
+            ],
+            [
+              "signal_aggregation",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "state_migration"
+            ],
+            [
+              "state_migration",
+              "month_selection"
+            ]
+          ],
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "month_selection",
+            "hedge_estimation",
+            "signal_aggregation",
+            "entry_exit",
+            "margin_budget",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "HT03",
+        "exact_structure": false,
+        "status": "historical_package_quality_pending",
+        "score": 0.5625,
+        "spec": {
+          "decision_object": "crush_leg_portfolio",
+          "core_mechanism": "crush_component_aggregation",
+          "title": "国内B/M/Y大豆压榨价差",
+          "novelty_claim": "历史对照，不能作为本次新生成数。",
+          "family_id": "F05",
+          "lineage": {
+            "derived_from": [],
+            "kind": "historical_reference"
+          },
+          "research_question": "研究整体压榨关系、分项信号、实际多腿与资金占用。",
+          "decision_dependencies": [
+            [
+              "hedge_estimation",
+              "signal_aggregation"
+            ],
+            [
+              "signal_aggregation",
+              "month_selection"
+            ],
+            [
+              "month_selection",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "hedge_drift",
+            "margin_exposure",
+            "expiry_roll",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "hedge_estimation",
+            "signal_aggregation",
+            "month_selection",
+            "entry_exit",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185356-d4e28b",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.4118,
+        "spec": {
+          "decision_object": "calendar_pair_inventory",
+          "core_mechanism": "calendar_spread_pairing",
+          "title": "同品种两个到期月份之间的配对选择：剩余期限可比、流动性与到期换腿",
+          "novelty_claim": "对比给定最近任务 TG-20261029-185226-a83ad1（判定为与 TG-20261029-172301-684a8d 重复：mechanism=calendar_spread_pairing、object=calendar_pair_inventory、必需决策集与维护目标完全相同，改动仅为依赖顺序与描述粒度）以及 TG-20261029-172301-684a8d 和 TG-20261029-185024-c3f04e：本任务的实际决策差异有三点。其一，必需决策用 month_selection 承担“从多个可交易月份中选出实际配对两腿”，其决策对象是配对本身，而不是价差参与条件；684a8d 的 pair_selection 与 c3f04e 的 pair_selection 都不含从多月份逐日重选配对的表述，c3f04e 的多月份选择依托 curve_signal。其二，本任务未纳入 curve_signal，机制不依赖曲线斜率合成为配对依据，期限口径只服务于可比表达与换腿时点。其三，依赖结构让 state_migration 回指 month_selection，并要求迁移时处置已确认的期限口径版本与未完成换腿中间状态；这是应最近反馈“仅调整顺序与描述粒度不算新题”的要求，把迁移对候选对集合的实际影响写成必须解决的取舍，而不是文字说明。与历史 HT05（FG/SA跨品种统计价差）相比，两腿来自同一品种不同月份，不涉及跨品种对冲估计。本任务只使用既有机制与决策词表，未引入新 ID；不声称数据已验收、已运行或已实证有效；若实现退化为在684a8d上仅更换品种或调整剩余期限阈值，应视为该任务的变体而非独立新题。",
+          "family_id": "F06",
+          "lineage": {
+            "derived_from": [
+              "S11",
+              "TG-20261029-172301-684a8d",
+              "TG-20261029-185226-a83ad1",
+              "HT05"
+            ],
+            "kind": "expiry_pair_selection_refinement_pending_review"
+          },
+          "research_question": "在国内期货真实分合约日线环境中，仅使用当时已收盘且已发布的字段：同一品种存在多个到期月份时，如何先按剩余期限、价格刻度与合约乘数把各月份化为可比较的期限口径，据此决定本期实际参与哪两条腿；当日价差的价格与成交活跃度在只有已收盘结算数据时如何决定参与与退出；当双腿保证金占用与费用随价格、保证金率和手数变动时如何决定配对手数；当某一腿接近最后交易日而决定换月时，平旧开新的顺序与旧配对库存、已确认的期限口径版本如何迁移，使分段研发中口径与库存连续可核？",
+          "decision_dependencies": [
+            [
+              "tenor_normalization",
+              "month_selection"
+            ],
+            [
+              "month_selection",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ],
+            [
+              "state_migration",
+              "month_selection"
+            ],
+            [
+              "tenor_normalization",
+              "roll_policy"
+            ]
+          ],
+          "maintenance_targets": [
+            "expiry_roll",
+            "margin_exposure",
+            "curve_stability",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "month_selection",
+            "tenor_normalization",
+            "entry_exit",
+            "roll_policy",
+            "margin_budget",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-172301-684a8d",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.3333,
+        "spec": {
+          "decision_object": "calendar_pair_inventory",
+          "core_mechanism": "calendar_spread_pairing",
+          "title": "FG近远月价差的配对、到期和移仓",
+          "novelty_claim": "相对HT05的FG/SA跨品种关系，改为同品种两月份的期限匹配及移仓库存，决策结构有所变化；仍须人工核查并验证数据覆盖，不保证已经是独立可运行题。",
+          "family_id": "F06",
+          "lineage": {
+            "derived_from": [
+              "S11",
+              "HT05"
+            ],
+            "kind": "calendar_structure_candidate_pending_review"
+          },
+          "research_question": "同品种近远月价差如何随剩余期限、流动性与到期迁移保持可交易？",
+          "decision_dependencies": [
+            [
+              "pair_selection",
+              "tenor_normalization"
+            ],
+            [
+              "tenor_normalization",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "curve_stability",
+            "expiry_roll",
+            "margin_exposure",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "pair_selection",
+            "tenor_normalization",
+            "entry_exit",
+            "margin_budget",
+            "roll_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185226-a83ad1",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.3333,
+        "spec": {
+          "decision_object": "calendar_pair_inventory",
+          "core_mechanism": "calendar_spread_pairing",
+          "title": "同品种多月份价差的期限单位、整数手数配对与到期迁移",
+          "novelty_claim": "与最近失败候选 TG-20261029-185048-755aae 所指向的 TG-20261029-185024-c3f04e（同为 term_curve_rotation / term_curve_pair_selection）相比，本任务实际改变的决策结构是：不以曲线斜率与形态信号的合成为核心，也不以多月份曲线信号挑选配对，而是把同一品种价差的可比期限单位与真实整数手数配对作为必须解决的决策，并让保证金预算成为配对成立的条件而不是末端记账；依赖链为期限口径→配对选择→预算与手数→参与退出→移仓→状态迁移，并让配对选择直接约束状态迁移，以处理口径版本与旧库存映射。与已登记候选 TG-20261029-172301-684a8d（calendar_spread_pairing、calendar_pair_inventory）相比，本任务不以近远月价差的配对与到期迁移为唯一问题，而是先要求解决不同到期月份间的可比期限表达以及价格刻度与乘数导致的整数手数配对，二者会改变候选合约对集合与参与条件。与历史 HT05（FG/SA跨品种统计价差）在腿关系上不同：本题两条腿来自同一品种不同月份，不涉及跨品种对冲关系估计。本任务只使用既有机制与决策词表，未引入新 ID，也未声称数据已获取或已运行；若实现退化为仅更换品种或调整剩余期限阈值，应视为上述候选的变体而非独立新题。",
+          "family_id": "F06",
+          "lineage": {
+            "derived_from": [
+              "SRC_CHAN",
+              "SRC_PROJECT_PLAN",
+              "S11"
+            ],
+            "kind": "tenor_and_lot_pairing_refinement_pending_review"
+          },
+          "research_question": "在国内期货真实分合约日线环境中，仅使用当时已收盘且已发布的数据，如何把同一品种不同到期月份的价格表达为可比的期限单位，使剩余期限差异不会混入价差本身的判断；在此基础上如何按当时的流动性与可交易状态选出实际两条合约腿，并按价格刻度、合约乘数与整数手数把配对结果化为真实手数；当两腿保证金占用与费用随价格、保证金率和持仓变化时，如何决定参与、退出与持有时限；当某一腿临近最后交易日或流动性转移时，如何安排平旧开新的顺序并承接旧配对库存与未决状态，使这部分研究在分段研发中可连续维护？",
+          "decision_dependencies": [
+            [
+              "tenor_normalization",
+              "pair_selection"
+            ],
+            [
+              "pair_selection",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "entry_exit"
+            ],
+            [
+              "entry_exit",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ],
+            [
+              "pair_selection",
+              "state_migration"
+            ]
+          ],
+          "maintenance_targets": [
+            "expiry_roll",
+            "margin_exposure",
+            "curve_stability",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "tenor_normalization",
+            "pair_selection",
+            "margin_budget",
+            "entry_exit",
+            "roll_policy",
+            "state_migration"
+          ]
+        }
+      },
+      {
+        "task_id": "TG-20261029-185538-ab9792",
+        "exact_structure": false,
+        "status": "historical_read_only",
+        "score": 0.3333,
+        "spec": {
+          "decision_object": "calendar_pair_inventory",
+          "core_mechanism": "calendar_spread_pairing",
+          "title": "同品种跨期价差的参与规模自适应：交割月流动性衰减下的配对重选与手数再平衡",
+          "novelty_claim": "相对最近失败项 TG-20261029-185356-d4e28b（被判为与 TG-20261029-185226-a83ad1、TG-20261029-172301-684a8d 重复）与更早的 TG-20261029-185024-c3f04e：本任务不把“从多月份中选两腿”当作差异来源，而是把关系可信度随近腿流动性衰减而下降、并据此决定缩减/暂停/更换配对作为必须解决的决策，使 relationship_monitoring 成为回指配对选择的枢纽，同时让预算与整数手数跟随可信度调整，而非末端记账；state_migration 回指期限口径，并要求承接口径版本与未完成换腿的中间状态，这一决策结构在 684a8d、a83ad1、d4e28b 与 c3f04e 中均不存在（它们分别以 pair_selection/month_selection 加移仓与预算为主，monitoring 不是必需决策且不构成回指闭环）。与历史 HT05（FG/SA 跨品种统计价差）相比，两腿来自同一品种不同月份，不涉及跨品种对冲关系估计；与 HT03/HT04 相比也不涉及加工关系或油品跨品种腿。不声称已具备已验收数据、已运行或已实证有效；若实现中关系监控退化为对既有移仓阈值的重新命名，或缩减只是固定参数，应视为上述任务的变体而非独立新题，需人工语义审。",
+          "family_id": "F06",
+          "lineage": {
+            "derived_from": [
+              "S11",
+              "SRC_CHAN",
+              "SRC_PROJECT_PLAN",
+              "TG-20261029-185356-d4e28b",
+              "TG-20261029-172301-684a8d",
+              "TG-20261029-185024-c3f04e"
+            ],
+            "kind": "liquidity_decay_relationship_monitoring_pending_review"
+          },
+          "research_question": "在国内期货真实分合约日线环境中，仅使用当时已收盘且已发布字段：同一品种两个到期月份之间的相对价格关系在剩余期限收窄、近腿成交活跃度衰减时，其可观察程度与可参与规模会同时变化。如何先用剩余期限把两端价格化为可比期限口径并选出本期实际参与的两腿；当近腿流动性下降到一定水平时，如何判定该价差关系已不足以支撑当前参与规模，从而主动缩减、更换配对或暂停，而不是等到临近最后交易日才被动移仓；预算与手数预算如何跟随关系可信度调整，使已建配对库存、未成交换腿与跨段状态在该过程中保持连续可核？",
+          "decision_dependencies": [
+            [
+              "tenor_normalization",
+              "pair_selection"
+            ],
+            [
+              "pair_selection",
+              "margin_budget"
+            ],
+            [
+              "margin_budget",
+              "relationship_monitoring"
+            ],
+            [
+              "relationship_monitoring",
+              "pair_selection"
+            ],
+            [
+              "relationship_monitoring",
+              "roll_policy"
+            ],
+            [
+              "roll_policy",
+              "state_migration"
+            ],
+            [
+              "state_migration",
+              "tenor_normalization"
+            ]
+          ],
+          "maintenance_targets": [
+            "curve_stability",
+            "expiry_roll",
+            "margin_exposure",
+            "state_compatibility"
+          ],
+          "required_decisions": [
+            "tenor_normalization",
+            "pair_selection",
+            "margin_budget",
+            "relationship_monitoring",
+            "roll_policy",
+            "state_migration"
+          ]
+        }
+      }
+    ]
+  }
+}

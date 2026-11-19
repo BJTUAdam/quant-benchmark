@@ -1,0 +1,126 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-185310-93eea1",
+  "spec_hash": "235d8c29b7764725982c6bbedfe905cd3e58ef41ad8e7354a5db543f144087b3",
+  "reviewed_at": "2026-11-05T04:30:25+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "候选与 TG-20261029-185310-93eea1 在核心机制、决策对象、必需决策集合及两条资金分配回指边上等价，仅细化集合过渡与额度扣减描述，构成实质重复，需归并或重新提出真正独立的研究取舍",
+    "候选自称“研究核心从集合边界协商转为换手额度与候选集合、留存宽度的三方让步”，但其依赖结构与93eea1相同，未出现新的必需决策或新的接口关系，novelty_claim 的事实支撑不足"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "21d5c367d1d3485c451f92c52b5addcd832251a10195d39e3047415c82cc2b6e",
+  "content_hash": "2fa76d80254ecf08b07c1b066b13a40a1ade61187a0215dbf5b57f3ac1d48f02",
+  "rationale": "候选与 TG-20261029-185310-93eea1 具有完全相同的核心机制、决策对象、六项必需决策集合与两条资金分配回指边（capital_allocation→liquidity_filter 与 capital_allocation→holding_buffer），研究问题同为“成交活跃度界定可参与排名集合、资金预算反写候选边界与留存门槛宽度、换手预算与留存相互让步”。候选新增的资格集合过渡迟滞、T+1库存与未成交单额度扣减顺序属于93eea1已允许的换仓可执行性与集合过渡细节，属于装饰性细化而非新的研究决策。虽然决策依赖列表的排列与部分描述不同，但职责拆分与闭环结构与93eea1等价，因此判为duplicate。候选 novelty_claim 承认若退化为附加过滤则仅为变体，但其自身已具备93eea1的全部实质结构，不能仅因描述细化而独立。与5120cb、316d9a、d78026、be6167、6227b7、cc1583及HT06、HT01、ca5a47的差异属于参数、决策集删减、依赖边显式化或机制不同，不改变其与93eea1等价的核心。",
+  "pending_bindings": [
+    "真实股票或ETF代码池、实际起止日期与可见性尚未绑定（symbols为空、bridge binding_status=not_bound）",
+    "运行时资源预算需本人运行finlab setup选择，草案 resources=null、resource_status=requires_human_setup 为预期待办",
+    "交易规则、费用、T+1规则及多腿部分成交行为待 market_rules_status 绑定后确认"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F03 relative_strength_rotation / ranked_stock_portfolio，候选池由成交活跃度界定后再排名的前置 liquidity_filter 已存在",
+        "均包含 liquidity_filter→rank_aggregation、holding_buffer→turnover_budget→capital_allocation 主干且资金分配回指留存门槛"
+      ],
+      "task_id": "TG-20261029-185132-5120cb",
+      "differences": [
+        "5120cb 的依赖为 capital_allocation→holding_buffer 单向回指，尚未让资金分配反写 liquidity_filter 的候选边界；候选新增 capital_allocation→liquidity_filter 与 capital_allocation→holding_buffer 双回指",
+        "候选研究问题增加了换手额度扣减顺序与资格集合过渡迟滞，但核心“活跃度界定可参与排名集合、再协商留存宽度与预算”与5120cb一致"
+      ]
+    },
+    {
+      "similarities": [
+        "核心机制、决策对象、六项必需决策集合完全相同：feature_definition/liquidity_filter/rank_aggregation/holding_buffer/turnover_budget/capital_allocation",
+        "依赖结构几乎一致：feature_definition与liquidity_filter双输入排名，capital_allocation同时回指 liquidity_filter 与 holding_buffer 形成资格集合与留存门槛的双向闭环",
+        "研究问题同为“流动性与资金预算重新定义候选池边界后，留存门槛与换手预算如何协商”，维护目标 ranking_stability/cost_sensitivity/state_compatibility 重合"
+      ],
+      "task_id": "TG-20261029-185310-93eea1",
+      "differences": [
+        "候选把资格集合的收缩/恢复过渡规则、T+1新增库存与未成交单的额度扣减顺序写得更细，但这些是93eea1已允许的换仓可执行性与集合过渡规则的细化，而非新的研究决策",
+        "候选依赖边为 capital_allocation→liquidity_filter 与 capital_allocation→holding_buffer，与93eea1的两条回指边等价；少量描述性强化不构成实质机制改变"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F03流动性守门后相对强弱换仓、候选池边界随分配结果回缩、留存门槛与换手预算协商的双向闭环",
+        "六项必需决策与决策对象一致"
+      ],
+      "task_id": "TG-20261029-185451-316d9a",
+      "differences": [
+        "316d9a 额外强调守门性排除与排名性掉出的区分及两类排除的不同持仓处置，候选未把该排除语义作为必需研究取舍写入模块",
+        "候选更聚焦换手额度扣减顺序与资格集合过渡，但未提供超出316d9a守门—缓冲—换手联合求解的新决策对象"
+      ]
+    },
+    {
+      "similarities": [
+        "同一 relative_strength_rotation / ranked_stock_portfolio 主干，含 feature_definition→rank_aggregation→holding_buffer→turnover_budget→capital_allocation 链"
+      ],
+      "task_id": "TG-20261029-172300-d78026",
+      "differences": [
+        "d78026 不含 liquidity_filter，候选池默认全池可比；候选把流动性资格集合设为必需决策并让资金分配回指候选边界",
+        "候选加入 capital_allocation→liquidity_filter 与 capital_allocation→holding_buffer 闭环，研究问题从单向链变为资格—留存—预算协商"
+      ]
+    },
+    {
+      "similarities": [
+        "同一机制与决策对象主干，含 holding_buffer→turnover_budget→capital_allocation 与 capital_allocation→holding_buffer 回指"
+      ],
+      "task_id": "TG-20261029-184930-be6167",
+      "differences": [
+        "be6167 不含 liquidity_filter，仅让资金分配回指留存门槛；候选新增流动性资格集合与资金分配回指候选边界",
+        "候选增加 turnover_budget 与资格集合之间的额度过早扣减与过渡规则，但该差异在93eea1中已被覆盖"
+      ]
+    },
+    {
+      "similarities": [
+        "同为流动性资格集合由 capital_allocation 回指的候选池边界协商题，含 feature_definition→liquidity_filter→rank_aggregation 与预算回指"
+      ],
+      "task_id": "TG-20261105-041728-6227b7",
+      "differences": [
+        "6227b7 删除 turnover_budget 并把回指延伸到 feature_definition；候选保留 turnover_budget 并去掉分配→特征回指",
+        "候选与6227b7的决策集配置不同，但与93eea1的六项决策与双回指结构等价，故更接近93eea1"
+      ]
+    },
+    {
+      "similarities": [
+        "同为相对强弱下流动性资格集合边界、留存门槛与现金预算联合维护的候选池协商题"
+      ],
+      "task_id": "TG-20261105-041955-cc1583",
+      "differences": [
+        "cc1583 剔除 turnover_budget 改由 capital_allocation 承担换仓可执行性；候选保留 turnover_budget",
+        "候选与cc1583均被上下文归为93eea1附近的变体候选，差异主要在决策集删减与参数化描述"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F03股票组合排名与留存缓冲题目，含 feature_definition/rank_aggregation/holding_buffer/turnover_budget/capital_allocation"
+      ],
+      "task_id": "HT06",
+      "differences": [
+        "HT06 为 dynamic_constituent_multifactor / constituent_stock_portfolio，核心含 constituent_eligibility 动态成分资格并设基准超额目标；候选不含成分资格、无基准超额，改以成交活跃度与资金预算界定候选池"
+      ]
+    },
+    {
+      "similarities": [
+        "同为股票组合类历史题，含 capital_allocation 决策"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01 为 F01 short_horizon_trend / stock_trend_portfolio，决策对象为趋势组合的区间识别、入场确认与退出；候选为横截面排名与流动性—留存—预算协商，机制与决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为股票组合类历史题，含再入场与资金分配"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "ca5a47 为 F01 consolidation_breakout / breakout_position_state，决策对象为区间突破状态生命周期；候选为 ranked_stock_portfolio 的候选池边界协商，机制与决策对象不同"
+      ]
+    }
+  ]
+}

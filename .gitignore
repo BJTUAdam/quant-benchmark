@@ -1,0 +1,37 @@
+# Python and editor files
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.DS_Store
+
+# Local credentials and machine-specific overrides
+.env
+.env.*
+*.env
+*.local.json
+*.private.env
+*.private.json
+!*.draft.private.json
+!*.env.example
+!.env.example
+
+# Local delivery image (obtain separately from the FinLab delivery)
+/make-task/images/*.tar
+
+# Staged task data and generated trajectory outputs
+*.log
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+platform_private/
+/trajectory-runner/benchmark/packages/
+/trajectory-runner/benchmark/matrices/
+/trajectory-runner/benchmark/batches/
+/trajectory-runner/benchmark/results/
+/trajectory-runner/project/demo_runner/runs/
+/trajectory-runner/project/demo_runner/runtime_setup.*
+/trajectory-runner/project/autonomous_runs/

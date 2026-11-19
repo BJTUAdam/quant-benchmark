@@ -1,0 +1,133 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-172300-ca5a47",
+  "spec_hash": "6a2d638b1f4fd04abdb9731ed88dd84f38230e1c37ccb98d2f5acbb6afa752e9",
+  "reviewed_at": "2026-11-05T04:16:52+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "variant",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "b2ec880d6f45c6b5ccedddb23ddf30af2ad0308e4ca906b946f0e0008719df55",
+  "content_hash": "66a8b68e2f4482d583162ec4874f5170c01e58e6cc506adc6222b8ab7a76a797",
+  "rationale": "候选与closest的TG-20261029-172300-ca5a47在机制、决策对象、必需决策词表与运行环境上完全一致，候选新增的差异集中在failure_exit把结构失效与突破未确认两路证据合并去重、撤销未成交单，以及capital_allocation回指entry_confirmation与range_detection两模块的回压边。这些变化是在同一突破候选状态生命周期内对既有决策的口径细化与依赖边增补，未改变核心研究问题与决策语义：仍是区间识别、突破确认、失败退出、再入场与资金分配的突破状态维护。ca5a47的宽泛novelty_claim已允许区间失效与失败处置的区分，候选增加的一条撤销步骤与预算回压边属于对既有允许解法的细化，不构成实质性新决策对象或新机制。维护目标新增risk_recovery亦属于同类跨段兼容扩展。因此判variant而非distinct，closest指向ca5a47。候选未声称数据已采集或运行完成，public信息无答案实现或密钥，long_horizon由七段连续账户、分段反馈与memory持续维护支撑。",
+  "pending_bindings": [
+    "数据绑定：真实股票/ETF代码与名称、真实起止与冻结版本待运营方在绑定时确认",
+    "停牌、价格限制、公司行为、T+1与交易单位规则待runtime_profile绑定",
+    "resources=null与resource_status=requires_human_setup为预期待办，CPU/内存/时限由本人运行finlab setup配置",
+    "评分配置与运行难度待管线绑定后固定",
+    "formal_segments实际分段边界未冻结"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F01 consolidation_breakout机制与breakout_position_state决策对象",
+        "必需决策集合完全一致：range_detection、entry_confirmation、failure_exit、reentry_policy、capital_allocation",
+        "均为区间识别→突破确认→失败退出→再入场→资金分配的突破候选状态生命周期",
+        "均使用akquant_stock_etf_v2、日线NextOpen、跨段现金持仓未完成订单memory连续"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "候选增加failure_exit对区间结构失效与突破未确认两路证据的优先级去重规则，并把capital_allocation回指entry_confirmation与range_detection",
+        "候选决策依赖多出capital_allocation→entry_confirmation、capital_allocation→range_detection及range_detection→failure_exit三条边，形成资金回压闭环",
+        "候选维护目标在structure_validity、signal_execution_gap、state_compatibility外增加risk_recovery"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F01 consolidation_breakout与breakout_position_state",
+        "共享range_detection、failure_exit、reentry_policy、capital_allocation",
+        "均有capital_allocation回指闭环与risk_recovery维护目标"
+      ],
+      "task_id": "TG-20261029-184839-b184fc",
+      "differences": [
+        "b184fc以state_identification与switch_hysteresis为必需决策并令迟滞前置失败退出，候选完全不含状态辨识与切换迟滞",
+        "候选的差异来源是失效证据合并与预算回压识别/确认宽度，而非参与控制切换"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F01短趋势母题，含range_detection、entry_confirmation、reentry_policy、capital_allocation",
+        "共享structure_validity、signal_execution_gap、state_compatibility维护目标"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01为宽泛short_horizon_trend，决策对象为stock_trend_portfolio，退出为exit_policy而非failure_exit",
+        "候选聚焦区间→确认→两路失效→冷却→预算回压闭环，不做宽泛趋势追踪"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F01，同含failure_exit、capital_allocation与资金回压闭环",
+        "维护目标集相同，均含risk_recovery"
+      ],
+      "task_id": "TG-20261029-185249-24341b",
+      "differences": [
+        "24341b为trend_pullback机制与trend_pullback_inventory对象，核心是趋势资格撤回与回撤失效区分",
+        "候选为突破候选状态的两路失效（结构失效vs未确认）合并，不涉及趋势资格与回撤定位"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F01趋势/区间母题，均处理失效证据吸收与预算回压"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "8868c8为trend_pullback库存，且不设failure_exit而由exit_policy吸收失效",
+        "候选显式保留failure_exit并聚焦突破确认缺失，决策对象与机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同含range_detection、reentry_policy、capital_allocation与失效证据去重"
+      ],
+      "task_id": "TG-20261029-184707-5e00a9",
+      "differences": [
+        "5e00a9为F02 range_boundary_reversion与多品种商品期货分合约，需处理合约月份与参考漂移",
+        "候选为F01股票ETF整理区间突破，不做边缘回归与趋势否决"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F01，同含entry_confirmation与退出反馈边"
+      ],
+      "task_id": "TG-20261029-185109-ad8725",
+      "differences": [
+        "ad8725为trend_pullback_inventory，核心是回撤定位、分批库存与状态迁移",
+        "候选以突破确认缺失与区间结构失效区分为核心，不涉及分批库存迁移"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F01趋势回撤家族，均含退出与层级维护"
+      ],
+      "task_id": "TG-20261029-184647-ca78bb",
+      "differences": [
+        "ca78bb为trend_pullback_inventory与staged_inventory，无failure_exit与突破确认",
+        "候选为突破候选状态，决策对象与机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同含entry_confirmation、隔日/T+1库存与退出"
+      ],
+      "task_id": "TG-20261029-184905-a288f9",
+      "differences": [
+        "a288f9为F02 shock_path_reversion与shock_event_inventory，核心是异常冲击识别与恢复路径",
+        "候选为整理区间突破状态生命周期，不做冲击事件检测"
+      ]
+    },
+    {
+      "similarities": [
+        "同含capital_allocation式预算缩减与分步恢复、risk_recovery维护目标",
+        "均处理T+1库存与已挂未成交单处置"
+      ],
+      "task_id": "TG-20261029-185155-f10be3",
+      "differences": [
+        "f10be3为F04 drawdown_risk_budget与portfolio_risk_controller，核心是组合级预算刻度表达与恢复闭环",
+        "候选为F01突破候选状态，预算仅作为回压识别/确认的辅助状态，不研究组合风险预算表达"
+      ]
+    }
+  ]
+}

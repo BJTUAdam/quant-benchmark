@@ -1,0 +1,269 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "整理区间突破后的确认缺失处置：区间失效与突破未确认的区分、失败退出与再入场预算回压",
+  "family_id": "F01",
+  "source_ids": [
+    "SRC_STOCK_TRENDS",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "consolidation_breakout",
+  "decision_object": "breakout_position_state",
+  "required_decisions": [
+    "range_detection",
+    "entry_confirmation",
+    "failure_exit",
+    "reentry_policy",
+    "capital_allocation"
+  ],
+  "decision_dependencies": [
+    [
+      "range_detection",
+      "entry_confirmation"
+    ],
+    [
+      "entry_confirmation",
+      "failure_exit"
+    ],
+    [
+      "range_detection",
+      "failure_exit"
+    ],
+    [
+      "failure_exit",
+      "reentry_policy"
+    ],
+    [
+      "reentry_policy",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "entry_confirmation"
+    ],
+    [
+      "capital_allocation",
+      "range_detection"
+    ]
+  ],
+  "maintenance_targets": [
+    "structure_validity",
+    "signal_execution_gap",
+    "risk_recovery",
+    "state_compatibility"
+  ],
+  "research_question": "在国内股票或ETF日线环境中，仅用当时已收盘数据界定整理区间并给出突破信号；当突破后价格未能完成确认、又退回区间内部时，如何把“区间本身被证伪（结构失效）”与“区间仍有效但突破未获确认”两路证据区分并去重，转化为对已有候选持仓的退出与对已挂未成交单的撤销，而不是把两种情况都当成普通止损；退出与撤销造成的预算缩减与现金碎片，又如何反过来收窄下一段区间识别的有效边界与突破确认的等待宽度，使整个状态生命周期在跨段维护中连续可核？",
+  "research_modules": [
+    {
+      "decision_id": "range_detection",
+      "description": "仅用已完成日线收盘数据界定整理区间：区间上下边界、成立所需的最短驻留与失效条件的表达方式（例如边界被连续收于区间之外多久视为结构失效）。需要说明区间有效期如何随新数据滚动更新，以及更新时对旧边界是替换、扩展还是重置。此模块只决定“当前是否存在有效区间及其边界”，不决定是否入场。",
+      "interaction": "区间边界与有效期直接决定突破信号的空间位置；同时向 failure_exit 提供“结构失效”的判定依据，使退出模块能区分区间被证伪与突破未确认。capital_allocation 的预算缩减结果会反向收窄该模块接受的区间宽度有效范围，形成资金约束对区间识别的回压。"
+    },
+    {
+      "decision_id": "entry_confirmation",
+      "description": "在区间边界给定后，定义突破的确认依据与等待时机：例如需要连续几根完成日线收于边界之外、或以收盘价相对边界的持续性而非盘中穿越作为确认；并明确确认之前是否允许以试探性手数参与、以及该试探的规模上限。此模块只回答“何时算确认、确认前可做什么”，不回答失败后如何退出。",
+      "interaction": "接收 range_detection 的边界与有效期作为输入；其确认结论是 failure_exit 判定“突破未确认”的前提。同时受 capital_allocation 回压：预算缩减后允许的试探规模与最长等待宽度被收紧，从而改变什么算容易达成的确认。"
+    },
+    {
+      "decision_id": "failure_exit",
+      "description": "定义两类失败路径并给出优先级与去重规则：一是已持有候选因区间结构失效而退出，二是突破始终未获确认且价格退回区间内部而退出；说明两路证据同时出现时如何合并为一次退出动作、如何避免重复计减，以及退出时对已挂未成交单的撤销顺序。还需处理股票/ETF的T+1不可卖库存：当日新买部分无法立即卖出时，退出如何分批、残余敞口如何隔日处置。",
+      "interaction": "同时接收 entry_confirmation 的未确认结论与 range_detection 的结构失效判定，是两路证据的汇合点；其退出结果触发 reentry_policy 的冷却与恢复，并把已实现亏损与残余敞口传递给 capital_allocation。"
+    },
+    {
+      "decision_id": "reentry_policy",
+      "description": "规定失败退出后的冷却与恢复条件：同一标的需要满足哪些当时可见的条件才允许再次进入候选状态（例如区间重新成立、或确认条件被重新满足且间隔满足最短冷却），以及冷却期内是否允许观察但不参与。需明确冷却的计量方式与解除时是否保留旧区间的记忆。",
+      "interaction": "由 failure_exit 的退出类型驱动：结构失效与未确认两类退出可对应不同的冷却强度；其恢复结论决定何时可再次调用 entry_confirmation。同时受 capital_allocation 约束，预算缩减期间可允许再入场但规模更低或冷却更长。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在多个候选标的与多次失败之间分配资金、现金与单标的上限；当连续失败或已实现回撤出现时，如何缩减可用于突破试探与确认后建仓的预算，缩减按暴露单位还是按单标的额度表达；缩减后如何在后续连续成功中分步恢复，并确保恢复不依赖被覆盖的亏损记忆。",
+      "interaction": "接收 failure_exit 的实现亏损与残余敞口作为缩减触发来源；其预算状态回写至 entry_confirmation（收紧确认前试探规模与等待宽度）与 range_detection（收窄可接受区间宽度），形成资金约束回压识别与确认的闭环，使预算成为一等状态而非末端记账。"
+    }
+  ],
+  "maintenance_rationale": "后续新揭晓的段数据可能显示：区间在多数时段被重新定义后边界频繁跳变（结构有效性问题）；突破信号与 NextOpen 实际成交之间存在系统性价差，导致确认条件在实盘序列中更难满足（信号执行差距）；连续失败后退出的残余敞口与T+1库存使预算恢复滞后于信号恢复（风险恢复问题）；以及预算回压改变确认宽度后，旧的持仓与区间记忆若不同步迁移会造成状态不一致（跨段兼容问题）。这些观察可能促使保持原逻辑、仅调整区间与确认的判定口径、或修改失败退出的合并规则与预算回压强度；不承诺每次维护都提升收益。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "股票池为真实股票或ETF代码；当前为空池，待运营方按真实名称与代码绑定，不使用匿名代号。",
+      "仅运营方采集规划用途，真实起止与冻结版本在绑定时确认；任务包不含行情文件或 data/ 目录。",
+      "所需区间宽度、突破持续性、冷却间隔等均由 allowed_fields 中已列出的日线价量字段计算，不新增原始字段。",
+      "停牌、价格限制、公司行为与T+1规则需在数据绑定时明确，未绑定前不假设可用。"
+    ]
+  },
+  "parameter_space": [
+    "区间成立所需的最短驻留长度（以完成日线根数表达）",
+    "区间边界被收于区间之外视为结构失效的持续条件",
+    "突破确认所需的连续收于边界之外的根数与确认前允许的试探手数上限",
+    "失败退出时撤销未成交单与分批减仓的优先顺序规则",
+    "冷却期的计量方式与解除条件（是否要求区间重新成立）",
+    "连续失败触发预算缩减的阈值与缩减阶梯，以及分步恢复的分级条件"
+  ],
+  "novelty_claim": "与 existing_tasks 中最近的 TG-20261029-172300-ca5a47（同为 consolidation_breakout / breakout_position_state，必需决策为区间识别、突破确认、失败退出、再入场、资金分配）相比：该候选把失败处置当作单一入口，突破确认到失败退出为单向链，资金分配只位于链末端承担分配，不反向影响区间识别与确认宽度。本任务的实际研究取舍是 failure_exit 同时接收“区间结构失效”与“突破未确认”两路证据并须给出优先级与去重规则，且 capital_allocation 回指 entry_confirmation 与 range_detection，使预算缩减直接改变确认等待宽度与可接受区间宽度；维护目标也由 signal_execution_gap 主导扩展为加入 risk_recovery 与 structure_validity 的双重检验。与 TG-20261029-184839-b184fc 相比，该候选以 state_identification 与 switch_hysteresis 作为差异来源，本任务不含状态辨识与切换迟滞，差异来自失效证据合并与预算回压而非参与控制。与历史 HT01 宽泛短周期趋势相比，本任务不以宽泛突破跟踪为目标，而聚焦区间→确认→两路失效→冷却→预算回压的闭环。沿用既有机制、对象与决策词表，未引入新 ID，未声称已获数据、已运行或已实证有效；若实现退化为在 ca5a47 上仅增加一个撤销挂单步骤或调整阈值，应视为该候选的变体而非独立新题，需人工语义审。",
+  "lineage": {
+    "derived_from": [
+      "S01",
+      "HT01",
+      "TG-20261029-172300-ca5a47",
+      "TG-20261029-184839-b184fc"
+    ],
+    "kind": "failure_evidence_merge_and_budget_feedback_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "strategy.py",
+      "backtest.py",
+      "params.json",
+      "RESEARCH.md",
+      "CHANGELOG.md"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "batch_id": "B-20261105-041626-d5ef52",
+    "version": 0,
+    "provenance": "model_api",
+    "pipeline_status": "not_connected",
+    "data_status": "not_bound",
+    "status": "pending_human_review",
+    "model_review_status": "needs_attention",
+    "id": "TG-20261105-041643-7e6569",
+    "created_at": "2026-11-05T04:16:43+00:00"
+  }
+}

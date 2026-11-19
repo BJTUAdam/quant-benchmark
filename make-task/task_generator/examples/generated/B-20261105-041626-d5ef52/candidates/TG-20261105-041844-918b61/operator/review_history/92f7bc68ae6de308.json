@@ -1,0 +1,120 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-172301-684a8d",
+  "spec_hash": "a814457c9689001193b83afc6c664c7b9a668dfc8a7574025e92814e39a52a70",
+  "reviewed_at": "2026-11-05T04:18:54+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "uncertain",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "def411a8ae5b3d45f5c127519a7dc1838d266c223d20d3a0a3edd53ac2fd75cc",
+  "content_hash": "0d9d865ad027302115884150155fd24b23ef3539abab2fa27733d90f697913c6",
+  "rationale": "候选与最近的历史F06任务共享同品种多月份、期限口径、真实两腿、整数手数、移仓与状态迁移，但候选明确把curve_signal设为必需决策并让其直接驱动pair_selection排序，且state_migration同时回指pair_selection与curve_signal。TG-20261029-172301-684a8d与TG-20261029-185356-d4e28b均不以曲线斜率信号为配对依据；TG-20261029-185226-a83ad1以整数手数与保证金预算为核心；TG-20261029-185538-ab9792以关系监控为枢纽。该差异是否构成实质独立决策，还是仅属于旧F06题宽泛允许方法内的细化，边界不够明确：一方面curve_signal在既有决策词表中存在、且同属term_curve语境；另一方面它确实改变pair_selection的排序语义与迁移确认对象。按边界不足要求不能勉强放行，故置uncertain，需人工语义审。未发现答案实现、最终参数或未来行情泄露；长程维护通过分段反馈、状态连续与口径版本迁移成立。数据未绑定、分段未冻结、资源需本人setup、评分待管线绑定均属预期待办。",
+  "pending_bindings": [
+    "正式起止日期、dataset_id与virtual_start/virtual_stop均为null，binding_status=not_bound，需数据接入阶段绑定。",
+    "FG与M同一品种多到期月份的真实分合约覆盖、月份覆盖需绑定确认。",
+    "乘数、保证金率、费用、夜盘交易日与到期规则market_rules_status=requires_binding，缺失时不得正式运行。",
+    "runtime_profile.resources=null、resource_status=requires_human_setup，资源预算由本人运行finlab setup配置。",
+    "formal_segments=7但分段边界boundaries=null，需绑定后固定。",
+    "评分细则待管线绑定，题目不提供预期成绩。"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同属F06同品种多月份期限结构，环境为akquant_futures_v2，决策频率为收盘后日线、NextOpen撮合，维护目标包含curve_stability、expiry_roll、margin_exposure、state_compatibility。",
+        "均需tenor_normalization、pair_selection、entry_exit、roll_policy、state_migration。"
+      ],
+      "task_id": "TG-20261029-172301-684a8d",
+      "differences": [
+        "候选把curve_signal设为必需决策，并让curve_signal直接驱动pair_selection候选排序；684a8d以近远月价差的pair_selection与到期迁移为核心，未把多月份曲线信号作为必需决策。",
+        "候选依赖链包含state_migration回指pair_selection与curve_signal，要求口径版本更新后候选对与信号阈值不得自动沿用；684a8d的迁移链未形成该双回指闭环。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F06 calendar_spread_pairing/term_curve_pairing语境，环境与维护目标相同，均需tenor_normalization、pair_selection、entry_exit、roll_policy、state_migration。"
+      ],
+      "task_id": "TG-20261029-185226-a83ad1",
+      "differences": [
+        "a83ad1以可比期限单位与真实整数手数配对、保证金预算为核心必需决策，不含curve_signal。",
+        "候选以多月份曲线斜率信号驱动配对选择为核心，pair_selection的候选排序取决于curve_signal；该差异需人工判断是否仅是旧题允许方法的细化。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F06同品种多月份配对，均需tenor_normalization、pair_selection/month_selection、entry_exit、roll_policy、state_migration，且state_migration回指配对选择。"
+      ],
+      "task_id": "TG-20261029-185356-d4e28b",
+      "differences": [
+        "d4e28b用month_selection从多月份中选两腿，明确不纳入curve_signal，期限口径只服务可比表达与换腿时点。",
+        "候选新增由多月份曲线斜率与形态变化生成的curve_signal并作为配对排序依据；该机制差异是否足以构成独立研究决策需人工判断。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F06同品种跨期价差，环境与维护目标相同，均涉及tenor_normalization、pair_selection、roll_policy、state_migration。"
+      ],
+      "task_id": "TG-20261029-185538-ab9792",
+      "differences": [
+        "ab9792的枢纽是relationship_monitoring随近腿流动性衰减触发缩减/暂停/重选配对，不含curve_signal。",
+        "候选的枢纽是curve_signal驱动pair_selection，配对随曲线形态动态变化；两者核心触发机制不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均为国内期货多腿研究，涉及真实合约腿、整数手数、roll_policy与state_migration。"
+      ],
+      "task_id": "HT03",
+      "differences": [
+        "HT03为F05大豆压榨crush_component_aggregation，跨品种B/M/Y加工关系与分项信号汇总；候选为同品种不同月份，不涉及加工系数或跨品种对冲。"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及month_selection与合约腿选择、roll与状态迁移。"
+      ],
+      "task_id": "HT05",
+      "differences": [
+        "HT05为F05 FG/SA跨品种统计价差与对冲关系估计；候选为同品种不同月份曲线结构，不涉及跨品种对冲估计。"
+      ]
+    },
+    {
+      "similarities": [
+        "均为期货多腿、真实合约腿与保证金/移仓维护。"
+      ],
+      "task_id": "HT04",
+      "differences": [
+        "HT04为F05 SC/FU/LU油品跨品种相对价值多腿组合；候选为同品种月份结构，决策对象不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及合约月份选择、配对/腿选择、roll与状态迁移。"
+      ],
+      "task_id": "TG-20261029-172301-36425d",
+      "differences": [
+        "36425d为F05 FU/LU跨品种残差滚动对冲与暂停重估；候选为同品种月份曲线斜率驱动的配对，机制与决策对象不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均要求当时可见数据、整数手数、关系监控/信号与状态迁移的联合维护。"
+      ],
+      "task_id": "TG-20261105-041820-c67182",
+      "differences": [
+        "c67182为F05跨品种加工链条残差与对冲比例重估；候选为同品种多月份期限曲线，不涉及跨品种对冲估计。"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及状态识别与状态迁移的连续维护。"
+      ],
+      "task_id": "TG-20261029-172300-e01b9a",
+      "differences": [
+        "e01b9a为F04趋势/震荡参与控制器，决策对象为participation_controller；候选为F06同品种期限曲线配对，决策机制与标的截然不同。"
+      ]
+    }
+  ]
+}

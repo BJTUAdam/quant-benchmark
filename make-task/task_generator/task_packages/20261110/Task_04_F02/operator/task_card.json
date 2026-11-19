@@ -1,0 +1,318 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "重叠冲击的恢复证据：事件归属、重复参与与隔日库存预算",
+  "family_id": "F02",
+  "source_ids": [
+    "SRC_STOCK_TRENDS",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "shock_path_reversion",
+  "decision_object": "shock_event_inventory",
+  "required_decisions": [
+    "shock_detection",
+    "recovery_path",
+    "entry_confirmation",
+    "overnight_inventory",
+    "capital_allocation",
+    "reentry_policy",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "shock_detection",
+      "recovery_path"
+    ],
+    [
+      "recovery_path",
+      "entry_confirmation"
+    ],
+    [
+      "entry_confirmation",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "overnight_inventory"
+    ],
+    [
+      "overnight_inventory",
+      "reentry_policy"
+    ],
+    [
+      "shock_detection",
+      "reentry_policy"
+    ],
+    [
+      "reentry_policy",
+      "entry_confirmation"
+    ],
+    [
+      "shock_detection",
+      "state_migration"
+    ],
+    [
+      "recovery_path",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "capital_allocation"
+    ],
+    [
+      "state_migration",
+      "overnight_inventory"
+    ],
+    [
+      "recovery_path",
+      "overnight_inventory"
+    ]
+  ],
+  "maintenance_targets": [
+    "reversion_failure",
+    "signal_execution_gap",
+    "cost_sensitivity",
+    "state_compatibility"
+  ],
+  "research_question": "同一股票的冲击事件尚未恢复又发生新的价量冲击时，如何确定事件与恢复证据的归属，限制重复参与，并使多个事件研究台账、隔日锁定库存及统一账户预算连续一致？",
+  "research_modules": [
+    {
+      "decision_id": "shock_detection",
+      "description": "研究同一股票尚未完成恢复时再次出现价量冲击，如何划分新事件、原事件延续和同一事件的重复触发；只以当时完成的日线分配事件编号与创建时事实。",
+      "interaction": "事件边界和创建时快照交recovery_path；合并与分裂决定资本预留和reentry_policy资格，不能把持仓后最大的波动追溯成最初冲击。"
+    },
+    {
+      "decision_id": "recovery_path",
+      "description": "研究重叠事件下回摆、延续与未决证据的归属：同一根行情对旧事件和新事件可能方向相反，需要说明证据共享、占用或互斥规则及累计方式。同时研究回归实现、延续失效与持有时限分别如何触发旧仓退出或事件结束；明确未决事件不能无限占用库存。",
+      "interaction": "接收shock_detection的事件版本；将每个事件的可用恢复证据传entry_confirmation，事件归并时先经state_migration承接证据，不能复制一次反弹给多个事件并重复扩大参与。本模块给overnight_inventory输出退出需求与事件结束裁决；只有平台确认退出成交且关联未完成订单已处理后，才可将有库存的事件标为完成，不能把证据恢复等同实际平仓。"
+    },
+    {
+      "decision_id": "entry_confirmation",
+      "description": "研究在当前事件集合上确认回归参与的时机，区分对旧事件追加、对新事件首次参与和禁止重复参与；确认只能依据当前已可见证据。",
+      "interaction": "接收recovery_path和reentry_policy，输出带事件归属的待办给capital_allocation；资金不足或旧事件库存未解除时，确认保留、降级或过期的规则须明确，不能按事件数量简单叠加买单。"
+    },
+    {
+      "decision_id": "overnight_inventory",
+      "description": "将实际成交、T+1不可卖量、可卖量和未完成订单映射到事件研究台账；多事件台账的净量必须与平台统一真实持仓核对，不创建独立虚构子账户。",
+      "interaction": "接收capital_allocation的实际执行，向reentry_policy报告旧事件是否真正结束；归并事件或新参数不能使旧库存从台账消失，也不能把未卖出的旧仓当作空仓重开。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在同一股票多个事件以及不同股票事件之间研究净头寸上限、事件预留额度和重复证据的预算折减；预算按统一账户真实持仓约束，而非假设每个事件各有初始资金。",
+      "interaction": "接收entry_confirmation和overnight_inventory；事件合并经state_migration完成后才重新核算预留。预算反馈影响下一期确认等待，不在同一事件中循环改变已经使用的恢复证据。"
+    },
+    {
+      "decision_id": "reentry_policy",
+      "description": "研究旧冲击未清理、已退出后再冲击及事件合并后的再次参与资格，明确冷却对象是股票、事件簇还是恢复证据，并保留已经用过的确认信息。",
+      "interaction": "接收overnight_inventory和shock_detection，新机会需交entry_confirmation判断；未成交退出或不可卖库存不能被当作已完成旧事件而提前解除冷却。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "研究跨段改变冲击划分或证据归属方法时，如何保持旧事件编号、已消耗证据、真实订单和库存研究台账可追溯；定义合并与分裂的守恒检查。",
+      "interaction": "接收shock_detection和recovery_path版本，映射结果传capital_allocation及overnight_inventory对账；迁移不重放历史买单，不复制旧仓，不重新获得已消耗的恢复证据。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能从孤立冲击变为成簇冲击，恢复证据被多事件反复使用、冷却状态错配和旧库存重复归属的风险随之变化。维护可改变事件划分、证据去重、预算分摊或保留既有规则，但必须检查真实持仓守恒、已使用证据不复活以及未完成退出不丢失；这些行为是否改善长期运行由轨迹验证。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内股票，具体固定股票池和真实连续范围在数据绑定时明确；不依据未来成分筛选股票。",
+      "市场数据通过已绑定的Tushare桥接接口获得，不提供行情文件包。默认日线环境，不能由日线推断盘中委托排队位置。",
+      "daily成交价使用原始报价；adj_factor只可使用当前已可见版本，公司行为由平台处理，不能重复计算分红或使用最终复权因子回填过去。",
+      "至少连续两年并满足研发期加七段的有效交易日要求；实际分段、数据版本和公开虚拟范围在冻结后确定。",
+      "名称和代码保留真实值；公开日期只是虚拟顺序标签，不能据年份套用真实事件。"
+    ]
+  },
+  "parameter_space": [
+    "价量冲击的识别尺度与联合证据",
+    "事件簇合并、延续和分裂条件",
+    "恢复证据共享、占用或互斥规则",
+    "回摆、延续与未决状态的停留条件",
+    "回归实现、延续失效与最长持有期限的退出裁决及事件结束条件",
+    "首次参与与追加参与的确认差异",
+    "同票多事件净头寸和预留额度上限",
+    "重复证据参与的预算折减规则",
+    "事件、事件簇或股票级冷却的选择",
+    "隔日锁定库存的事件归属与释放规则",
+    "事件划分版本变更的台账迁移方法",
+    "真实订单、持仓与研究台账的守恒核对"
+  ],
+  "novelty_claim": "相邻题S04及TG-20261105-042202-a4ef6a研究单个冲击恢复与隔日库存。本候选把同时未完成的事件集合及证据归属作为必要对象，要求事件合并/分裂、恢复证据去重、同票净头寸预算与台账守恒共同影响参与，不能只换冲击指标或阈值。事件管理可能仍被宽泛旧题覆盖，保留为独立性待复核的研究候选，不声称已通过语义去重。",
+  "lineage": {
+    "derived_from": [
+      "S04",
+      "HT02",
+      "TG-20261105-042202-a4ef6a"
+    ],
+    "kind": "assistant_authored_research_candidate_not_claimed_independent"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-04",
+    "task_id": "TASK12-20261110-04",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

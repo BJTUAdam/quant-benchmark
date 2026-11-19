@@ -1,0 +1,290 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "跨品种对冲关系的分歧仲裁：可信区间、冻结估计与逐级恢复",
+  "family_id": "F05",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "cross_product_residual",
+  "decision_object": "cross_product_leg_portfolio",
+  "required_decisions": [
+    "month_selection",
+    "hedge_estimation",
+    "relationship_monitoring",
+    "state_identification",
+    "switch_hysteresis",
+    "margin_budget",
+    "entry_exit",
+    "roll_policy"
+  ],
+  "decision_dependencies": [
+    [
+      "month_selection",
+      "hedge_estimation"
+    ],
+    [
+      "hedge_estimation",
+      "relationship_monitoring"
+    ],
+    [
+      "relationship_monitoring",
+      "state_identification"
+    ],
+    [
+      "state_identification",
+      "switch_hysteresis"
+    ],
+    [
+      "switch_hysteresis",
+      "margin_budget"
+    ],
+    [
+      "margin_budget",
+      "entry_exit"
+    ],
+    [
+      "entry_exit",
+      "relationship_monitoring"
+    ],
+    [
+      "entry_exit",
+      "roll_policy"
+    ],
+    [
+      "roll_policy",
+      "month_selection"
+    ],
+    [
+      "roll_policy",
+      "hedge_estimation"
+    ]
+  ],
+  "maintenance_targets": [
+    "hedge_drift",
+    "regime_transition",
+    "risk_recovery",
+    "margin_exposure",
+    "expiry_roll"
+  ],
+  "research_question": "当FU/LU等跨品种关系的多个可解释估计口径互相矛盾时，如何区分短期残差偏离、估计失稳与合约换月造成的口径变化，并让冻结估计、降低参与、退出和恢复分别有明确适用状态？研究对象是分歧的仲裁与风险恢复路径，不能把冲突简单平均成一个永远可交易的信号。",
+  "research_modules": [
+    {
+      "decision_id": "month_selection",
+      "description": "仅从当时可见且可交易的实际分合约中确定参与月份，说明期限错配和换月窗口的资格规则。",
+      "interaction": "月份变更先生成新关系版本再进入估计；旧月份已有库存仍按旧版本处置，不能把价格拼接跳跃直接当成关系失效。"
+    },
+    {
+      "decision_id": "hedge_estimation",
+      "description": "构造至少两种各有明确含义的对冲关系口径及各自的样本资格、估计更新时间和整数手数映射；不预定哪一种口径总是正确。",
+      "interaction": "输出估计差异及其可比尺度供监测使用。预算降低可改变可执行整数比例时，保留统计比例与执行比例的区别，不把不可交易手数当成第二个估计器。"
+    },
+    {
+      "decision_id": "relationship_monitoring",
+      "description": "将估计口径之间的差异、残差表现和实际持仓偏离分别记录，定义证据缺失或冲突，而非一律当作零残差。",
+      "interaction": "监测接收真实成交后形成的敞口，再为状态识别提供已完成证据；不得用下一阶段数据事后决定本段估计是否可信。"
+    },
+    {
+      "decision_id": "state_identification",
+      "description": "定义可解释且互斥的状态，例如一致、暂时分歧、证据不足和持续失稳，并说明同一事件中多个条件命中时的裁决顺序。",
+      "interaction": "先完成当前状态判定，再交由迟滞机制决定是否允许转换；状态可以保留旧估计但必须区分禁止加仓与必须退出。"
+    },
+    {
+      "decision_id": "switch_hysteresis",
+      "description": "决定分歧出现和消退时的确认、最短驻留及恢复步数，明确状态复核先于预算和下单。",
+      "interaction": "恢复需要重新满足估计资格与月份资格，不因一次残差回归就解除暂停；迟滞更新的结果只影响当前决策之后的动作。"
+    },
+    {
+      "decision_id": "margin_budget",
+      "description": "将已确认状态映射到允许新增、仅减仓或分步恢复的手数上限，按各真实腿独立保证金及费用计算，不假定跨品种抵扣。",
+      "interaction": "预算只能限制可执行动作，不能反过来抹掉失稳证据；当整数手数无法满足对冲容差时应选择等待或减仓，而非强制补足风险。"
+    },
+    {
+      "decision_id": "entry_exit",
+      "description": "在状态和预算共同允许时定义残差参与、保持或退出，说明仅一腿成交、未完成订单与重新估计之间的处理顺序。",
+      "interaction": "真实成交后的偏离回到监测。冻结估计时保留版本标记，不能把新估计残差直接应用于旧持仓账本导致无解释的仓位跳变。"
+    },
+    {
+      "decision_id": "roll_policy",
+      "description": "定义到期前撤旧订单、减旧仓与转入新月份的阶段动作；换月失败时要有明确的保守处理。",
+      "interaction": "换月会重新触发月份资格与估计资格核验；新组合尚未建立时，关系状态不能默认恢复为一致。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能出现估计口径频繁反向、低流动性月份证据不足、迟滞过慢留下失稳敞口，或恢复过快造成重复开平。每段后可保持原规则、调整确认和预算参数或修改仲裁逻辑，但估计版本、旧仓、未完成订单与memory连续；维护需说明改变影响哪类分歧及为何不依赖未来证据。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "FU",
+      "LU"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内真实分合约；品种代码是待绑定合约池，实际合约月份、交易所、到期规则和覆盖范围由平台绑定，不用主力连续价格替代可交易合约。",
+      "行情经Tushare桥接查询，不交付行情文件包。真实时间范围、冻结版本及阶段边界尚未绑定；公开时间只为虚拟事件顺序，不依据虚拟年份套用现实事件。",
+      "仅登记fut_daily与fut_basic可提供字段；计算出的价差、残差、流动性度量及影子归属记录由策略在当前已可见信息上构造，不作为上游新字段。",
+      "平台须绑定合约乘数、报价单位、交易时段、结算价、逐日价格限制、保证金和费用。当前引擎不支持的按手收费或差异平今费不得静默设0；规则未齐不能正式运行。",
+      "多腿订单逐腿撮合，可能部分成交、撤单失败或产生临时净敞口；不得依赖原子组合成交、跨腿保证金优惠或未绑定的跨品种转换系数。",
+      "来源仅使用已登记来源卡的主题和目录启发；本题研究问题由本轮助手设计，未引用或读取未提供的全书内容，不是书中现成策略。",
+      "策略的订单/成交通知仅更新JSON memory中的归属、占用及剩余意图；新增订单和撤单只在平台允许的on_bars回调发出。不得假设on_order/on_trade可立即再次发单，也不得将下一根开盘的成交容量提前视为已知。"
+    ]
+  },
+  "parameter_space": [
+    "估计窗口长度与最低有效样本数",
+    "不同估计口径的更新节奏",
+    "分歧标准化尺度与证据不足判定",
+    "失稳进入与恢复退出的独立确认门槛",
+    "状态最短驻留与分步恢复幅度",
+    "可执行整数比例误差上限",
+    "状态对应的新增手数预算",
+    "残差参与与持有时限",
+    "到期前停止加仓与撤旧单窗口",
+    "连续缺失行情时的状态记忆保留方式"
+  ],
+  "novelty_claim": "与S09/HT04已有滚动对冲、暂停重估有重叠。本题候选差异是把估计分歧的互斥状态、迟滞转换、冻结估计资格与风险恢复顺序列为必需仲裁问题；不能仅因多放一个估计器就认定独立新题，若这些决策退化为既有relationship_monitoring的阈值改写，应计为变体。",
+  "lineage": {
+    "derived_from": [
+      "S09",
+      "HT04"
+    ],
+    "kind": "assistant_authored_research_candidate_not_api_screened"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "FU",
+      "LU"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-09",
+    "task_id": "TASK12-20261110-09",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

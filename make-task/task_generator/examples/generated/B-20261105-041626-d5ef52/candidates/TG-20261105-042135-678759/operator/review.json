@@ -1,0 +1,131 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-041906-253472",
+  "spec_hash": "430eee70e1e20916a66bdb4131e65807e95d8d10b8066b306d39535b0abb2a1f",
+  "reviewed_at": "2026-11-05T04:30:03+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "03971c27b0acd73d964ce9dd8947627cfca15a1dedea7f0135e9b7b9a0f0c617",
+  "content_hash": "0d62d2cca5f96d68034fa044f32e5e5da0826094e9dc0ee70987cb46dd34322b",
+  "rationale": "候选与TG-20261105-041906-253472在家族、核心机制、决策对象、五个必需决策、六条依赖边、维护目标和研究问题上几乎逐句同构，structural_check亦记录exact_matches命中该ID。候选相对该最近题的新增表述（逐腿撮合、部分成交、残余敞口、保证金占用）落在akquant_futures_v2既定执行语义内，由同一组决策承担，未形成新的必需研究决策或改变核心问题。与其他历史trend_pullback候选相比，候选主要是在state_migration/entry_confirmation/failure_exit之间做决策切分与依赖边重排，属于同一宽泛问题下的相邻变体，而非独立研究对象。因此判为duplicate，最接近为TG-20261105-041906-253472。",
+  "pending_bindings": [
+    "真实分合约数据冻结、授权与月份流动性绑定未完成（binding_status=not_bound，dataset_id=null）",
+    "交易规则、保证金、结算、费用、夜盘交易日与到期规则待绑定（market_rules_status=requires_binding）",
+    "正式期虚拟时间范围与七段分段边界未确定",
+    "资源预算需本人运行finlab setup选择（resources=null，resource_status=requires_human_setup）；CPU/内存建议为非生效",
+    "评分配置与管线在正式开始前固定，尚未绑定"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同家族F01、同核心机制trend_pullback、同决策对象trend_pullback_inventory",
+        "五个必需决策完全一致：trend_qualification、pullback_location、staged_inventory、exit_policy、capital_allocation",
+        "六条决策依赖边完全一致，含capital_allocation回指trend_qualification与staged_inventory的预算回压闭环",
+        "维护目标一致：structure_validity、signal_execution_gap、risk_recovery、state_compatibility",
+        "研究问题几乎逐句同构：单品种趋势资格复核、回撤定位到分批库存、资格撤回与退出联动、预算缩减回压资格宽度与批次手数"
+      ],
+      "task_id": "TG-20261105-041906-253472",
+      "differences": [
+        "候选在staged_inventory与exit_policy描述中更显式写入逐腿撮合、可部分成交、残余敞口，并落到capital_allocation的保证金占用；但该环境约束是akquant_futures_v2的既定执行语义，不是新增研究决策",
+        "候选标题与研究问题增加了保证金占用、残余敞口的表述，但仍由同一组决策承担，不引入新决策ID或新依赖边"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制trend_pullback、同对象trend_pullback_inventory，前四个决策与依赖链一致",
+        "均要求趋势资格撤回证据并入exit_policy而非独立失效决策",
+        "均含capital_allocation回指trend_qualification的预算回压"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "该历史题为股票日线＋分钟、T+1库存环境，候选为期货分合约逐腿撮合环境，执行约束与标的类别不同",
+        "该题不设capital_allocation→staged_inventory边，候选补回该预算对批次手数的约束；但这属于依赖边重排，核心决策词表与问题结构仍等价"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制、同对象，均涉及趋势资格、回撤定位、分批库存、退出与预算缩减排退",
+        "均以预算缩减约束下一段资格判定宽度"
+      ],
+      "task_id": "TG-20261029-185249-24341b",
+      "differences": [
+        "该题把failure_exit设为独立必需决策以吸收失效信号；候选明确不设failure_exit，改由exit_policy吸收资格撤回，决策划分不同",
+        "候选增加capital_allocation→staged_inventory的预算回压边；但两者核心问题仍是趋势回撤库存与失效—预算闭环，属于依赖与决策切分的相邻变体而非独立新问题"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制trend_pullback、同对象trend_pullback_inventory，均含趋势资格、回撤定位、分批库存、退出政策",
+        "均讨论退出后状态承接"
+      ],
+      "task_id": "TG-20261029-184647-ca78bb",
+      "differences": [
+        "该题以state_migration承接批次与未决状态，候选不设state_migration",
+        "该题不含capital_allocation决策，候选引入预算回压闭环，决策集差异更大"
+      ]
+    },
+    {
+      "similarities": [
+        "同机制、同对象，均含趋势资格、回撤定位、分批库存、退出",
+        "均讨论资格撤回后的状态一致与分批库存"
+      ],
+      "task_id": "TG-20261029-185109-ad8725",
+      "differences": [
+        "该题以entry_confirmation为必需决策并含state_migration；候选两者均无",
+        "候选引入capital_allocation回指资格与库存的闭环，属于不同的决策切分"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F01，均涉及趋势方向与资金分配",
+        "均为趋势类母题"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01为45股短周期趋势组合，对象为stock_trend_portfolio，含range_detection、reentry_policy；候选为单品种期货趋势回撤库存",
+        "决策对象与库存管理机制不同，仅为宽泛历史母题对照"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F01，均含capital_allocation回指与失效证据处理、预算回压"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "该题为consolidation_breakout/breakout_position_state，核心是区间识别、突破确认、失败退出与再入场；候选为趋势回撤库存，决策对象与触发机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同族F01，均涉及失败处置与预算反馈"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "该题为整理区间突破后的跟踪、失败退出与再入场，对象为breakout_position_state；候选为趋势内回撤分批库存，不以突破确认和再入场为核心"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及风险预算缩减、恢复与资本分配闭环",
+        "均有risk_recovery维护目标"
+      ],
+      "task_id": "TG-20261105-042021-e6bb50",
+      "differences": [
+        "该题为drawdown_risk_budget/portfolio_risk_controller，核心是组合回撤证据等级与恢复准入；候选为单品种趋势回撤库存，核心触发机制与决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同属趋势/反弹类策略母题，含staged_inventory与exit_policy"
+      ],
+      "task_id": "HT02",
+      "differences": [
+        "HT02为超跌反弹股票组合，对象为oversold_stock_portfolio，核心机制oversold_rebound；候选为期货趋势回撤库存，机制与对象均不同"
+      ]
+    }
+  ]
+}

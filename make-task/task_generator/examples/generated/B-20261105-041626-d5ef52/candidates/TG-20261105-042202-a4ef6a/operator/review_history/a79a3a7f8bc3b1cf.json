@@ -1,0 +1,121 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-041931-972c77",
+  "spec_hash": "922284d22329823dd89f2300a606160349445500461f3db5c5f3b2e5888730a8",
+  "reviewed_at": "2026-11-05T04:22:12+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "variant",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "82fafabff2f637a1bb6ac67b50ede93e1325fda769de0ed7bdc76a84534b9b84",
+  "content_hash": "a773a5186488b748474edf2fe7411180aa5ebfa3a900b3617f4c8c6aba5c4932",
+  "rationale": "候选与 TG-20261105-041931-972c77 在机制、决策对象、必需决策集与维护目标上完全一致：同为区间界定→区间边缘冲击识别→回摆/延续/未决路径→确认参与→隔夜库存→失效暂停与回写区间重建的闭环。候选相对该题的实质改动是交易对象由股票/ETF改为单个期货品种真实分合约，并由此引入有符号整数手数、逐腿部分成交、残余敞口、结算与换月等执行约束；这些属于标的与执行配置层面的参数化变化，执行语义差异虽真实，但核心研究问题与决策职责仍等价，故归为 variant。相较 a288f9，候选将 exit_policy 替换为 failure_exit 并新增 range_detection 为必需决策，但 a288f9 的统一退出政策与冲击识别已宽泛允许失效回写，仅细化旧允许解法不构成独立新题。novelty_claim 中“区间检测与失效回写承担区间有效期重建”与决策链描述一致，但对 a288f9 的覆盖关系与期货分合约执行差异的独立性估计偏高，若认定其改变了必需研究决策则可讨论为 distinct，本次按判定边界保守归为 variant。其余最近任务在机制（区间回归、突破、超跌反弹、状态切换控制）或决策对象上不同，差异为实质决策变化。",
+  "pending_bindings": [
+    "实际分合约月份覆盖、连续可得性与真实冻结版本待数据绑定时确认",
+    "分合约乘数、保证金率、结算、费用、夜盘交易日与到期规则待 market_rules 绑定",
+    "日期范围、minimum_years 2 与七段正式分段边界待绑定冻结",
+    "资源预算需本人运行 finlab setup 选择；resources=null 与 resource_status=requires_human_setup 为预期待办",
+    "Tushare 桥接 data/dataset 尚未接入，data_status=not_bound、pipeline_status=not_connected",
+    "评分细则待管线绑定后固定"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为 F02 / shock_path_reversion / shock_event_inventory，必需决策集完全相同（range_detection、shock_detection、recovery_path、entry_confirmation、overnight_inventory、failure_exit）",
+        "同为区间有效期界定→区间边缘异常冲击识别→回摆/延续/未决路径判定→确认后参与→隔夜库存处置→失效暂停与冷却恢复→回写事件识别与区间重建的闭环",
+        "维护目标同为 reference_drift、reversion_failure、signal_execution_gap、state_compatibility"
+      ],
+      "task_id": "TG-20261105-041931-972c77",
+      "differences": [
+        "交易对象由国内股票与ETF日线改为单个商品期货品种的真实分合约日线，执行配置变为有符号整数手数、逐腿部分成交、残余敞口、结算与换月；这属于标的与执行配置层面的变化",
+        "入场语义由股票T+1不可卖库存改为期货NextOpen逐腿撮合下的挂续/撤单与残余敞口计量，但核心决策仍为同一职责的隔夜库存处置",
+        "失效回写与区间重建的衔接描述更细，但仍是原题已在允许范围内的失效闭环细化，未产生新的必需研究决策"
+      ]
+    },
+    {
+      "similarities": [
+        "同一 shock_path_reversion 机制与 shock_event_inventory 决策对象；均须解决冲击识别、恢复路径、确认、隔夜库存与退出",
+        "维护目标重叠：reversion_failure、signal_execution_gap、state_compatibility"
+      ],
+      "task_id": "TG-20261029-184905-a288f9",
+      "differences": [
+        "本候选新增 range_detection 为必需决策并把 exit_policy 替换为 failure_exit，但 a288f9 的退出政策宽泛允许失效处置与回写，覆盖关系明确",
+        "交易对象从单只股票日线改为期货分合约，属参数/标的与执行配置变化；未引入新的独立研究决策"
+      ]
+    },
+    {
+      "similarities": [
+        "都含 range_detection 与 failure_exit，都涉及区间界定与失败处置的生命周期"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "机制为 consolidation_breakout / breakout_position_state，核心是突破确认、失败退出、再入场与资金分配；本候选围绕冲击事件恢复路径与隔夜库存，决策对象与触发机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "都含 range_detection、entry_confirmation、failure_exit 三决策"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "该题为区间突破后确认缺失的两路失效证据合并与预算回压，机制为 consolidation_breakout；本候选无突破确认、无预算回压与再入场，决策对象为冲击事件库存"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F02 期货分合约日线，共享 reference_drift、reversion_failure 等维护目标"
+      ],
+      "task_id": "TG-20261029-184707-5e00a9",
+      "differences": [
+        "机制为 range_boundary_reversion / range_position_lifecycle，核心决策为参考估计、偏离测量、趋势否决、退出与再入场及多品种资金分配；本候选无趋势否决与再入场，核心为冲击路径与隔夜库存"
+      ]
+    },
+    {
+      "similarities": [
+        "都含 range_detection 与失败处置类决策"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "机制为 short_horizon_trend / stock_trend_portfolio，宽泛短周期股票趋势组合；本候选为期货冲击事件库存，机制与标的均不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F02 反转母题，都涉及参考水平偏离与库存管理"
+      ],
+      "task_id": "HT02",
+      "differences": [
+        "机制为 oversold_rebound / oversold_stock_portfolio，横截面超跌选股与分批库存；本候选不选横截面股票组合，核心为事件冲击路径判定与分合约隔夜库存"
+      ]
+    },
+    {
+      "similarities": [
+        "同为 F02，区间边缘与持仓生命周期相关"
+      ],
+      "task_id": "TG-20261029-172300-7af535",
+      "differences": [
+        "机制为 range_boundary_reversion / range_position_lifecycle，决策为参考估计、偏离测量、趋势否决、退出、再入场；本候选无趋势否决与再入场，决策对象为冲击事件库存"
+      ]
+    },
+    {
+      "similarities": [
+        "同为单个商品期货品种真实分合约日线，共享分合约切换与参考漂移维护"
+      ],
+      "task_id": "TG-20261105-041705-dcbca2",
+      "differences": [
+        "机制为 range_boundary_reversion / range_position_lifecycle，含趋势否决与再入场；本候选为 shock_path_reversion / shock_event_inventory，无趋势否决与再入场，核心是冲击路径与隔夜库存"
+      ]
+    },
+    {
+      "similarities": [
+        "都含 range_detection、failure_exit 与隔夜/状态连续处理"
+      ],
+      "task_id": "TG-20261029-184839-b184fc",
+      "differences": [
+        "机制为 consolidation_breakout，核心为状态辨识、切换迟滞、失败处置与预算恢复；本候选无状态辨识与切换迟滞，机制与决策对象不同"
+      ]
+    }
+  ]
+}

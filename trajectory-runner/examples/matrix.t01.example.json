@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "matrix_id": "t01new1",
+  "mode": "real",
+  "project_root": "/ABSOLUTE/WSL/PATH/trajectory-runner-current-source/project",
+  "packages": [
+    "/ABSOLUTE/WSL/PATH/t01_task_package.zip"
+  ],
+  "repeats": 1,
+  "policy": {
+    "context_mode": "fresh",
+    "interaction_protocol": "environment_feedback_v1",
+    "execution_backend": "docker",
+    "docker_image": "sha256:a12194d4e79ca6526d57b48874d9e9b98cf51dd7d8121bcb860a5ec0aa01d306",
+    "max_model_calls": 80,
+    "max_tokens": 32768,
+    "timeout_seconds": 300,
+    "stage_warning_seconds": 1440,
+    "stage_urgent_seconds": 2040,
+    "stage_hard_seconds": 2400,
+    "max_research_calls": 65,
+    "max_strategy_evaluations": 40,
+    "max_sweep_evaluations": 12,
+    "research_timeout_seconds": 180,
+    "reserved_final_evaluations": 2,
+    "user_agent": {
+      "mode": "hybrid_v1",
+      "max_model_calls": 3,
+      "max_tokens": 512,
+      "timeout_seconds": 30
+    }
+  },
+  "models": [
+    {
+      "id": "dsv4pro",
+      "provider": "openai_compatible",
+      "base_url": "https://api.deepseek.com",
+      "model": "deepseek-v4-pro",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "thinking": "disabled",
+      "output_token_parameter": "max_tokens"
+    }
+  ]
+}

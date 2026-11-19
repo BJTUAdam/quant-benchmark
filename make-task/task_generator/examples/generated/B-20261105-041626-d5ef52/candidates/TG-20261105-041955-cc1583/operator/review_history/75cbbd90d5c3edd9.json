@@ -1,0 +1,123 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-041728-6227b7",
+  "spec_hash": "0e2f76ffa23e68584738d97d460520a1d7357176166f9d2678c840eb1a643b8d",
+  "reviewed_at": "2026-11-05T04:20:07+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "variant",
+  "status": "needs_attention",
+  "issues": [
+    "与 TG-20261105-041728-6227b7 核心问题及决策语义等价（必需决策、依赖拓扑、维护目标、研究问题一致），仅标题措辞与流动性/复权口径描述细化，属于同义改写；按 duplicate 处理，不应作为独立新题批准，除非能指出并实现相对 6227b7 的实质研究决策变化。"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "209b0edb276c16cb557c58bbc84718e450647c66a614b0541238ec54d25914ad",
+  "content_hash": "ace1f0939ff350a15de330258e8eee36c663284c1dee685146aab2f389629ad9",
+  "rationale": "候选与 TG-20261105-041728-6227b7 的必需决策集合、decision_dependencies 拓扑、维护目标与研究问题核心均逐项一致：同为核心问题——资金分配结果反向收缩/恢复可参与排名集合、集合变化后留存门槛与排名分母重新协商，并让分配回指特征窗口可用性。候选标题把“回溯”改为“反向协商”，正文把流动性与涨跌停状态、复权口径写得更细，但这些都是对同一闭环的措辞细化与配置明确化，未引入新的研究决策或机制变化，因此核心问题与决策语义等价，属 duplicate。相比 93eea1，候选删除 turnover_budget 并以 capital_allocation 承担现金约束、新增特征回指，这构成与 93eea1 的决策集合差异；但该差异在 6227b7 中已完整出现，故候选相对真实最近任务仍为重复。closest_task_id 取 6227b7。novelty_claim 对 93eea1 的“剔除 turnover_budget”差异属实，但对 6227b7 的独立性未获支撑——候选与 6227b7 结构指纹一致（exact_matches 含 6227b7），其新增描述不构成独立研究取舍。候选数据未绑定、资源待本人 setup，均为预期待办，不构成 issues；公开信息未含答案实现、最终参数、未来行情或密钥，long_horizon 有七段分段反馈与现金/持仓/memory 连续维护，满足长程要求。",
+  "pending_bindings": [
+    "股票池当前为空池，待运营方绑定真实股票或ETF代码。",
+    "数据侧 daily、adj_factor、stk_limit、trade_cal、index_daily 的授权、冻结版本与可见性待绑定时确认。",
+    "runtime_profile 的 market_rules_status 为 requires_binding，交易单位、T+1、费用、公司行为、价格限制待绑定后固定。",
+    "resources=null、resource_status=requires_human_setup，资源预算须由本人运行 finlab setup 选择，CPU/内存建议为非生效参考。",
+    "formal_segments=7 的实际虚拟时间范围与分段边界在绑定后确定。",
+    "评分配置在正式开始前固定，具体指标与权重待管线绑定。"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F03 relative_strength_rotation / ranked_stock_portfolio，必需决策集合完全一致：feature_definition、liquidity_filter、rank_aggregation、holding_buffer、capital_allocation。",
+        "依赖边结构完全一致，含 feature_definition→liquidity_filter、capital_allocation→liquidity_filter、capital_allocation→feature_definition 两条回指边。",
+        "研究问题核心相同：分配结果（碎片化、剩余现金）反向收缩/恢复下一期可参与排名集合，集合变化后留存门槛重新协商；维护目标与长程分段反馈语义一致。"
+      ],
+      "task_id": "TG-20261105-041728-6227b7",
+      "differences": [
+        "候选标题与正文把“流动性与涨跌停状态界定可参与集合、现金预算回指集合、回指特征窗口可用性”表述得更细，但相对 6227b7 只是同一闭环的措辞细化，未引入新的研究决策。",
+        "候选去掉了 6227b7 中的冲突表述（6227b7 称“回溯”），但研究目标、决策、依赖、维护对象均相同，属同义改写。",
+        "数据要求与执行字段（涨跌停、成交额、虚拟日期）仅为同一任务的配置明确化，不改变核心研究取舍。"
+      ]
+    },
+    {
+      "similarities": [
+        "同族同机制同对象，均为相对强弱排名、流动性筛选、留存门槛与现金预算联动。",
+        "均把流动性筛选置于排名之前，并让资金分配影响候选集合。"
+      ],
+      "task_id": "TG-20261029-185132-5120cb",
+      "differences": [
+        "5120cb 必需决策含 turnover_budget，依赖链为 holding_buffer→turnover_budget→capital_allocation→holding_buffer，不含 capital_allocation→liquidity_filter 与 →feature_definition 回指；候选剔除 turnover_budget 并新增两条回指边，决策划分有实质调整（但此调整在 6227b7 中已出现）。"
+      ]
+    },
+    {
+      "similarities": [
+        "同族同机制同对象；均含 liquidity_filter 且 capital_allocation 回指 liquidity_filter，形成资格集合与留存门槛的双向协商。",
+        "均要求特征与流动性度量口径一致、集合逐期增删后重算排名分母。"
+      ],
+      "task_id": "TG-20261029-185310-93eea1",
+      "differences": [
+        "93eea1 保留 turnover_budget 作为必需决策且依赖链含 holding_buffer→turnover_budget→capital_allocation；候选删除 turnover_budget，改由 capital_allocation 承担现金与T+1约束，并额外加重 capital_allocation→feature_definition 回指边，决策集合与依赖拓扑存在实质差异。"
+      ]
+    },
+    {
+      "similarities": [
+        "同族同机制同对象，均研究相对强弱排名、持有缓冲、换手预算与资金分配协同。"
+      ],
+      "task_id": "TG-20261029-172300-d78026",
+      "differences": [
+        "d78026 无 liquidity_filter，依赖链为单向特征→排名→缓冲→换手→分配，不含集合资格与分配回指；候选新增流动性集合边界与双向回指闭环，决策对象边界与信息需求不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "同族同机制同对象；be6167 已含 capital_allocation→holding_buffer 回指，形成缓冲与预算闭环。"
+      ],
+      "task_id": "TG-20261029-184930-be6167",
+      "differences": [
+        "be6167 无 liquidity_filter，闭环仅回指 holding_buffer；候选把回指扩展到 liquidity_filter 与 feature_definition，改变可参与集合与特征窗口，决策语义超出 be6167 的缓冲闭环范围。"
+      ]
+    },
+    {
+      "similarities": [
+        "同族 F03，均有多因子排名、持有缓冲与资金分配。"
+      ],
+      "task_id": "HT06",
+      "differences": [
+        "HT06 core_mechanism 为 dynamic_constituent_multifactor，决策对象为 constituent_stock_portfolio，必需 constituent_eligibility 动态成分资格决策并有基准超额目标；候选不含成分资格决策、不设基准超额目标，机制与对象均不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "历史短趋势股票组合，同属股票组合类任务。"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01 为 short_horizon_trend / stock_trend_portfolio，决策为区间识别、入场确认、退出与再入场；候选为横截面排名与流动性集合闭环，决策对象与机制完全不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "同为整理区间突破类任务的对照项，均在股票日线环境维护状态生命周期。"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "ca5a47 为 consolidation_breakout / breakout_position_state，决策为区间→确认→失败→重入；候选为相对强弱排名与流动性集合，机制、对象与决策均不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F01趋势回撤库存任务，含资本分配与向下游回压预算的思想。"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "8868c8 为 trend_pullback / trend_pullback_inventory，决策为趋势资格、回撤定位、分批库存与退出；候选为横截面排名与流动性集合维护，机制、对象完全不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "同为待人工审的 F01 突破类候选，依赖结构中含 capital_allocation 回指前置决策的预算回压母题。"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "7e6569 为 consolidation_breakout / breakout_position_state，决策为区间识别、突破确认、失败退出与再入场；候选为横截面相对强弱排名与可参与集合边界，机制与决策对象完全不同。"
+      ]
+    }
+  ]
+}

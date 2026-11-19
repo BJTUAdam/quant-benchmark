@@ -1,0 +1,304 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "同品种双价差共享中间月份：曲线意图归属、净头寸与滚动交接",
+  "family_id": "F06",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "term_curve_rotation",
+  "decision_object": "term_curve_pair_selection",
+  "required_decisions": [
+    "tenor_normalization",
+    "curve_signal",
+    "pair_selection",
+    "signal_aggregation",
+    "staged_inventory",
+    "margin_budget",
+    "entry_exit",
+    "roll_policy",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "tenor_normalization",
+      "curve_signal"
+    ],
+    [
+      "curve_signal",
+      "pair_selection"
+    ],
+    [
+      "pair_selection",
+      "signal_aggregation"
+    ],
+    [
+      "signal_aggregation",
+      "margin_budget"
+    ],
+    [
+      "margin_budget",
+      "staged_inventory"
+    ],
+    [
+      "staged_inventory",
+      "entry_exit"
+    ],
+    [
+      "entry_exit",
+      "signal_aggregation"
+    ],
+    [
+      "entry_exit",
+      "roll_policy"
+    ],
+    [
+      "roll_policy",
+      "pair_selection"
+    ],
+    [
+      "roll_policy",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "staged_inventory"
+    ],
+    [
+      "pair_selection",
+      "tenor_normalization"
+    ]
+  ],
+  "maintenance_targets": [
+    "curve_stability",
+    "signal_execution_gap",
+    "expiry_roll",
+    "margin_exposure",
+    "state_compatibility"
+  ],
+  "research_question": "同一品种至少三个真实月份形成两条共享中间合约的跨期价差时，如何由曲线变化选择相互兼容的价差意图、将其映射到真实合约净头寸，并在部分成交与月份滚动后保持意图归属和风险核算一致？研究对象是多条跨期关系共同控制一个账户，不能把两条理想回测曲线简单相加。",
+  "research_modules": [
+    {
+      "decision_id": "tenor_normalization",
+      "description": "定义不同月份间隔、剩余可交易期限及价格水平的可比表达，明确同一事件使用的月份集合和资料可见时点。",
+      "interaction": "选对结果改变可比期限区间，须按同一时间戳的数据重算归一化；不能将未来主力月份选择或期末曲线用于当期标准化。"
+    },
+    {
+      "decision_id": "curve_signal",
+      "description": "在至少三个当时可用月份上区分共同水平变化、相邻斜率及局部形变，说明缺少某一节点时的等待、降级或退出规则。",
+      "interaction": "信号产生多个价差意图而非直接发原子订单。归一化版本改变时，应区分估计值变动与真实持仓变动。"
+    },
+    {
+      "decision_id": "pair_selection",
+      "description": "从曲线候选中选择可同时参与的两条价差，明确何时允许共享同一实际中间合约、何时只保留一条或全部等待。",
+      "interaction": "选择影响归一化和共享腿结构；原有持仓仍占预算，不能只因当前另选两对就丢弃旧合约风险。"
+    },
+    {
+      "decision_id": "signal_aggregation",
+      "description": "维护价差级的目标与退出意图，按真实合约代码计算账户净目标，并定义共享中间合约成交向各意图的分配顺序。 影子归属仅作为策略memory内的解释性账本，不构造可独立成交、开平或结算的虚拟子账户；只有真实合约净订单及系统成交能改变平台账户。",
+      "interaction": "净头寸抵消不会自动证明两个价差都完成。实际执行的归属残差须进入下一轮信号仲裁，而不是把同一成交同时计入两条价差。 当两意图在共享腿恰好抵消时，记录意图变化但不虚构双方成交，也不将理想价差收益用于系统评分。"
+    },
+    {
+      "decision_id": "staged_inventory",
+      "description": "将净目标转换为逐腿增减仓队列，保留每条价差未完成部分及共享合约的真实仓位；规定撤单、补缺腿与新建仓的顺序。",
+      "interaction": "部分成交会改变下一轮各意图的可执行容量和预算。没有完成的组合不能按理论曲线计为完整持仓，单腿风险也不能被影子归属掩盖。"
+    },
+    {
+      "decision_id": "margin_budget",
+      "description": "对真实合约净额、尚可能成交的订单与过渡敞口计提预算，在两条价差意图之间分配剩余容量。",
+      "interaction": "预算约束分步队列并可迫使只保留一条价差；不能重复计算净额抵消带来的可用资金，也不假定跨期保证金抵扣。"
+    },
+    {
+      "decision_id": "entry_exit",
+      "description": "定义单条价差退出、两条同时退出和意图冲突时如何更新净目标，避免退出一条时无解释地破坏另一条对冲。",
+      "interaction": "退出先更新意图账本再交给同一执行队列；成交反馈重建剩余归属，旧订单未撤掉时不能直接用新目标覆盖。 退出或反向动作先与当前真实净仓、可用数量和仍有效订单对账，不能按两份影子头寸重复发送超过实际库存的平仓；开平与反向语义以绑定SDK验收为准。"
+    },
+    {
+      "decision_id": "roll_policy",
+      "description": "当共享中间月份失去资格或接近到期时，决定平旧结构、迁移共享节点、改成不共享的两对或暂停参与。",
+      "interaction": "月份映射变化必须重新选择配对并重算期限；旧中间合约与新中间合约不能视作同一个节点直接抵消。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "段间维护保存曲线版本、价差意图、成交归属和未完成队列；修改规则时先与账户真实持仓逐项对账。",
+      "interaction": "迁移不改变已发生的成交，不重写过去指标；重建后的队列仍经预算、真实月份映射和逐腿执行检查。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能出现共享节点成交归属与实际仓位不一致、两条信号互相抵消造成反复下单、节点换月导致旧意图失配，或预算只允许执行半个目标。每段可按已观察到的偏差维护曲线表达、兼容筛选、归属和调度规则，且账户、真实合约持仓、挂单与JSON memory连续；没有证据时允许保持原逻辑。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "M"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内真实分合约；品种代码是待绑定合约池，实际合约月份、交易所、到期规则和覆盖范围由平台绑定，不用主力连续价格替代可交易合约。",
+      "行情经Tushare桥接查询，不交付行情文件包。真实时间范围、冻结版本及阶段边界尚未绑定；公开时间只为虚拟事件顺序，不依据虚拟年份套用现实事件。",
+      "仅登记fut_daily与fut_basic可提供字段；计算出的价差、残差、流动性度量及影子归属记录由策略在当前已可见信息上构造，不作为上游新字段。",
+      "平台须绑定合约乘数、报价单位、交易时段、结算价、逐日价格限制、保证金和费用。当前引擎不支持的按手收费或差异平今费不得静默设0；规则未齐不能正式运行。",
+      "多腿订单逐腿撮合，可能部分成交、撤单失败或产生临时净敞口；不得依赖原子组合成交、跨腿保证金优惠或未绑定的跨品种转换系数。",
+      "来源仅使用已登记来源卡的主题和目录启发；本题研究问题由本轮助手设计，未引用或读取未提供的全书内容，不是书中现成策略。",
+      "策略的订单/成交通知仅更新JSON memory中的归属、占用及剩余意图；新增订单和撤单只在平台允许的on_bars回调发出。不得假设on_order/on_trade可立即再次发单，也不得将下一根开盘的成交容量提前视为已知。",
+      "平台仅有单一真实账户和逐合约净持仓。影子账本只解释目标意图及真实成交归属，不创建可独立开平、独立结算或独立评分的虚拟多空账户；净额抵消不合成两份成交或价差收益。减仓须以当时真实可用净仓和未完成订单为限；反向目标不得按影子多头/空头数量直接重复平仓，须按本版SDK实际买卖、平仓与反向语义核验。"
+    ]
+  },
+  "parameter_space": [
+    "曲线样本窗口与最低可用节点数",
+    "期限/价格归一化尺度",
+    "共同平移与局部形变的区分规则",
+    "两条价差同时参与的兼容阈值",
+    "共享节点资格与仅保留一条的条件",
+    "价差意图冲突时的优先级",
+    "共享合约成交的归属顺序",
+    "未完成意图的超时与撤单机制",
+    "真实净额、挂单与过渡敞口的预算上限",
+    "共享中间月份退出时的迁移次序",
+    "版本迁移中归属账本与实际持仓的对账规则"
+  ],
+  "novelty_claim": "S12已有多月份曲线到动态配对；本题不因增加一个月份或曲线指标认定新题。候选差异是同时管理两条共享实际合约的价差意图、成交归属和净持仓执行，形成价差账本与合约账本相互约束的问题。如果实现仍只选一对合约，或用两条理想价差收益相加，应并回旧模板，不能计独立新题。",
+  "lineage": {
+    "derived_from": [
+      "S12",
+      "S11"
+    ],
+    "kind": "assistant_authored_research_candidate_not_api_screened"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "M"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-12",
+    "task_id": "TASK12-20261110-12",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

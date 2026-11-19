@@ -1,0 +1,270 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "风险预算表达与恢复执行链：暴露刻度选择、分步减仓可行性与逐级恢复准入",
+  "family_id": "F04",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN",
+    "SRC_STOCK_TRENDS"
+  ],
+  "core_mechanism": "drawdown_risk_budget",
+  "decision_object": "portfolio_risk_controller",
+  "required_decisions": [
+    "state_identification",
+    "risk_budget",
+    "drawdown_response",
+    "recovery_policy",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "state_identification",
+      "risk_budget"
+    ],
+    [
+      "risk_budget",
+      "drawdown_response"
+    ],
+    [
+      "drawdown_response",
+      "recovery_policy"
+    ],
+    [
+      "recovery_policy",
+      "risk_budget"
+    ],
+    [
+      "drawdown_response",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "state_identification"
+    ]
+  ],
+  "maintenance_targets": [
+    "risk_recovery",
+    "signal_execution_gap",
+    "state_compatibility"
+  ],
+  "research_question": "在国内股票或ETF日线环境中，仅使用已完成交易日收盘后可见的价格、成交与账户信息：如何把组合风险状态（已回撤幅度、近期已实现波动、仓位与现金集中度）整理为可审计的预算表达刻度（例如暴露比例、名义上限或现金留存比例），并在缩减触发时按当时可成交约束——T+1新买不可卖、已挂未成交单、单票权重上限与现金不足——决定缩减到哪一档、哪些待办失效、未完成减仓如何顺延；缩减后又如何按逐级恢复条件部分回升预算，而不是一次性回到原预算，使预算占用、未完成待办与目标预算的差额在跨段维护中连续可核？",
+  "research_modules": [
+    {
+      "decision_id": "state_identification",
+      "description": "仅用当时已收盘的价量与账户数据，定义可审计的组合风险状态证据：已实现回撤幅度、近期已实现波动、仓位与现金集中度；规定各证据的读取窗口、更新时点、优先与去重规则，使同一段回撤不会被重复计为多档状态，且状态读取结果可被后续预算刻度直接引用。",
+      "interaction": "状态证据集合与读取口径决定risk_budget可用的预算刻度种类与取值范围；同时接收来自state_migration的回指，使跨段承接后的状态读取口径与已建仓位、未完成待办保持一致，避免状态在段间被错误重置或重复累计。"
+    },
+    {
+      "decision_id": "risk_budget",
+      "description": "把状态识别给出的风险证据映射为可执行的预算表达刻度（暴露比例、名义上限或现金留存比例之间的取舍），并规定预算占用与目标预算差额的核算方式，包括已建仓、挂单占用与现金留存如何计入当期已用预算；预算刻度须能被后续缩减与恢复按档阅读。",
+      "interaction": "风险状态证据决定预算刻度的选择与档位；同时接收来自recovery_policy的回指，使恢复准入结果改变下一期目标预算档位，并让预算占用差额成为恢复判定的输入。"
+    },
+    {
+      "decision_id": "drawdown_response",
+      "description": "在缩减触发时，依据预算档位与当时可成交约束（T+1新买不可卖、已挂未成交单、单票权重上限、现金不足）决定缩减到哪一档、哪些挂单撤销、哪些持仓分批减仓，并规定未完成减仓的顺延与残余敞口记录方式；缩减执行结果须可审计、可承接。",
+      "interaction": "缩减触发由risk_budget档位与占用差额驱动；缩减产生的结果同时写入recovery_policy作为恢复起点，并写入state_migration以承接未完成减仓、撤单记录与残余敞口，使下一段能识别预算占用与目标预算的差额。"
+    },
+    {
+      "decision_id": "recovery_policy",
+      "description": "定义缩减后的逐级恢复条件与节奏：哪些证据须独立于被覆盖的回撤记忆、恢复须分几级、每级准入需要多长的可观察延续；规定恢复准入如何读取预算占用差额与残余敞口，使部分恢复不依赖一次性回到原预算。",
+      "interaction": "恢复条件读取drawdown_response留下的缩减起点与残余敞口，并回指risk_budget，使恢复结果直接改变下一期目标预算档位；恢复准入过程同时经由state_migration承接，保证恢复节奏在段间连续。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "定义跨段承接规则：预算档位、预算占用、已建仓、未完成减仓、已撤挂单记录与残余敞口如何持久化到JSON memory并在下一段恢复；规定缩减未完成与恢复进行中的中间状态如何被识别，避免段间重复缩减或跳档恢复。",
+      "interaction": "承接来自drawdown_response的缩减结果，并回指state_identification，使下一段状态读取口径与已承接的预算档位、残余敞口一致，防止状态证据被重复累计或错误重置。"
+    }
+  ],
+  "maintenance_rationale": "后续分段揭晓的观察可能显示：风险状态证据在缩减后因仓位下降而分布改变，导致状态识别口径漂移；预算刻度选择在不同波动环境下使缩减与恢复的可执行性不同；缩减触发的分步减仓与T+1约束可能留下残余敞口，使预算占用与目标预算差额长期存在；恢复准入过松会导致反复触发缩减，过紧则使预算长期偏低。维护时可选择保持现有证据窗口与恢复节奏、调整预算刻度种类或恢复分级条件，或重构状态证据合并与承接逻辑；不承诺每次维护提升收益，也不要求实盘盈利。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "股票/ETF池待绑定；使用可核验真实代码或空池加notes待绑定，不使用匿名代号。",
+      "所有策略事件日期为虚拟日期，仅标识数据顺序与可见时点，不对应真实历史年份。",
+      "接口与字段候选来自data_profiles.stock_etf_daily；实际授权、冻结和可见性在数据绑定时确认。",
+      "本任务研究组合风险预算控制器，不依赖指数成分数据；指数仅用于查询与基准角色，不下单。",
+      "交易日历以桥接返回的trade_cal为准。"
+    ]
+  },
+  "parameter_space": [
+    "状态证据读取窗口长度（回撤、已实现波动、集中度各自窗口）",
+    "风险证据合并的优先与去重规则开关",
+    "预算表达刻度选择（暴露比例/名义上限/现金留存比例）",
+    "预算档位数量与各档阈值",
+    "缩减触发确认时点与忍让窗口",
+    "分步减仓每批比例与最小可减单位",
+    "挂单撤销与残余敞口顺延规则开关",
+    "恢复分级数量与每级准入的延续观察长度",
+    "恢复准入读取的预算占用差额阈值"
+  ],
+  "novelty_claim": "与existing_tasks中最近的F04任务对照：TG-20261029-185155-f10be3（drawdown_risk_budget / portfolio_risk_controller，必需决策为state_identification、risk_budget、drawdown_response、recovery_policy、state_migration）已把预算刻度表达与缩减执行连续性作为核心；TG-20261029-185000-a26d12与TG-20261029-185515-8f94f2分别以参与方式联动和多源证据合并与参与档位交接为差异来源，均包含participation_policy。本任务的必需决策集合与f10be3相同，但实际研究取舍不同：f10be3强调预算表达形式的取舍与逐级恢复回指预算，本任务在此基础上把缩减执行的可行性约束（T+1新买不可卖、已挂未成交单、单票权重上限、现金不足）对预算档位选择与恢复准入的约束显式化，并使恢复准入必须读取预算占用与目标预算差额及残余敞口，而非仅依据回撤记忆被覆盖；state_migration回指state_identification，要求缩减未完成与恢复进行中的中间状态在段间被识别，避免重复缩减或跳档恢复。与a26d12相比，本任务不把参与方式作为独立必需决策，不以参与档位语义为控制量；与8f94f2相比，本任务不纳入participation_policy，不以多源证据合并与参与档位交接为核心，差异来自执行可行性对预算刻度的约束与承接规则。与种S08方向一致，属该方向扩展；若实现退化为在f10be3上仅调整档位数量、阈值或维护目标表述顺序，应视为其变体而非独立新题，需人工语义审。",
+  "lineage": {
+    "derived_from": [
+      "S08",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN",
+      "TG-20261029-185155-f10be3",
+      "TG-20261029-185000-a26d12"
+    ],
+    "kind": "budget_execution_feasibility_and_recovery_admissibility_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "batch_id": "B-20261105-041626-d5ef52",
+    "version": 0,
+    "provenance": "model_api",
+    "pipeline_status": "not_connected",
+    "data_status": "not_bound",
+    "status": "variant_candidate",
+    "model_review_status": "needs_attention",
+    "id": "TG-20261105-041755-b4949b",
+    "created_at": "2026-11-05T04:17:55+00:00"
+  }
+}

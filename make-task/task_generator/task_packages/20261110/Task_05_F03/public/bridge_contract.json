@@ -1,0 +1,100 @@
+{
+  "schema_version": "finlab.bridge_contract.v2",
+  "identity_policy": "real_names_and_codes",
+  "date_domain": "virtual",
+  "calendar_semantics": "virtual_sequence_only_not_historical_years",
+  "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+  "disclosure": {
+    "source": "platform_controller",
+    "interval": "[start,stop)",
+    "release": "cumulative_committed_segments",
+    "strategy_clock": "current_event",
+    "out_of_range": "reject_entire_request",
+    "error_code": "TIME_RANGE_EXCEEDED",
+    "audit": "platform_private_sqlite"
+  },
+  "url_env": "MARKET_BRIDGE_URL",
+  "token_env": "MARKET_BRIDGE_TOKEN",
+  "virtual_start": null,
+  "virtual_stop": null,
+  "minimum_years": 2,
+  "symbols": [
+    "000001.SZ",
+    "600000.SH",
+    "600036.SH",
+    "601318.SH",
+    "600519.SH",
+    "000858.SZ",
+    "600030.SH",
+    "601166.SH"
+  ],
+  "endpoints": [
+    {
+      "api_name": "daily",
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "open",
+        "high",
+        "low",
+        "close",
+        "vol",
+        "amount"
+      ],
+      "frequency": "daily",
+      "visibility": "available_at_lte_controller_clock"
+    },
+    {
+      "api_name": "adj_factor",
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "adj_factor"
+      ],
+      "frequency": "daily",
+      "visibility": "available_at_lte_controller_clock"
+    },
+    {
+      "api_name": "stk_limit",
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "up_limit",
+        "down_limit"
+      ],
+      "frequency": "daily",
+      "visibility": "available_at_lte_controller_clock"
+    },
+    {
+      "api_name": "trade_cal",
+      "fields": [
+        "exchange",
+        "cal_date",
+        "is_open",
+        "pretrade_date"
+      ],
+      "frequency": "daily",
+      "visibility": "available_at_lte_controller_clock"
+    },
+    {
+      "api_name": "index_daily",
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "close"
+      ],
+      "frequency": "daily",
+      "visibility": "available_at_lte_controller_clock"
+    }
+  ],
+  "binding_status": "not_bound",
+  "dataset_id": null,
+  "required_checks": [
+    "point_in_time",
+    "coverage",
+    "calendar",
+    "units",
+    "corporate_actions_or_settlement",
+    "trading_rules"
+  ]
+}

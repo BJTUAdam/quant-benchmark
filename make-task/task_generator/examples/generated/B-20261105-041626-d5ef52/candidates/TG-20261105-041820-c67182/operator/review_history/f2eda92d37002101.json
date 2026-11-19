@@ -1,0 +1,133 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-042329-afee5f",
+  "spec_hash": "e981c0e8cc7ed9d50a53a52bdc68272fbcdc5cdd9d8a1edd996d16528ffa1ac1",
+  "reviewed_at": "2026-11-05T04:28:48+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "38d2d465548e4ad2eff33950a839456b94d04158ea4a7ebe1fd3e688df4067d6",
+  "content_hash": "73d4ccd3ead8c741d30117c788eaef567c2e6a6f1833700dc37f5c65b5092d76",
+  "rationale": "候选与pending项TG-20261105-042329-afee5f在核心机制（cross_product_residual）、决策对象（cross_product_leg_portfolio）、必需决策集合、闭环依赖边（state_migration→month_selection、relationship_monitoring→hedge_estimation）及研究问题各环节上逐项等价。唯一显见差异是标的池从FG/SA固定两品种改为宽品种池内择两腿，month_selection本身已允许按当时可见条件选择实际参与的合约腿，属旧题宽泛允许范围内的参数/样本配置变化，不构成实质研究决策改变。与历史项TG-20261029-172301-36425d相比同样只增加依赖边与择腿范围，属依赖描述细化。novelty_claim所强调的“迁移时对冲比例版本与候选腿集合互不自动沿用”已在pending项与36425d中作为state_migration回指描述覆盖，非新增必需决策。因此判duplicate。",
+  "pending_bindings": [
+    "真实分合约同时月份覆盖与规则证据待绑定（binding_status=not_bound, market_rules_status=requires_binding）",
+    "虚拟起止与正式分段边界待绑定",
+    "资源预算须本人运行finlab setup配置，resources=null为预期待办",
+    "评分配置待正式开始前固定",
+    "运行难度与覆盖需实测"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F05跨品种残差机制、cross_product_leg_portfolio决策对象",
+        "必需决策集合相同，均含month_selection/hedge_estimation/entry_exit/relationship_monitoring/margin_budget/state_migration",
+        "均要求滚动对冲、关系失效暂停重估、真实腿逐腿撮合与残余敞口处理"
+      ],
+      "task_id": "TG-20261029-172301-36425d",
+      "differences": [
+        "历史项聚焦FU/LU固定双腿，候选改为品种池内择两腿，但择腿与对冲仍属旧题宽泛允许范围",
+        "候选新增state_migration回指month_selection、relationship_monitoring回指hedge_estimation两条闭环边，仅为依赖描述细化，不改变核心决策对象",
+        "候选未引入新的必需决策或维护机制"
+      ]
+    },
+    {
+      "similarities": [
+        "同为cross_product_residual与cross_product_leg_portfolio",
+        "必需决策集合完全相同，依赖链亦含state_migration→month_selection与relationship_monitoring→hedge_estimation两条闭环边",
+        "研究问题均覆盖：当时可见滚动对冲估计、整数手数与乘数、残差参与建仓、关系失效区分与暂停重估、双腿保证金预算、迁移旧腿与对冲比例版本使状态连续",
+        "维护目标高度重合（hedge_drift、margin_exposure、state_compatibility/expiry_roll）"
+      ],
+      "task_id": "TG-20261105-042329-afee5f",
+      "differences": [
+        "该pending项限定FG/SA两品种，候选使用B/M/Y/SC/FU/LU/FG/SA宽品种池并要求择两腿",
+        "此项差异仅为标的池配置与表述变化，核心机制、决策对象、必需决策与闭环依赖一致，未产生实质研究决策变化"
+      ]
+    },
+    {
+      "similarities": [
+        "同属跨品种统计残差与双腿对冲母题",
+        "均涉及关系失效判定与换月迁移"
+      ],
+      "task_id": "HT05",
+      "differences": [
+        "HT05固定FG/SA且含独立roll_policy，候选不含roll_policy而将换月并入state_migration",
+        "候选不预绑产业配对，但择腿机制与HT05的month_selection宽泛范围重叠"
+      ]
+    },
+    {
+      "similarities": [
+        "同为多腿真实合约相对价值与滚动对冲",
+        "均含month_selection、hedge_estimation、relationship_monitoring、margin_budget"
+      ],
+      "task_id": "HT04",
+      "differences": [
+        "HT04为油品多品种相对价值且含signal_aggregation，候选为两品种残差对冲",
+        "候选不以油品组合为对象，但残差对冲框架已被HT04宽泛允许"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05真实分合约、整数手数、保证金预算与状态迁移",
+        "均有state_migration回指month_selection的闭环"
+      ],
+      "task_id": "TG-20261105-042048-66d9a5",
+      "differences": [
+        "该题为crush_component_aggregation，核心是B/M/Y加工关系与分项信号冲突裁决",
+        "候选跨品种残差机制与择两腿，决策对象different"
+      ]
+    },
+    {
+      "similarities": [
+        "同为F05真实多腿头寸与资金占用管理"
+      ],
+      "task_id": "HT03",
+      "differences": [
+        "HT03为豆类加工系数压榨关系，候选为统计残差对冲，不使用加工系数",
+        "决策对象分别为crush_leg_portfolio与cross_product_leg_portfolio"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及月份/到期选择与迁移闭环"
+      ],
+      "task_id": "TG-20261029-185356-d4e28b",
+      "differences": [
+        "该题为F06同品种跨期价差配对，决策对象calendar_pair_inventory",
+        "候选为F05跨品种残差，机制与对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为期货真实分合约、到期迁移与保证金预算"
+      ],
+      "task_id": "TG-20261029-172301-684a8d",
+      "differences": [
+        "同品种近远月价差配对，非跨品种对冲估计",
+        "机制calendar_spread_pairing与候选cross_product_residual不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同为多月份选择与整数手数配对"
+      ],
+      "task_id": "TG-20261029-185226-a83ad1",
+      "differences": [
+        "同品种期限单位配对与移仓，决策对象calendar_pair_inventory",
+        "候选跨品种残差，不涉及期限曲线可比表达"
+      ]
+    },
+    {
+      "similarities": [
+        "均含relationship_monitoring并回指选择模块"
+      ],
+      "task_id": "TG-20261029-185538-ab9792",
+      "differences": [
+        "该题监控近腿流动性衰减下的配对与规模，机制calendar_spread_pairing",
+        "候选监控跨品种对冲比例稳定性，机制不同"
+      ]
+    }
+  ]
+}

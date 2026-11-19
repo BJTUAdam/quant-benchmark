@@ -1,0 +1,17 @@
+[
+  {
+    "candidate_id": "TG-20261105-041705-dcbca2",
+    "reason": "static_validation_failed_or_stale",
+    "error_code": "SNAPSHOT_STATIC_VALIDATION_FAILED"
+  },
+  {
+    "candidate_id": "TG-20261105-042112-504553",
+    "reason": "static_validation_failed_or_stale",
+    "error_code": "SNAPSHOT_STATIC_VALIDATION_FAILED"
+  },
+  {
+    "candidate_id": "TG-20261105-042355-2f1469",
+    "reason": "static_validation_failed_or_stale",
+    "error_code": "SNAPSHOT_STATIC_VALIDATION_FAILED"
+  }
+]

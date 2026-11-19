@@ -1,0 +1,128 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261029-185310-93eea1",
+  "spec_hash": "f5f91dfab8471cf41b4086bafa35675b547a1a85e936f248d9f697baf29be208",
+  "reviewed_at": "2026-11-05T04:24:47+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [
+    "候选相对TG-20261029-185310-93eea1的核心研究决策与机制等价：均以流动性资格集合为排名分母，并由capital_allocation回指资格集合与留存门槛，属于同义改写和依赖边微调，不构成独立新题。",
+    "novelty_claim将删除turnover_budget和新增capital_allocation→feature_definition作为独立依据，但未说明该回指带来的具体、可检验的研究决策变化，且93eea1的资格集合与排名分母变化已覆盖特征可用性协商。"
+  ],
+  "long_horizon_valid": true,
+  "context_hash": "78b2f4e0bc052d122fa7e51a73b0b06110aed29d688a797176cb0077c5510ff1",
+  "content_hash": "ed7e041eab81220b5b0fe4a5f81ac52cc243d15889ad3441a75a3c769e49a8df",
+  "rationale": "候选与最近的TG-20261029-185310-93eea1同属F03 relative_strength_rotation / ranked_stock_portfolio，且已经共享核心研究问题：以成交活跃度界定可参与排名的流动性资格集合，并由当期资金分配后的仓位碎片化与剩余现金反过来收缩或恢复下一期资格集合，使留存门槛与排名分母重新协商。候选删除turnover_budget、新增capital_allocation→feature_definition回指，属于决策集微调和依赖边重排；所称现金约束改变特征窗口可用性在93eea1中已可被资格集合变化与排名分母变化覆盖，未形成可辨识的实质新决策。与TG-20261029-185132-5120cb和TG-20261105-042228-c84215相比，候选同样未提出超出流动性资格与预算反馈协商的新机制，差异主要是是否保留turnover_budget和依赖边排列。与d78026/be6167相比，候选引入liquidity_filter确有扩展，但该扩展已被93eea1实现并成为本候选的直接祖先，候选自身相对93eea1无实质研究决策变化。因此判定为duplicate，closest_task_id取TG-20261029-185310-93eea1。",
+  "pending_bindings": [
+    "股票池真实代码与成分资料待绑定。",
+    "实际数据授权、冻结版本、交易单位与T+1规则待绑定。",
+    "资源预算待本人运行finlab setup配置，草案resources=null、resource_status=requires_human_setup。",
+    "评分配置待正式开始前固定。",
+    "实际分段边界与虚拟时间范围待绑定。"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同属F03、relative_strength_rotation、ranked_stock_portfolio。",
+        "均包含feature_definition、liquidity_filter、rank_aggregation、holding_buffer、capital_allocation。",
+        "均要求流动性筛选在排名之前作为资格集合，并让资金分配对留存门槛或资格集合形成反馈。"
+      ],
+      "task_id": "TG-20261029-185132-5120cb",
+      "differences": [
+        "5120cb保留turnover_budget，依赖链为特征+流动性→排名→缓冲→换手→分配→缓冲；候选删除turnover_budget，将分配直接回指liquidity_filter与feature_definition。",
+        "候选新增capital_allocation→feature_definition回指，但未实际改变候选的核心决策语义：仍是在相对强弱排名下，用流动性资格和现金预算反馈调整留存/换仓，差异主要是依赖边重排和是否设换手预算。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F03、relative_strength_rotation、ranked_stock_portfolio。",
+        "候选与93eea1均将liquidity_filter设为排名前置资格集合，并保留feature_definition→liquidity_filter、feature_definition→rank_aggregation、liquidity_filter→rank_aggregation、rank_aggregation→holding_buffer、holding_buffer→capital_allocation、capital_allocation→liquidity_filter等依赖。",
+        "二者均以现金碎片化与剩余现金反过来收缩或恢复下一期可参与排名的资格集合，并要求留存门槛随资格集合变化重新协商。"
+      ],
+      "task_id": "TG-20261029-185310-93eea1",
+      "differences": [
+        "93eea1含turnover_budget；候选删除turnover_budget，并将capital_allocation→holding_buffer保留而非新增。",
+        "候选新增capital_allocation→feature_definition，声称现金约束改变特征窗口可用性；但特征窗口长度与可用性在liquidity_filter集合变化和排名分母变化中已可被93eea1的研究问题覆盖，新增边未带来可辨识的实质新决策。",
+        "候选删减turnover_budget并增加回指feature_definition属于依赖结构重排和决策集微调，非研究决策的根本变化。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F03、relative_strength_rotation、ranked_stock_portfolio。",
+        "均有liquidity_filter与capital_allocation回指liquidity_filter的资格集合闭环。",
+        "均使用同一流动性资格集合与留存门槛重新协商的母题。"
+      ],
+      "task_id": "TG-20261105-042228-c84215",
+      "differences": [
+        "c84215保留turnover_budget并强调T+1新买库存与未成交单对换手额度的扣减顺序，候选删除turnover_budget。",
+        "候选新增capital_allocation→feature_definition，但未明确T+1/未成交单扣减换手额度等可执行性机制，反而弱于c84215已提出的换手额度三方让步。",
+        "差异主要是是否保留换手预算和回指哪一决策，不构成新的核心研究决策。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F03、relative_strength_rotation、ranked_stock_portfolio，且共享相对强弱特征、排名合成、持有缓冲和资金分配等决策。"
+      ],
+      "task_id": "TG-20261029-172300-d78026",
+      "differences": [
+        "d78026不含liquidity_filter，候选新增流动性资格集合并由capital_allocation回指，核心触发机制与必需决策有明显扩展。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F03、relative_strength_rotation、ranked_stock_portfolio，且保留了capital_allocation→holding_buffer的回指。"
+      ],
+      "task_id": "TG-20261029-184930-be6167",
+      "differences": [
+        "be6167不含liquidity_filter，候选新增流动性资格集合及其与capital_allocation的双向闭环，决策集与机制不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "同属F03大类，均可能涉及排名、持有缓冲和资金分配。"
+      ],
+      "task_id": "HT06",
+      "differences": [
+        "HT06为dynamic_constituent_multifactor/constituent_stock_portfolio，核心含成分资格决策和基准超额目标；候选不含成分资格，核心为流动性资格集合与现金预算反馈，决策对象不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均为股票组合类任务，使用量价数据并涉及持仓维护。"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01为F01 short_horizon_trend/stock_trend_portfolio，核心是短周期趋势追踪；候选为横截面相对强弱排名与资格集合协商，机制与决策对象不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均为日线量价策略，涉及持仓状态维护。"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "ca5a47为F01 consolidation_breakout/breakout_position_state，核心是区间突破与失败退出；候选为相对强弱排名组合与流动性资格反馈，机制和决策对象不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及资金分配回指和状态维护。"
+      ],
+      "task_id": "TG-20261105-042021-e6bb50",
+      "differences": [
+        "e6bb50为F04 drawdown_risk_budget/portfolio_risk_controller，核心是回撤风险预算、证据等级与恢复准入；候选核心是相对强弱排名与流动性资格集合，机制、决策对象和必需决策不同。"
+      ]
+    },
+    {
+      "similarities": [
+        "均涉及资格条件与资金分配回指。"
+      ],
+      "task_id": "TG-20261029-185416-8868c8",
+      "differences": [
+        "8868c8为F01 trend_pullback/trend_pullback_inventory，核心是趋势回撤与分批库存处置；候选为横截面相对强弱排名，机制、决策对象和决策依赖不同。"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "status": "not_run",
+  "classification": "not_run",
+  "reason": "尚未调用模型进行独立初筛；不允许据此正式入库"
+}

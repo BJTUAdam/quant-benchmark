@@ -1,0 +1,318 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "横截面反转事件的分批入场、隔日退出与换手额度竞争",
+  "family_id": "F03",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_QLIB",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "cross_sectional_reversal",
+  "decision_object": "cross_sectional_reversal_portfolio",
+  "required_decisions": [
+    "deviation_measurement",
+    "liquidity_filter",
+    "rank_aggregation",
+    "overnight_inventory",
+    "exit_policy",
+    "turnover_budget",
+    "capital_allocation"
+  ],
+  "decision_dependencies": [
+    [
+      "deviation_measurement",
+      "rank_aggregation"
+    ],
+    [
+      "liquidity_filter",
+      "rank_aggregation"
+    ],
+    [
+      "rank_aggregation",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "overnight_inventory"
+    ],
+    [
+      "overnight_inventory",
+      "exit_policy"
+    ],
+    [
+      "exit_policy",
+      "turnover_budget"
+    ],
+    [
+      "turnover_budget",
+      "capital_allocation"
+    ]
+  ],
+  "maintenance_targets": [
+    "ranking_stability",
+    "cost_sensitivity",
+    "reversion_failure",
+    "signal_execution_gap",
+    "state_compatibility"
+  ],
+  "research_question": "当多只股票在不同时点出现反转候选时，如何把新事件排名与已有各入场批次的恢复程度、持有时限、T+1可卖性和退出需求一起管理？重点研究应保留多少额度处理旧批次退出，何时允许新增候选占用资金，以及同一股票多次触发时合并或拆分批次的后果。",
+  "research_modules": [
+    {
+      "decision_id": "deviation_measurement",
+      "description": "研究只用当时数据定义短期价格偏离及归一化尺度，保留触发时参考值、波动尺度和事件编号。",
+      "interaction": "同一标的再次出现偏离时，rank_aggregation必须能区分新事件与旧事件未结束，不能事后以最低点重新编号。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "研究成交活跃度和当前可交易限制如何约束反转参与，保留缺数据与确知不可交易的区别。",
+      "interaction": "筛选结果供rank_aggregation比较新事件；退出中的旧库存仍由exit_policy处置，不能因被筛除就从账户记录中消失。"
+    },
+    {
+      "decision_id": "rank_aggregation",
+      "description": "在同一决策时点比较新反转事件，研究偏离强度、事件年龄和参与容量的权衡，以及已持有同标的是否新增批次。",
+      "interaction": "排序是capital_allocation的输入，不直接替代对旧库存的退出判断；不能因为旧仓跌得更深而无条件抬升其加仓优先级。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在新入场事件、待退出旧批次、当前现金和未成交占用之间分配整手资金，研究同一股票总风险上限。",
+      "interaction": "先扣除turnover_budget为旧批次保留的执行额度，再决定本次新增；每个实际入场归入overnight_inventory，不提前使用未成交卖出所得。"
+    },
+    {
+      "decision_id": "overnight_inventory",
+      "description": "维护每个实际入场批次的可卖日期、成本、数量、触发参考和事件年龄，明确同股票批次聚合与费用口径。",
+      "interaction": "exit_policy先读取实际可卖库存和批次状态；当日新买批次不能借旧批次的可卖资格绕过T+1。"
+    },
+    {
+      "decision_id": "exit_policy",
+      "description": "研究偏离恢复、机制失效与持有时限如何产生退出需求，明确同标的不同批次退出的排序和合并。",
+      "interaction": "输出退出需求及紧急程度给turnover_budget；尚不可卖或未成交部分必须持续保留，不能在指标恢复时假定仓位已经平掉。"
+    },
+    {
+      "decision_id": "turnover_budget",
+      "description": "在风险退出、普通恢复退出和新增入场之间分配当期换手与费用额度，研究退出积压时冻结、缩减或继续新增的条件。",
+      "interaction": "退出需求来自exit_policy，约束下期capital_allocation；先确认本期实际成交，再结转未完成额度和库存，不将预算重置误当完成退出。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能出现反转触发密集、恢复变慢、不同批次挤占资金或多日无法退出。维护要判断改变事件定义、批次合并、退出优先级还是新增预算；任何改变都要接续旧批次的数量与可卖日期。七段不重置账户，研究记录应解释新增机会与存量风险的取舍，而非只报告单笔假设收益。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内A股真实代码；该代码清单为待绑定的固定研究池，数据覆盖、可交易状态和费用尚未验收，不宣称具有全市场代表性。",
+      "通过任务桥接查询daily、adj_factor、stk_limit、trade_cal、index_daily；不提供行情data目录，不将真实采集范围、映射或原始缓存交给策略。",
+      "运营方须确认至少连续两年的实际覆盖、复权因子历史可见版本、现金分红和送转等公司行为、逐日价格限制、停牌与T+1规则；缺失行情不能直接视作停牌。",
+      "需要指数基准时由平台另行绑定实际指数代码及冻结index_daily；不交易指数。所有特征仅用当时已可见历史字段计算，未来收益LABEL不作为特征。",
+      "公开日期是虚拟事件标签，日期起止和七段边界均待数据绑定。运行预算由本人首次配置，题目不预填CPU、内存或时限。",
+      "来源卡只提供已核验的简介、目录或开源特征设计范围，本题为本轮模型形式化设计，不宣称摘录原书策略或具有盈利证明。",
+      "股票仅允许现货多头、新增买入和对实际可卖持仓减仓，不做融券卖空；指数只查询和作为基准，不下单。不得把卖出尚未成交所得提前计入现金。"
+    ]
+  },
+  "parameter_space": [
+    "偏离参考窗口与标准化尺度",
+    "反转事件触发、延续和终止定义",
+    "重复触发事件的合并间隔与编号规则",
+    "新事件横截面排序及并列处理",
+    "进入前成交容量与涨跌停限制处理",
+    "同股票多批次合并或分开记账的规则",
+    "各批次恢复退出、失效退出与持有时限",
+    "可卖库存中退出批次的排序",
+    "风险退出与普通退出的预算层级",
+    "新入场预算与旧退出保留额度",
+    "组合及单标的上限、现金留存",
+    "未成交退出的重试、撤单和过期规则",
+    "参数更新后旧事件参考与年龄的兼容方式"
+  ],
+  "novelty_claim": "相对S06的偏离、活跃度和一次性排序分配链，本题增加实际入场批次及可卖性，要求退出需求先争取换手额度，再约束新事件资金分配；研究对象是跨标的事件与存量批次共同竞争资源。它不只是换阈值，但仍可能与宽泛反转题存在语义包含关系，待后续复核，不保证独立新题。",
+  "lineage": {
+    "derived_from": [
+      "S06"
+    ],
+    "kind": "new_conversation_authored_candidate_pending_semantic_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "production_state": {
+    "id": "TASK12-20261110-06",
+    "task_id": "TASK12-20261110-06",
+    "version": 1,
+    "status": "spec_checked",
+    "provenance": "conversation_model_authored",
+    "human_approved": false,
+    "approval_method": "not_registered",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "model_review_status": "conversation_peer_review"
+  }
+}

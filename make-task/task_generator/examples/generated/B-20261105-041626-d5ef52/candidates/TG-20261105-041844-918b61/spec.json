@@ -1,0 +1,241 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "同品种多月份期限曲线的斜率变化与动态配对选择：可交易合约对集合、整数手数与到期迁移的联合维护",
+  "family_id": "F06",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "term_curve_rotation",
+  "decision_object": "term_curve_pair_selection",
+  "required_decisions": [
+    "curve_signal",
+    "tenor_normalization",
+    "pair_selection",
+    "entry_exit",
+    "roll_policy",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "tenor_normalization",
+      "curve_signal"
+    ],
+    [
+      "curve_signal",
+      "pair_selection"
+    ],
+    [
+      "pair_selection",
+      "entry_exit"
+    ],
+    [
+      "entry_exit",
+      "roll_policy"
+    ],
+    [
+      "roll_policy",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "pair_selection"
+    ],
+    [
+      "state_migration",
+      "curve_signal"
+    ]
+  ],
+  "maintenance_targets": [
+    "curve_stability",
+    "expiry_roll",
+    "margin_exposure",
+    "state_compatibility"
+  ],
+  "research_question": "在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段：同一品种同时存在多个到期月份时，如何先把各月份价格按剩余期限化为可比的曲线口径，再由多月份曲线的斜率与形态变化生成当时可见的信号；该信号如何从可交易月份集合中选出本期实际参与的一条合约对，而不是固定近远月对；当两腿的真实乘数、价格刻度与整数手数导致配对难以按比例成立时，如何决定参与、退出与持有时限；当某一腿临近到期或流动性转移时，如何安排平旧开新并承接口径版本与未完成换腿的中间状态，使分段研发中配对与曲线口径连续可核？",
+  "research_modules": [
+    {
+      "decision_id": "tenor_normalization",
+      "description": "用已完成日线中的到期月份信息与当时可见价格，把同一品种各月份表达为可比期限口径，明确剩余期限差、价格刻度与合约乘数差异的处理方式，并记录口径版本。",
+      "interaction": "为曲线斜率与形态提供同一尺度的输入；口径版本变化会改变curve_signal的阈值含义，并作为state_migration需要承接的迁移对象。"
+    },
+    {
+      "decision_id": "curve_signal",
+      "description": "基于可比期限口径下的多月份价格，定义当时可见的曲线斜率与形态变化信号，说明信号方向、强度与失效条件，不使用事后数据。",
+      "interaction": "信号输入来自tenor_normalization；信号结果决定pair_selection的候选排序，并在state_migration恢复后需按新口径重新确认。"
+    },
+    {
+      "decision_id": "pair_selection",
+      "description": "从当时可交易且有可见成交的月份中选出本期实际参与的一条合约对，综合曲线信号、剩余期限匹配与流动性，给出配对理由与备选对。",
+      "interaction": "依赖curve_signal与tenor_normalization；选出的真实两腿决定entry_exit的标的与移仓起点，且state_migration后的候选对集合不得自动沿用旧选择。"
+    },
+    {
+      "decision_id": "entry_exit",
+      "description": "在选定的真实两腿上按有符号整数手数决定参与、退出与持有时限，处理逐腿撮合可能的部分成交与残余敞口。",
+      "interaction": "接收pair_selection的两腿；退出结果影响roll_policy的触发时点与margin_budget之外的保证金占用变化。"
+    },
+    {
+      "decision_id": "roll_policy",
+      "description": "在某一腿临近最后交易日或流动性转移前，安排平旧开新的顺序，核算移仓成本与过渡期间的残余敞口。",
+      "interaction": "由entry_exit的持仓与退出状态触发；移仓结果需要state_migration承接旧配对库存与未成交换腿。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "版本更新或口径调整时迁移曲线口径版本、已选合约对、旧腿持仓与未完成换腿中间状态，规定恢复后是否需重新确认信号与配对。",
+      "interaction": "承接roll_policy的移仓中间态；迁移后的口径与记忆状态回指pair_selection与curve_signal，要求重新确认后才会继续参与。"
+    }
+  ],
+  "maintenance_rationale": "后续分段揭晓的观察可能显示某些月份对的流动性格局或曲线斜率形态发生漂移，从而使既有曲线口径与配对选择不再适用；此时需决定保持现有阈值、调整口径参数或修改信号与配对逻辑。已建配对库存和未完成换腿必须在口径版本更新时被显式承接，否则移仓与保证金占用会出现无法对账的断层。维护不承诺提升收益，仅要求行为可解释、可接续。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "FG",
+      "M"
+    ],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅运营方采集规划；正式起止、dataset_id与边界均为null，binding_status=not_bound。",
+      "需覆盖FG与M同一品种多个到期月份的真实分合约日线，含结算价、成交量与持仓量；具体月份覆盖待绑定确认。",
+      "乘数、保证金率、费用、夜盘交易日与到期规则待绑定，缺失时不得正式运行。",
+      "曲线信号等指标由模块内用已列字段计算，不新增原始字段。"
+    ]
+  },
+  "parameter_space": [
+    "曲线信号的观察窗口长度",
+    "斜率或形态变化的确认强度阈值",
+    "候选月份对的最小剩余期限差",
+    "流动性筛选的最小成交量与持仓量门槛",
+    "配对时两腿的整数手数比例允许偏差",
+    "持有时限上限",
+    "移仓触发距最后交易日的前置幅度",
+    "口径版本更新后重新确认所需的观察长度"
+  ],
+  "novelty_claim": "与existing_tasks中最近的F06任务对照：TG-20261029-172301-684a8d与TG-20261029-185226-a83ad1的机制为calendar_spread_pairing，核心是近远月价差的pair_selection与到期迁移，不含由多月份曲线斜率信号驱动配对的决策链；TG-20261029-185356-d4e28b与TG-20261029-185538-ab9792虽涉及多月份选择与关系监控，但其决策对象仍为calendar_pair_inventory，且均未把curve_signal设为必需决策。本任务的实际研究取舍是：curve_signal由可比期限口径下的多月份曲线生成，并直接决定pair_selection的候选排序，使配对随曲线形态动态变化而非固定近远月；state_migration同时回指pair_selection与curve_signal，要求口径版本更新后候选对集合与信号阈值不得自动沿用。与历史HT03的B/M/Y加工关系、HT04的油品跨品种腿、HT05的FG/SA跨品种统计价差相比，本任务两腿来自同一品种不同月份，不涉及跨品种对冲估计或加工系数。与种子S11相比，本任务机制为term_curve_rotation，不以近远月价差配对为核心。若实现退化为在684a8d上仅增加一个斜率过滤或调整窗口阈值，应视为该任务的变体而非独立新题，需人工语义审。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+  "lineage": {
+    "derived_from": [
+      "S12",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN",
+      "TG-20261029-172301-684a8d"
+    ],
+    "kind": "term_curve_pairing_candidate_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "FG",
+      "M"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "schema_version": "finlab.skill.akquant_docs.v1",
+  "engine_version": "0.3.76",
+  "source_tag": "v0.3.76",
+  "source_commit": "269fab31a389a607da5c5d4872ef6b54390de6d4",
+  "source_repository": "https://github.com/akfamily/akquant",
+  "fetched_at": "2026-11-04T20:27:49.680309+00:00",
+  "official_documents": 13,
+  "scope": "Selected Chinese release documentation relevant to data, strategy, matching, assets, and recovery",
+  "transformations": [
+    "prepend platform compatibility notice",
+    "local links for saved documents",
+    "fixed-commit links for unsaved references",
+    "convert embedded images to source links"
+  ],
+  "runtime_changed": false,
+  "documents": [
+    {
+      "source_path": "docs/zh/reference/api.md",
+      "path": "official/reference/api.md",
+      "title": "API 参考",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/reference/api.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/reference/api.md",
+      "raw_sha256": "e13ee4c8eb62c4ff4ac0a59b73cb5c6876ab7efd885ca96cea9536af5df93f72",
+      "sha256": "66b0be3ea548feb6dca92aa97270b83807ec7d198fef02a00dd5982c0c78cd08",
+      "bytes": 118096
+    },
+    {
+      "source_path": "docs/zh/start/quickstart.md",
+      "path": "official/start/quickstart.md",
+      "title": "快速开始",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/start/quickstart.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/start/quickstart.md",
+      "raw_sha256": "463eecc3daac49991a3a73c25021547c326ddd4d33cdaa1acda075f5b1d116de",
+      "sha256": "6e41dabb09950a0f616df57394c4f7e987b45f2415ca820d1d3f7f7e5c92d37c",
+      "bytes": 20525
+    },
+    {
+      "source_path": "docs/zh/start/first_strategy.md",
+      "path": "official/start/first_strategy.md",
+      "title": "手把手教程：编写你的第一个量化策略",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/start/first_strategy.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/start/first_strategy.md",
+      "raw_sha256": "29e1ad2e2fbe0dbb2c2b80f534ab169866562485e229ce1cb834880c2a9ae838",
+      "sha256": "c304e971bb762c4011428c7bd9e0a0b20eec343203d60bb3df8abfd6a0d33b28",
+      "bytes": 10609
+    },
+    {
+      "source_path": "docs/zh/guide/strategy.md",
+      "path": "official/guide/strategy.md",
+      "title": "策略编写指南",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/guide/strategy.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/guide/strategy.md",
+      "raw_sha256": "602c3594e24e3ab793058544f18af334946243401ceb2b2f32bfa62d2abd8e73",
+      "sha256": "9307f3665fdf99ce06a9e87a19f6b2a856175f2a5ec7af630784b4932a6ea490",
+      "bytes": 79634
+    },
+    {
+      "source_path": "docs/zh/guide/data.md",
+      "path": "official/guide/data.md",
+      "title": "数据准备与加载指南 (Data Guide)",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/guide/data.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/guide/data.md",
+      "raw_sha256": "a671673365bafa19b8d75c9866e59294e68dd4d66c2c91c4981a0b28c767fc8e",
+      "sha256": "41968548664089e4e9a2d04a4c1594d059b7207acef193dd6851c37da414df52",
+      "bytes": 20154
+    },
+    {
+      "source_path": "docs/zh/guide/testing.md",
+      "path": "official/guide/testing.md",
+      "title": "测试指南",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/guide/testing.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/guide/testing.md",
+      "raw_sha256": "e01a2da19ce0231f783953283ad5708d2aefac9a9209f2a90091e94f3634a4a4",
+      "sha256": "04f35002008c5304601d6d83d688731f97300b2d97b76a5ea8f81828cc7d3b08",
+      "bytes": 6196
+    },
+    {
+      "source_path": "docs/zh/advanced/warm_start.md",
+      "path": "official/advanced/warm_start.md",
+      "title": "热启动 (Warm Start) 指南",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/advanced/warm_start.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/advanced/warm_start.md",
+      "raw_sha256": "2b1dea564a2e019b799c840c7a64c94e3091d9ec8176aa4b0f046c74cc5ca32f",
+      "sha256": "bcb30841bc16917027b22d4606863e7384ec075a3f9cf75c8405fbf5086a8507",
+      "bytes": 11166
+    },
+    {
+      "source_path": "docs/zh/advanced/timezone.md",
+      "path": "official/advanced/timezone.md",
+      "title": "时区处理指南 (Timezone Handling Guide)",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/advanced/timezone.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/advanced/timezone.md",
+      "raw_sha256": "4767002f1ac0dd421bb1a1966a6180e3aff0a83666805c2501d442706593a19d",
+      "sha256": "a31937ebf85b8e503466eeba44a18ff27e6940b9205b489782f0f6079deed8a0",
+      "bytes": 10961
+    },
+    {
+      "source_path": "docs/zh/advanced/tick_size_alignment.md",
+      "path": "official/advanced/tick_size_alignment.md",
+      "title": "Tick Size 对齐指南",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/advanced/tick_size_alignment.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/advanced/tick_size_alignment.md",
+      "raw_sha256": "064da783320f86fdd14883addd707973016e7d9861302b2a66dc756006ea521e",
+      "sha256": "a4615d7ffdb59ebf16bbd31db277f97b72730d7dcdd61732a2b3e37c22187725",
+      "bytes": 12895
+    },
+    {
+      "source_path": "docs/zh/textbook/06_stock_a.md",
+      "path": "official/textbook/06_stock_a.md",
+      "title": "第 6 章：A 股市场微观结构与策略实战",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/06_stock_a.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/06_stock_a.md",
+      "raw_sha256": "3fe4808a4221371bf4aa354fec24807727491060afeec6c2e7daeb55d26e130a",
+      "sha256": "8d929424a7cfef863b1ca0da306d9acce0137f6c3be571b9aca3f4fe37a24c7b",
+      "bytes": 22328
+    },
+    {
+      "source_path": "docs/zh/textbook/07_futures.md",
+      "path": "official/textbook/07_futures.md",
+      "title": "第 7 章：期货市场与衍生品策略",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/07_futures.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/07_futures.md",
+      "raw_sha256": "58a92744e110eaeeb83ca9c94bfa37a594a203291fbc7c327f5cc98e88a2bc85",
+      "sha256": "d8afee78a21bde70b356e109461a6891e2850dd7d58be2311a3d34bf2fdaa360",
+      "bytes": 26330
+    },
+    {
+      "source_path": "docs/zh/textbook/09_funds.md",
+      "path": "official/textbook/09_funds.md",
+      "title": "第 9 章：基金投资与资产配置理论",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/09_funds.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/09_funds.md",
+      "raw_sha256": "3986393cf6b3cd2d120510c7f9cf98897c7fd3602b33ccbb164dd364b8d3fb7d",
+      "sha256": "175c3e12ab39b88e3a4eb581645e756852c3636d87a9f0f9fce6b91db6601377",
+      "bytes": 17660
+    },
+    {
+      "source_path": "docs/zh/textbook/appendix_pitfalls.md",
+      "path": "official/textbook/appendix_pitfalls.md",
+      "title": "附录 C：常见误区对照表",
+      "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/appendix_pitfalls.md",
+      "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/docs/zh/textbook/appendix_pitfalls.md",
+      "raw_sha256": "fc5b36e3f8ae74ba84dff0a8d9c6eb0ab635bacacf9701e61c9de6716463e12f",
+      "sha256": "b34a80ab6990094a08b3ab06a72657af5ccde28bcb64a2f92d49de2c91e294be",
+      "bytes": 4456
+    }
+  ],
+  "license": {
+    "path": "LICENSE.upstream.txt",
+    "source_path": "LICENSE",
+    "source_url": "https://github.com/akfamily/akquant/blob/269fab31a389a607da5c5d4872ef6b54390de6d4/LICENSE",
+    "raw_url": "https://raw.githubusercontent.com/akfamily/akquant/269fab31a389a607da5c5d4872ef6b54390de6d4/LICENSE",
+    "sha256": "6b691996c9feee0e0c938238fd3d85118a09f5488dfd7af4fbedb603f2b34c4d",
+    "bytes": 1075
+  }
+}

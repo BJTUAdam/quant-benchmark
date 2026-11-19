@@ -1,0 +1,427 @@
+{
+  "action": "auto_accepted",
+  "admission_content_source": "verified_reviewed_snapshot",
+  "approval": {
+    "action": "auto_accepted",
+    "candidate_id": "TG-20261105-042135-678759",
+    "created_at": "2026-11-10T10:05:38+00:00",
+    "review_hash": "ab0b20e7ad753a89d7c0592a6a2bf1dd0e29b8586a52665df17639b82aa2d587",
+    "spec_hash": "430eee70e1e20916a66bdb4131e65807e95d8d10b8066b306d39535b0abb2a1f",
+    "task_id": "TG-20261105-042135-678759",
+    "version": 1
+  },
+  "approval_method": "automated",
+  "artifacts": {
+    "public_files": {
+      "CHANGELOG.md": "# 维护记录\n\n逐段记录保持、调参或改逻辑的依据及状态兼容。\n",
+      "DATA_API.md": "# 桥接数据契约\n\n仅从桥接器获取数据，无行情文件包。URL和令牌由运行系统注入；上游URL和Tushare令牌属于运营方。\n\n```python\nfrom finlab import tushare as ts\npro = ts.pro_api()  # 默认DataFrame；dataframe=False可返回列表\n# pro.query(\"daily\", ts_code=\"000001.SZ\", end_date=\"虚拟YYYYMMDD\")\n```\n\n|接口|允许字段|频率|\n|---|---|---|\n|fut_daily|ts_code, trade_date, open, high, low, close, settle, vol, oi|daily|\n|fut_basic|ts_code, name, list_date, delist_date|daily|\n\n字段含义与单位以绑定契约及官方定义为准。Tushare股票/ETF日线vol通常为手、amount为千元；回测输入由平台转成股/元。\n期货vol为手，价格按合约报价单位；不能套用股票倍率。分钟接口的单位必须另行确认。\n缺失值使用null，不填造价格；停牌、无交易和数据缺失分别处理。\n未知字段、未冻结范围和未来查询会返回错误，不能将错误当作零值或无交易。\n独立日期、时间戳、报告期和已登记时间文本统一映射，全部均为虚拟日期，不是实际历史年份。\n不得根据虚拟年份套用已知股灾、政策、节假日或预设事件；只按桥接交易日历与当前可见信息运行。\n名称代码及其嵌入年月保留，但不得用它们重建真实时间映射。\n",
+      "RESEARCH.md": "# 研究记录\n\n说明研究决策、证据、验证与限制。尚未执行的检查须标明。\n",
+      "SUBMISSION.md": "# 提交协议 finlab.submission.v2\n\n必需：strategy.py、backtest.py、params.json、RESEARCH.md、CHANGELOG.md。\nStrategy继承finlab.sdk.Strategy，使用initialize(ctx)、on_bars(ctx)、on_order(ctx,event)、on_trade(ctx,event)、on_finish(ctx)。\nctx.now为虚拟时间；虚拟年份仅是事件索引，不对应真实历史年份，不据此预设股灾、政策或未来事件。\nctx.bars为同时间戳已完成行情切片；ctx.portfolio为当前账户；ctx.params为本轮参数；ctx.memory必须是JSON对象。\nctx.order(symbol,quantity,side=\"buy\"/\"sell\",limit_price=None,tif=\"GTC\"/\"DAY\")按股或合约手数下单；ctx.cancel(order_id)撤销未完成订单。\nctx.query通过受限桥接器查询。回调返回前产生的订单依次校验，不能修改平台费用、成交价格或账户。\nbacktest.py调用finlab.sdk.launch。只能使用预装finlab、pandas、numpy及标准库；如需依赖由运营方构建审核后的新镜像。\n资源预算由本人先运行finlab setup明确设置；AI不能代填CPU、内存或时限。未配置时不能启动正式运行。\n提交检查不在宿主机执行代码；真正可运行性由隔离Docker运行验证。每轮代码与参数取内容哈希。\n系统结果包括equity.csv、orders.csv、trades.csv、metrics.json、run_manifest.json；可信检查点仅在平台保存。\n",
+      "TASK.md": "# 期货单品种趋势回撤中的资格复核与预算耦合库存：逐腿撮合下的分批建仓、资格撤回与退出联动\n\n> v2任务规格。规格批准、数据绑定和运行接入分别记录，当前状态以task_input.draft.json与平台登记记录为准。\n\n研究目标：在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段，如何在单个品种上确认既有趋势仍然适用、把回撤深度与回撤结束的判定转化为可按真实整数手数逐腿撮合参与的分批建仓节奏；当退出条件触发或趋势资格被撤回时，如何对已建批次逐批处置并处理部分成交与残余敞口；处置后的预算缩减与保证金占用变化又如何反过来收窄下一段趋势资格的判定宽度与可接受的回撤容差及可用批次手数，使资格、定位、库存、退出与预算在同一跨段状态中连续可核？\n\n## 运行协议\n\n先在研发期开发首版，再经历七段逐步揭晓的正式期。每段运行时冻结代码；完成后可以保持、调参或修改逻辑。\n现金、持仓、未完成订单和JSON memory连续。修改不重置账户，不覆盖过去结果。全部七段的连续账户用于评价。\n实际虚拟时间范围、数据版本和分段边界在绑定后确定。\n\n## 研究决策\n\n- 仅用已完成交易日收盘数据，界定单品种既有趋势的方向、成立时长与继续适用的条件，并明确趋势资格何时需要复核撤回；不使用未来数据、不预设真实年份事件。；相互影响：为回撤定位提供方向与前提，并接受资金分配的预算回压来调整资格判定的有效宽度；资格撤回本身不构成独立决策，而是并入退出政策与回撤定位的状态更新。\n- 在趋势资格成立的前提下，用当时可见的已完成价格与成交活跃度定位趋势内回撤的深度区间及回撤结束的可观察标志；区分正常回撤与趋势结构失效。；相互影响：接收趋势资格给出的方向与容差，其回撤结束判定触发分批库存节奏；回撤容差又受资金分配的预算回压影响，资格撤回时其状态需被退出政策吸收更新。\n- 把回撤结束的判定转化为按真实分合约有符号整数手数的分批建仓与分批退出库存安排；在逐腿撮合、可部分成交的约束下记录已成交批次、未成交部分与残余敞口。；相互影响：由回撤定位触发建仓批次与顺序，向退出政策暴露批次库存与残余敞口；同时受资金分配约束的可用手数上限与保证金占用影响，实际建仓规模反馈给预算。\n- 定义止盈、止损、持有时限与跟踪退出条件，并明确当退出条件触发、趋势资格被撤回或前一批次止损时，对已建批次逐批清退的顺序与未成交单处置；在部分成交与残余敞口下按腿给出可执行退出。；相互影响：接收分批库存的批次与残余敞口作为退出对象，其退出结果把释放的现金与已实现盈亏传递给资金分配；同时吸收趋势资格撤回与回撤失效两类证据，避免与回撤定位重复触发。\n- 在真实分合约保证金占用、费用与整数手数约束下，决定单品种上各批次可用手数与现金预算；当清退或连续止损后按预算缩减，随后依据恢复条件逐步回升。；相互影响：接收退出政策释放的现金与实现盈亏，将预算回压到趋势资格的判定宽度与可接受回撤容差，以及分批库存的可用批次手数上限，形成预算—资格—库存的闭环。\n\n可研究的参数与结构选择：\n\n- 趋势资格的方向确认参数与最短成立长度的可选范围\n- 回撤深度区间的下界与上界的可选范围\n- 批次数量与每批可用手数上限的比例参数\n- 预算缩减与恢复的分档比例参数\n- 退出政策的跟踪退出放宽量可选范围\n- 冷却期间长度参数\n\n持续维护依据：后续段落揭晓的已收盘数据可能显示：原先认定的趋势结构在回撤后不再成立，或回撤定位反复被证伪，或逐腿撮合造成的残余敞口使实际库存偏离信号意图。这些观察可能促使维护者保持现有逻辑（若资格撤回与退出政策仍能一致吸收失效且预算回压稳定）、只调参数（若仅是回撤容差或批次手数上限需要重校）、或修改逻辑（若趋势资格的撤回无法被退出政策可靠吸收，或预算回压导致资格判定失去意义、库存与预算互相锁死）。维护不承诺每次调优都提升收益，也不要求实盘盈利；未成交、部分成交与残余敞口需在段间可见后才可判断信号与执行差距。\n\n## 数据与执行\n\n行情通过Tushare协议桥接器查询。使用环境变量MARKET_BRIDGE_URL和MARKET_BRIDGE_TOKEN，详见DATA_API.md。\n名称与代码保持真实；全部时间字段使用虚拟时间，仅表示事件顺序和可见时点。\n虚拟年份不对应真实历史年份，不得按年份预设股灾、政策、节假日或未来事件，也不得反推实际时期。\n交易日以服务返回日历为准，不按虚拟日期的星期猜测；策略只能根据当时已可见数据形成判断。\n只能使用当前可见信息，不访问外网。指数仅用于查询与基准，不可下单。\nAKQuant 0.3.76执行撮合；收盘后决策、下一根行情开盘撮合。期货多腿逐腿撮合，可能部分成交，需处理残余敞口。\n交易单位、T+0/T+1、费用、公司行为、价格限制、保证金与结算按绑定后的runtime_profile固定。\n资源预算尚未选择，必须由本人先运行finlab setup；CPU、内存和时限由本人明确配置，AI不能代填。\n任务只提供非生效的CPU/内存建议；单次运行时限由使用者本人明确选择，不预填。\n规则未绑定时不能正式运行。原始价格用于撮合，研究复权数据不得重复计入公司行为收益。\n\n## 提交与评价\n\n提交strategy.py、backtest.py、params.json、RESEARCH.md、CHANGELOG.md，遵守SUBMISSION.md。\n回测入口必须可执行，策略通过finlab.strategy.v2接口运行。系统生成权益、订单、成交、指标和运行记录。\n统一记录扣除成本后的收益、风险和维护过程；评分配置在正式开始前固定，题目不提供答案或预期成绩。\n",
+      "backtest.py": "from finlab.sdk import launch\n\nif __name__ == \"__main__\":\n    launch(\"strategy.py\", \"params.json\")\n",
+      "bridge_contract.json": "{\n  \"schema_version\": \"finlab.bridge_contract.v2\",\n  \"identity_policy\": \"real_names_and_codes\",\n  \"date_domain\": \"virtual\",\n  \"calendar_semantics\": \"virtual_sequence_only_not_historical_years\",\n  \"virtual_date_notice\": \"全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。\",\n  \"url_env\": \"MARKET_BRIDGE_URL\",\n  \"token_env\": \"MARKET_BRIDGE_TOKEN\",\n  \"virtual_start\": null,\n  \"virtual_stop\": null,\n  \"minimum_years\": 2,\n  \"symbols\": [\n    \"FG.ZCE\",\n    \"M.DCE\"\n  ],\n  \"endpoints\": [\n    {\n      \"api_name\": \"fut_daily\",\n      \"fields\": [\n        \"ts_code\",\n        \"trade_date\",\n        \"open\",\n        \"high\",\n        \"low\",\n        \"close\",\n        \"settle\",\n        \"vol\",\n        \"oi\"\n      ],\n      \"frequency\": \"daily\",\n      \"visibility\": \"available_at_lte_controller_clock\"\n    },\n    {\n      \"api_name\": \"fut_basic\",\n      \"fields\": [\n        \"ts_code\",\n        \"name\",\n        \"list_date\",\n        \"delist_date\"\n      ],\n      \"frequency\": \"daily\",\n      \"visibility\": \"available_at_lte_controller_clock\"\n    }\n  ],\n  \"binding_status\": \"not_bound\",\n  \"dataset_id\": null,\n  \"required_checks\": [\n    \"point_in_time\",\n    \"coverage\",\n    \"calendar\",\n    \"units\",\n    \"corporate_actions_or_settlement\",\n    \"trading_rules\"\n  ]\n}\n",
+      "params.json": "{}\n",
+      "runtime_profile.json": "{\n  \"schema_version\": \"finlab.runtime.v2\",\n  \"engine\": \"akquant\",\n  \"engine_version\": \"0.3.76\",\n  \"strategy_api\": \"finlab.strategy.v2\",\n  \"asset_types\": [\n    \"FUTURES\"\n  ],\n  \"index_role\": \"query_and_benchmark_only\",\n  \"frequency\": \"daily\",\n  \"fill_policy\": \"NextOpen\",\n  \"initial_cash\": 1000000,\n  \"currency\": \"CNY\",\n  \"formal_segments\": 7,\n  \"multi_leg_execution\": \"per_leg_partial_fills_possible\",\n  \"state_continuity\": [\n    \"cash\",\n    \"positions\",\n    \"open_orders\",\n    \"memory\"\n  ],\n  \"resources\": null,\n  \"resource_status\": \"requires_human_setup\",\n  \"resource_recommendations\": {\n    \"cpus\": 2,\n    \"memory_mb\": 4096\n  },\n  \"market_rules_status\": \"requires_binding\",\n  \"instruments\": null,\n  \"benchmark\": null\n}\n",
+      "strategy.py": "\"\"\"接口演示：仅保持空仓，不构成题目参考答案。\"\"\"\nfrom finlab.sdk import Strategy as BaseStrategy\n\nclass Strategy(BaseStrategy):\n    def initialize(self, ctx):\n        ctx.memory.setdefault(\"observations\", 0)\n\n    def on_bars(self, ctx):\n        ctx.memory[\"observations\"] += 1\n        # ctx.order(\"真实代码\", 100, side=\"buy\")\n        # 日期均为虚拟日期。查询格式与任务授权见DATA_API.md。\n",
+      "task_input.draft.json": "{\n  \"schema_version\": \"finance_task_input.draft.v2\",\n  \"task_id\": \"TG-20261105-042135-678759\",\n  \"candidate_id\": \"TG-20261105-042135-678759\",\n  \"task_version\": 1,\n  \"initial_message\": {\n    \"role\": \"user\",\n    \"content_file\": \"public/TASK.md\"\n  },\n  \"expected_outputs\": [\n    \"CHANGELOG.md\",\n    \"RESEARCH.md\",\n    \"backtest.py\",\n    \"params.json\",\n    \"strategy.py\"\n  ],\n  \"dataset_id\": null,\n  \"formal_intervals\": null,\n  \"spec_status\": \"spec_accepted\",\n  \"approval_method\": \"automated\",\n  \"novelty\": \"duplicate\",\n  \"counts_new_question\": false,\n  \"data_status\": \"not_bound\",\n  \"runtime_status\": \"not_connected\",\n  \"binding_contract\": \"bridge_contract.json\",\n  \"runtime_profile\": \"runtime_profile.json\"\n}\n"
+    },
+    "public_hash": "dc554958b0281495d6c53f674ddfd9d880d4cab611176c50ca5e8abf77749279",
+    "review": {
+      "classification": "duplicate",
+      "closest_task_id": "TG-20261105-041906-253472",
+      "comparisons": [
+        {
+          "differences": [
+            "候选在staged_inventory与exit_policy描述中更显式写入逐腿撮合、可部分成交、残余敞口，并落到capital_allocation的保证金占用；但该环境约束是akquant_futures_v2的既定执行语义，不是新增研究决策",
+            "候选标题与研究问题增加了保证金占用、残余敞口的表述，但仍由同一组决策承担，不引入新决策ID或新依赖边"
+          ],
+          "similarities": [
+            "同家族F01、同核心机制trend_pullback、同决策对象trend_pullback_inventory",
+            "五个必需决策完全一致：trend_qualification、pullback_location、staged_inventory、exit_policy、capital_allocation",
+            "六条决策依赖边完全一致，含capital_allocation回指trend_qualification与staged_inventory的预算回压闭环",
+            "维护目标一致：structure_validity、signal_execution_gap、risk_recovery、state_compatibility",
+            "研究问题几乎逐句同构：单品种趋势资格复核、回撤定位到分批库存、资格撤回与退出联动、预算缩减回压资格宽度与批次手数"
+          ],
+          "task_id": "TG-20261105-041906-253472"
+        },
+        {
+          "differences": [
+            "该历史题为股票日线＋分钟、T+1库存环境，候选为期货分合约逐腿撮合环境，执行约束与标的类别不同",
+            "该题不设capital_allocation→staged_inventory边，候选补回该预算对批次手数的约束；但这属于依赖边重排，核心决策词表与问题结构仍等价"
+          ],
+          "similarities": [
+            "同机制trend_pullback、同对象trend_pullback_inventory，前四个决策与依赖链一致",
+            "均要求趋势资格撤回证据并入exit_policy而非独立失效决策",
+            "均含capital_allocation回指trend_qualification的预算回压"
+          ],
+          "task_id": "TG-20261029-185416-8868c8"
+        },
+        {
+          "differences": [
+            "该题把failure_exit设为独立必需决策以吸收失效信号；候选明确不设failure_exit，改由exit_policy吸收资格撤回，决策划分不同",
+            "候选增加capital_allocation→staged_inventory的预算回压边；但两者核心问题仍是趋势回撤库存与失效—预算闭环，属于依赖与决策切分的相邻变体而非独立新问题"
+          ],
+          "similarities": [
+            "同机制、同对象，均涉及趋势资格、回撤定位、分批库存、退出与预算缩减排退",
+            "均以预算缩减约束下一段资格判定宽度"
+          ],
+          "task_id": "TG-20261029-185249-24341b"
+        },
+        {
+          "differences": [
+            "该题以state_migration承接批次与未决状态，候选不设state_migration",
+            "该题不含capital_allocation决策，候选引入预算回压闭环，决策集差异更大"
+          ],
+          "similarities": [
+            "同机制trend_pullback、同对象trend_pullback_inventory，均含趋势资格、回撤定位、分批库存、退出政策",
+            "均讨论退出后状态承接"
+          ],
+          "task_id": "TG-20261029-184647-ca78bb"
+        },
+        {
+          "differences": [
+            "该题以entry_confirmation为必需决策并含state_migration；候选两者均无",
+            "候选引入capital_allocation回指资格与库存的闭环，属于不同的决策切分"
+          ],
+          "similarities": [
+            "同机制、同对象，均含趋势资格、回撤定位、分批库存、退出",
+            "均讨论资格撤回后的状态一致与分批库存"
+          ],
+          "task_id": "TG-20261029-185109-ad8725"
+        },
+        {
+          "differences": [
+            "HT01为45股短周期趋势组合，对象为stock_trend_portfolio，含range_detection、reentry_policy；候选为单品种期货趋势回撤库存",
+            "决策对象与库存管理机制不同，仅为宽泛历史母题对照"
+          ],
+          "similarities": [
+            "同族F01，均涉及趋势方向与资金分配",
+            "均为趋势类母题"
+          ],
+          "task_id": "HT01"
+        },
+        {
+          "differences": [
+            "该题为consolidation_breakout/breakout_position_state，核心是区间识别、突破确认、失败退出与再入场；候选为趋势回撤库存，决策对象与触发机制不同"
+          ],
+          "similarities": [
+            "同族F01，均含capital_allocation回指与失效证据处理、预算回压"
+          ],
+          "task_id": "TG-20261105-041643-7e6569"
+        },
+        {
+          "differences": [
+            "该题为整理区间突破后的跟踪、失败退出与再入场，对象为breakout_position_state；候选为趋势内回撤分批库存，不以突破确认和再入场为核心"
+          ],
+          "similarities": [
+            "同族F01，均涉及失败处置与预算反馈"
+          ],
+          "task_id": "TG-20261029-172300-ca5a47"
+        },
+        {
+          "differences": [
+            "该题为drawdown_risk_budget/portfolio_risk_controller，核心是组合回撤证据等级与恢复准入；候选为单品种趋势回撤库存，核心触发机制与决策对象不同"
+          ],
+          "similarities": [
+            "均涉及风险预算缩减、恢复与资本分配闭环",
+            "均有risk_recovery维护目标"
+          ],
+          "task_id": "TG-20261105-042021-e6bb50"
+        },
+        {
+          "differences": [
+            "HT02为超跌反弹股票组合，对象为oversold_stock_portfolio，核心机制oversold_rebound；候选为期货趋势回撤库存，机制与对象均不同"
+          ],
+          "similarities": [
+            "同属趋势/反弹类策略母题，含staged_inventory与exit_policy"
+          ],
+          "task_id": "HT02"
+        }
+      ],
+      "content_hash": "0d62d2cca5f96d68034fa044f32e5e5da0826094e9dc0ee70987cb46dd34322b",
+      "context_hash": "03971c27b0acd73d964ce9dd8947627cfca15a1dedea7f0135e9b7b9a0f0c617",
+      "issues": [],
+      "long_horizon_valid": true,
+      "mode": "model_api",
+      "pending_bindings": [
+        "真实分合约数据冻结、授权与月份流动性绑定未完成（binding_status=not_bound，dataset_id=null）",
+        "交易规则、保证金、结算、费用、夜盘交易日与到期规则待绑定（market_rules_status=requires_binding）",
+        "正式期虚拟时间范围与七段分段边界未确定",
+        "资源预算需本人运行finlab setup选择（resources=null，resource_status=requires_human_setup）；CPU/内存建议为非生效",
+        "评分配置与管线在正式开始前固定，尚未绑定"
+      ],
+      "public_information_safe": true,
+      "rationale": "候选与TG-20261105-041906-253472在家族、核心机制、决策对象、五个必需决策、六条依赖边、维护目标和研究问题上几乎逐句同构，structural_check亦记录exact_matches命中该ID。候选相对该最近题的新增表述（逐腿撮合、部分成交、残余敞口、保证金占用）落在akquant_futures_v2既定执行语义内，由同一组决策承担，未形成新的必需研究决策或改变核心问题。与其他历史trend_pullback候选相比，候选主要是在state_migration/entry_confirmation/failure_exit之间做决策切分与依赖边重排，属于同一宽泛问题下的相邻变体，而非独立研究对象。因此判为duplicate，最接近为TG-20261105-041906-253472。",
+      "reviewed_at": "2026-11-05T04:30:03+00:00",
+      "spec_hash": "430eee70e1e20916a66bdb4131e65807e95d8d10b8066b306d39535b0abb2a1f",
+      "status": "needs_attention",
+      "validation_errors": []
+    },
+    "status": "captured"
+  },
+  "candidate_id": "TG-20261105-042135-678759",
+  "counts_new_question": false,
+  "created_at": "2026-11-10T10:05:38+00:00",
+  "novelty": "duplicate",
+  "provenance": {
+    "approval_event": {
+      "action": "auto_accepted",
+      "candidate_id": "TG-20261105-042135-678759",
+      "created_at": "2026-11-10T10:05:38+00:00",
+      "note": "Program checks + current model review; no human approval",
+      "review_hash": "ab0b20e7ad753a89d7c0592a6a2bf1dd0e29b8586a52665df17639b82aa2d587",
+      "spec_hash": "430eee70e1e20916a66bdb4131e65807e95d8d10b8066b306d39535b0abb2a1f",
+      "task_id": "TG-20261105-042135-678759",
+      "version": 1
+    },
+    "human_approved": false,
+    "model_event": {
+      "action": "model_reviewed",
+      "candidate_id": "TG-20261105-042135-678759",
+      "created_at": "2026-11-05T04:30:03+00:00",
+      "id": 65,
+      "note": "独立API初筛完成；并非人工批准",
+      "review_hash": "ab0b20e7ad753a89d7c0592a6a2bf1dd0e29b8586a52665df17639b82aa2d587",
+      "spec_hash": "430eee70e1e20916a66bdb4131e65807e95d8d10b8066b306d39535b0abb2a1f"
+    },
+    "origin": "local_automated_acceptance",
+    "trusted_import": false
+  },
+  "related_reference_status": "comparison_reference_only_not_inherited_approval",
+  "related_task_id": "TG-20261105-041906-253472",
+  "review_hash": "ab0b20e7ad753a89d7c0592a6a2bf1dd0e29b8586a52665df17639b82aa2d587",
+  "schema_version": "taskgen.approved.v1",
+  "spec": {
+    "bridge_contract": {
+      "binding_status": "not_bound",
+      "calendar_semantics": "virtual_sequence_only_not_historical_years",
+      "dataset_id": null,
+      "date_domain": "virtual",
+      "endpoints": [
+        {
+          "api_name": "fut_daily",
+          "fields": [
+            "ts_code",
+            "trade_date",
+            "open",
+            "high",
+            "low",
+            "close",
+            "settle",
+            "vol",
+            "oi"
+          ],
+          "frequency": "daily",
+          "visibility": "available_at_lte_controller_clock"
+        },
+        {
+          "api_name": "fut_basic",
+          "fields": [
+            "ts_code",
+            "name",
+            "list_date",
+            "delist_date"
+          ],
+          "frequency": "daily",
+          "visibility": "available_at_lte_controller_clock"
+        }
+      ],
+      "identity_policy": "real_names_and_codes",
+      "minimum_years": 2,
+      "required_checks": [
+        "point_in_time",
+        "coverage",
+        "calendar",
+        "units",
+        "corporate_actions_or_settlement",
+        "trading_rules"
+      ],
+      "schema_version": "finlab.bridge_contract.v2",
+      "symbols": [
+        "FG.ZCE",
+        "M.DCE"
+      ],
+      "token_env": "MARKET_BRIDGE_TOKEN",
+      "url_env": "MARKET_BRIDGE_URL",
+      "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+      "virtual_start": null,
+      "virtual_stop": null
+    },
+    "core_mechanism": "trend_pullback",
+    "data_requirements": {
+      "date_end": "2025-12-31",
+      "date_start": "2022-01-01",
+      "extra_fields": [],
+      "minimum_years": 2,
+      "notes": [
+        "仅运营方采集需求，不进入公开任务正文；真实冻结与授权待绑定。",
+        "标的为期货真实分合约；研究在单品种上逐一进行，具体参与合约月份由当时可见的剩余期限与流动性决定，但不在本规格中预设真实月份映射。",
+        "品种候选限定本批支持的B、M、Y、SC、FU、LU、FG、SA；具体品种与合约后续按可见性绑定，不由本规格声称已支持其他计价单位或交易规则。",
+        "所有事件日期为虚拟日期，仅标识数据顺序与可见时点，不对应真实历史年份。"
+      ],
+      "profile_id": "futures_daily",
+      "symbols": [
+        "FG.ZCE",
+        "M.DCE"
+      ]
+    },
+    "decision_dependencies": [
+      [
+        "trend_qualification",
+        "pullback_location"
+      ],
+      [
+        "pullback_location",
+        "staged_inventory"
+      ],
+      [
+        "staged_inventory",
+        "exit_policy"
+      ],
+      [
+        "exit_policy",
+        "capital_allocation"
+      ],
+      [
+        "capital_allocation",
+        "trend_qualification"
+      ],
+      [
+        "capital_allocation",
+        "staged_inventory"
+      ]
+    ],
+    "decision_object": "trend_pullback_inventory",
+    "environment_id": "akquant_futures_v2",
+    "family_id": "F01",
+    "lineage": {
+      "derived_from": [
+        "S02",
+        "HT01",
+        "TG-20261029-184647-ca78bb",
+        "TG-20261029-185249-24341b"
+      ],
+      "kind": "budget_coupled_trend_pullback_inventory_pending_review"
+    },
+    "maintenance_rationale": "后续段落揭晓的已收盘数据可能显示：原先认定的趋势结构在回撤后不再成立，或回撤定位反复被证伪，或逐腿撮合造成的残余敞口使实际库存偏离信号意图。这些观察可能促使维护者保持现有逻辑（若资格撤回与退出政策仍能一致吸收失效且预算回压稳定）、只调参数（若仅是回撤容差或批次手数上限需要重校）、或修改逻辑（若趋势资格的撤回无法被退出政策可靠吸收，或预算回压导致资格判定失去意义、库存与预算互相锁死）。维护不承诺每次调优都提升收益，也不要求实盘盈利；未成交、部分成交与残余敞口需在段间可见后才可判断信号与执行差距。",
+    "maintenance_targets": [
+      "structure_validity",
+      "signal_execution_gap",
+      "risk_recovery",
+      "state_compatibility"
+    ],
+    "novelty_claim": "与历史对照 HT01（short_horizon_trend / stock_trend_portfolio）相比，本任务不以宽泛短周期突破跟踪为目标，而是以单品种趋势内回撤的分批库存与退出、以及预算回压为决策对象，属于 F01 中 trend_pullback 方向。与 existing_tasks 中最近的同类候选 TG-20261029-184647-ca78bb、TG-20261029-185109-ad8725、TG-20261029-185249-24341b、TG-20261029-185416-8868c8 相比，四者与候选题均为 trend_pullback / trend_pullback_inventory：ca78bb 以状态迁移承接批次；ad8725 以 entry_confirmation 作为差异来源；24341b 设 failure_exit 吸收失效信号；8868c8 不设 failure_exit 而要求退出政策吸收资格切换。本任务不设 state_migration、不新增确认环节、不设 failure_exit，其实际取舍是：capital_allocation 同时回指 trend_qualification 与 staged_inventory，使已实现保证金占用与现金碎片直接改变下一段趋势资格的有效宽度与可用批次手数；并在真实多腿逐腿撮合、可部分成交且有残余敞口的执行约束下由 exit_policy 定义逐批退出顺序与残余敞口处置，这是上述四候选未作为必需取舍的。与 TG-20261029-172300-ca5a47（consolidation_breakout / breakout_position_state）相比决策对象为趋势回撤库存而非突破候选状态，且不以再入场为核心。recent_feedback 指出同类 trend_pullback 候选多次仅重排依赖边即被判为 variant，本任务据此明确把预算对资格宽度与批次手数的双向约束作为实质研究取舍，并将执行约束落到逐腿部分成交上；仍可能被人工审认定为变体，若实现中预算回压退化为仅调整阈值或窗口，应视为既有趋势回撤题的变体而非独立新题。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+    "parameter_space": [
+      "趋势资格的方向确认参数与最短成立长度的可选范围",
+      "回撤深度区间的下界与上界的可选范围",
+      "批次数量与每批可用手数上限的比例参数",
+      "预算缩减与恢复的分档比例参数",
+      "退出政策的跟踪退出放宽量可选范围",
+      "冷却期间长度参数"
+    ],
+    "protocol": {
+      "boundaries": null,
+      "formal_segments": 7,
+      "maintenance": [
+        "hold",
+        "parameters",
+        "logic"
+      ],
+      "release_rule": "completed_segment_only_after_commit",
+      "research_fraction": 0.3
+    },
+    "required_decisions": [
+      "trend_qualification",
+      "pullback_location",
+      "staged_inventory",
+      "exit_policy",
+      "capital_allocation"
+    ],
+    "research_modules": [
+      {
+        "decision_id": "trend_qualification",
+        "description": "仅用已完成交易日收盘数据，界定单品种既有趋势的方向、成立时长与继续适用的条件，并明确趋势资格何时需要复核撤回；不使用未来数据、不预设真实年份事件。",
+        "interaction": "为回撤定位提供方向与前提，并接受资金分配的预算回压来调整资格判定的有效宽度；资格撤回本身不构成独立决策，而是并入退出政策与回撤定位的状态更新。"
+      },
+      {
+        "decision_id": "pullback_location",
+        "description": "在趋势资格成立的前提下，用当时可见的已完成价格与成交活跃度定位趋势内回撤的深度区间及回撤结束的可观察标志；区分正常回撤与趋势结构失效。",
+        "interaction": "接收趋势资格给出的方向与容差，其回撤结束判定触发分批库存节奏；回撤容差又受资金分配的预算回压影响，资格撤回时其状态需被退出政策吸收更新。"
+      },
+      {
+        "decision_id": "staged_inventory",
+        "description": "把回撤结束的判定转化为按真实分合约有符号整数手数的分批建仓与分批退出库存安排；在逐腿撮合、可部分成交的约束下记录已成交批次、未成交部分与残余敞口。",
+        "interaction": "由回撤定位触发建仓批次与顺序，向退出政策暴露批次库存与残余敞口；同时受资金分配约束的可用手数上限与保证金占用影响，实际建仓规模反馈给预算。"
+      },
+      {
+        "decision_id": "exit_policy",
+        "description": "定义止盈、止损、持有时限与跟踪退出条件，并明确当退出条件触发、趋势资格被撤回或前一批次止损时，对已建批次逐批清退的顺序与未成交单处置；在部分成交与残余敞口下按腿给出可执行退出。",
+        "interaction": "接收分批库存的批次与残余敞口作为退出对象，其退出结果把释放的现金与已实现盈亏传递给资金分配；同时吸收趋势资格撤回与回撤失效两类证据，避免与回撤定位重复触发。"
+      },
+      {
+        "decision_id": "capital_allocation",
+        "description": "在真实分合约保证金占用、费用与整数手数约束下，决定单品种上各批次可用手数与现金预算；当清退或连续止损后按预算缩减，随后依据恢复条件逐步回升。",
+        "interaction": "接收退出政策释放的现金与实现盈亏，将预算回压到趋势资格的判定宽度与可接受回撤容差，以及分批库存的可用批次手数上限，形成预算—资格—库存的闭环。"
+      }
+    ],
+    "research_question": "在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段，如何在单个品种上确认既有趋势仍然适用、把回撤深度与回撤结束的判定转化为可按真实整数手数逐腿撮合参与的分批建仓节奏；当退出条件触发或趋势资格被撤回时，如何对已建批次逐批处置并处理部分成交与残余敞口；处置后的预算缩减与保证金占用变化又如何反过来收窄下一段趋势资格的判定宽度与可接受的回撤容差及可用批次手数，使资格、定位、库存、退出与预算在同一跨段状态中连续可核？",
+    "runtime_profile": {
+      "asset_types": [
+        "FUTURES"
+      ],
+      "benchmark": null,
+      "currency": "CNY",
+      "engine": "akquant",
+      "engine_version": "0.3.76",
+      "fill_policy": "NextOpen",
+      "formal_segments": 7,
+      "frequency": "daily",
+      "index_role": "query_and_benchmark_only",
+      "initial_cash": 1000000,
+      "instruments": null,
+      "market_rules_status": "requires_binding",
+      "multi_leg_execution": "per_leg_partial_fills_possible",
+      "resource_recommendations": {
+        "cpus": 2,
+        "memory_mb": 4096
+      },
+      "resource_status": "requires_human_setup",
+      "resources": null,
+      "schema_version": "finlab.runtime.v2",
+      "state_continuity": [
+        "cash",
+        "positions",
+        "open_orders",
+        "memory"
+      ],
+      "strategy_api": "finlab.strategy.v2"
+    },
+    "schema_version": "finance_task_spec.v2",
+    "source_ids": [
+      "SRC_STOCK_TRENDS",
+      "SRC_CHAN",
+      "SRC_PROJECT_PLAN"
+    ],
+    "submission_contract": {
+      "dependencies": [
+        "finlab",
+        "pandas",
+        "numpy"
+      ],
+      "required_files": [
+        "strategy.py",
+        "backtest.py",
+        "params.json",
+        "RESEARCH.md",
+        "CHANGELOG.md"
+      ],
+      "results_generated_by": "platform",
+      "schema_version": "finlab.submission.v2",
+      "strategy_api": "finlab.strategy.v2"
+    },
+    "title": "期货单品种趋势回撤中的资格复核与预算耦合库存：逐腿撮合下的分批建仓、资格撤回与退出联动"
+  },
+  "spec_hash": "430eee70e1e20916a66bdb4131e65807e95d8d10b8066b306d39535b0abb2a1f",
+  "task_id": "TG-20261105-042135-678759",
+  "version": 1
+}

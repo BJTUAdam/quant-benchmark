@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "平台私有阶段披露策略（真实时间，禁止公开导出）",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "episode_id", "dataset_id", "freeze_hash", "interval", "stages", "policy_hash"],
+  "properties": {
+    "schema_version": {"const": "finlab.disclosure.v1"},
+    "episode_id": {"type": "string", "minLength": 1},
+    "dataset_id": {"type": "string", "minLength": 1},
+    "freeze_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "policy_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "interval": {"const": "[start,stop)"},
+    "stages": {
+      "type": "array", "minItems": 8, "maxItems": 8,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["stage", "start", "stop"],
+        "properties": {
+          "stage": {"type": "integer", "minimum": 0, "maximum": 7},
+          "start": {"type": "string", "format": "date-time"},
+          "stop": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  }
+}

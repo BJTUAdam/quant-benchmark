@@ -1,0 +1,304 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "多窗口相对强弱分歧下的排名裁决、换仓队列与部分执行维护",
+  "family_id": "F03",
+  "source_ids": [
+    "SRC_QLIB",
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "relative_strength_rotation",
+  "decision_object": "ranked_stock_portfolio",
+  "required_decisions": [
+    "feature_definition",
+    "rank_aggregation",
+    "holding_buffer",
+    "turnover_budget",
+    "liquidity_filter",
+    "capital_allocation",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "feature_definition",
+      "rank_aggregation"
+    ],
+    [
+      "rank_aggregation",
+      "holding_buffer"
+    ],
+    [
+      "holding_buffer",
+      "turnover_budget"
+    ],
+    [
+      "liquidity_filter",
+      "turnover_budget"
+    ],
+    [
+      "turnover_budget",
+      "capital_allocation"
+    ],
+    [
+      "capital_allocation",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "turnover_budget"
+    ]
+  ],
+  "maintenance_targets": [
+    "ranking_stability",
+    "cost_sensitivity",
+    "signal_execution_gap",
+    "state_compatibility"
+  ],
+  "research_question": "在同一股票池的不同回看尺度给出相互冲突的强弱排名时，如何裁决入选和留存，并把受成交容量、涨跌停、T+1及成本预算限制的换仓意图维护为可撤销且不重复下单的队列？研究必须区分信号目标、待执行指令和实际持仓，而非每次计算排名后立即假设全部换仓完成。",
+  "research_modules": [
+    {
+      "decision_id": "feature_definition",
+      "description": "使用已完成日线与当时可见复权因子定义至少两种回看尺度的可比强弱特征，记录窗口、有效样本、方向和特征版本。",
+      "interaction": "特征本身及其版本先冻结到当日信号快照，再交给rank_aggregation；不能因尚未成交而重写过去得分。"
+    },
+    {
+      "decision_id": "rank_aggregation",
+      "description": "研究多窗口排名一致、冲突与样本不足三种输入如何得到可比较的候选优先级，以及并列和缺失值的处理。",
+      "interaction": "输出除排序外还需保留冲突程度，供holding_buffer决定是否值得改变目标；不直接把冲突程度规定为最佳买卖信号。"
+    },
+    {
+      "decision_id": "holding_buffer",
+      "description": "分别定义新进入与继续持有条件，并研究排名反转时保留、替换或撤销尚未执行的目标。",
+      "interaction": "只产生目标变更请求；turnover_budget据其优先级安排执行，已持有状态与待买状态不得混成同一个排名缓冲判断。"
+    },
+    {
+      "decision_id": "liquidity_filter",
+      "description": "依据当前已知成交额和逐日可交易规则估计可参与容量；对无法卖出或买入的标的保留原因。",
+      "interaction": "容量约束由turnover_budget用于估计每次队列可实现部分；不将缺行情、涨跌停或T+1限制统一当作信号失效。"
+    },
+    {
+      "decision_id": "turnover_budget",
+      "description": "将成本和单次换仓约束映射为带时效的卖出/买入队列，研究旧指令过期、信号翻转、部分执行和撤单先后次序。",
+      "interaction": "接收holding_buffer目标及liquidity_filter容量；先保留需卖资金与已挂指令占用，再给capital_allocation可用额度，下一时点由state_migration恢复队列。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在目标名单、可用现金、未成交委托占用和不可卖库存之间分配权重与整手数量，研究无法立即完成的目标如何分期实现。",
+      "interaction": "只发送本次准许的订单，实际成交反馈写入state_migration；计划卖出资金不能提前当作可用现金。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "用JSON保存目标版本、指令ID、创建时点、剩余数量、过期依据和最后确认的实际持仓；更新参数或逻辑时重建仍有效的队列。",
+      "interaction": "每一时点先核对账户和旧委托，再交给turnover_budget处理新目标；修改不能重复发送已成交部分，不能删除未实现风险。"
+    }
+  ],
+  "maintenance_rationale": "后续阶段可能从多尺度一致变为持续分歧，也可能出现强者难买、弱者难卖或撤单重发频繁。维护需要判断调整排名裁决、留存缓冲还是队列时效；三者会改变实际换手与现金占用。每次维护都延续同一账户、挂单和JSON memory，并对比目标与实际持仓差距。尚无轨迹证明该任务具有确定长程难度或收益优势。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "date_start": null,
+    "date_end": null,
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅使用国内A股真实代码；该代码清单为待绑定的固定研究池，数据覆盖、可交易状态和费用尚未验收，不宣称具有全市场代表性。",
+      "通过任务桥接查询daily、adj_factor、stk_limit、trade_cal、index_daily；不提供行情data目录，不将真实采集范围、映射或原始缓存交给策略。",
+      "运营方须确认至少连续两年的实际覆盖、复权因子历史可见版本、现金分红和送转等公司行为、逐日价格限制、停牌与T+1规则；缺失行情不能直接视作停牌。",
+      "需要指数基准时由平台另行绑定实际指数代码及冻结index_daily；不交易指数。所有特征仅用当时已可见历史字段计算，未来收益LABEL不作为特征。",
+      "公开日期是虚拟事件标签，日期起止和七段边界均待数据绑定。运行预算由本人首次配置，题目不预填CPU、内存或时限。",
+      "来源卡只提供已核验的简介、目录或开源特征设计范围，本题为本轮模型形式化设计，不宣称摘录原书策略或具有盈利证明。",
+      "股票仅允许现货多头、新增买入和对实际可卖持仓减仓，不做融券卖空；指数只查询和作为基准，不下单。不得把卖出尚未成交所得提前计入现金。"
+    ]
+  },
+  "parameter_space": [
+    "参与比较的回看尺度集合及最小有效样本",
+    "收益、波动或相对基准强弱的可比口径",
+    "多窗口得分合成、冲突表达和并列处理",
+    "新入选门槛、继续持有门槛及冲突状态缓冲",
+    "队列排序依据和风险卖出与新增买入的优先级",
+    "每次及滚动换仓预算与费用估计",
+    "候选成交容量及订单分拆方式",
+    "待执行指令的有效期与失效触发",
+    "信号翻转时保留、缩减、撤销和替换的规则",
+    "单票权重、现金留存及整手余量处理",
+    "部分成交后的剩余目标计算",
+    "参数版本更新时旧队列的迁移和去重键"
+  ],
+  "novelty_claim": "相对S05和既有候选池资格协商题，本题将多窗口信号冲突如何改变待执行意图，以及旧换仓队列如何按实际成交迁移，作为必需研究对象；不要求资金预算反向修改股票池或特征窗口。决策图包含执行队列与状态恢复的闭环。它是新的规格候选，尚未通过跨历史题语义复核，不据此保证独立新题。",
+  "lineage": {
+    "derived_from": [
+      "S05"
+    ],
+    "kind": "new_conversation_authored_candidate_pending_semantic_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "disclosure": {
+      "source": "platform_controller",
+      "interval": "[start,stop)",
+      "release": "cumulative_committed_segments",
+      "strategy_clock": "current_event",
+      "out_of_range": "reject_entire_request",
+      "error_code": "TIME_RANGE_EXCEEDED",
+      "audit": "platform_private_sqlite"
+    },
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "000001.SZ",
+      "600000.SH",
+      "600036.SH",
+      "601318.SH",
+      "600519.SH",
+      "000858.SZ",
+      "600030.SH",
+      "601166.SH"
+    ],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  }
+}

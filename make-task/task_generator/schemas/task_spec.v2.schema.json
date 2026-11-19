@@ -1,0 +1,529 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "金融长程任务规格 v2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "title",
+    "family_id",
+    "source_ids",
+    "core_mechanism",
+    "decision_object",
+    "required_decisions",
+    "decision_dependencies",
+    "maintenance_targets",
+    "research_question",
+    "research_modules",
+    "maintenance_rationale",
+    "environment_id",
+    "data_requirements",
+    "parameter_space",
+    "novelty_claim",
+    "lineage",
+    "bridge_contract",
+    "runtime_profile",
+    "submission_contract",
+    "protocol"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "finance_task_spec.v2"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "family_id": {
+      "enum": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06"
+      ]
+    },
+    "source_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "core_mechanism": {
+      "type": "string"
+    },
+    "decision_object": {
+      "type": "string"
+    },
+    "required_decisions": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "decision_dependencies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "maintenance_targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "research_question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "research_modules": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "decision_id",
+          "description",
+          "interaction"
+        ],
+        "properties": {
+          "decision_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "interaction": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "maintenance_rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment_id": {
+      "enum": [
+        "akquant_stock_etf_v2",
+        "akquant_futures_v2"
+      ]
+    },
+    "data_requirements": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "symbols",
+        "date_start",
+        "date_end",
+        "minimum_years",
+        "extra_fields",
+        "notes"
+      ],
+      "properties": {
+        "profile_id": {
+          "enum": [
+            "stock_etf_daily",
+            "futures_daily"
+          ]
+        },
+        "symbols": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "date_start": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_end": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "minimum_years": {
+          "type": "number",
+          "minimum": 2
+        },
+        "extra_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "仅运营方采集需求；真实起止日期不进入公开包。"
+    },
+    "parameter_space": {
+      "type": "array",
+      "items": {
+        "type": [
+          "object",
+          "string"
+        ]
+      }
+    },
+    "novelty_claim": {
+      "type": "string"
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "derived_from",
+        "kind"
+      ],
+      "properties": {
+        "derived_from": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "type": "string"
+        }
+      }
+    },
+    "bridge_contract": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "identity_policy",
+        "date_domain",
+        "calendar_semantics",
+        "virtual_date_notice",
+        "url_env",
+        "token_env",
+        "virtual_start",
+        "virtual_stop",
+        "minimum_years",
+        "symbols",
+        "endpoints",
+        "binding_status",
+        "dataset_id",
+        "required_checks"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "finlab.bridge_contract.v2",
+          "type": "string"
+        },
+        "identity_policy": {
+          "const": "real_names_and_codes",
+          "type": "string"
+        },
+        "date_domain": {
+          "const": "virtual",
+          "type": "string"
+        },
+        "calendar_semantics": {
+          "const": "virtual_sequence_only_not_historical_years",
+          "type": "string"
+        },
+        "virtual_date_notice": {
+          "const": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+          "type": "string"
+        },
+        "url_env": {
+          "const": "MARKET_BRIDGE_URL",
+          "type": "string"
+        },
+        "token_env": {
+          "const": "MARKET_BRIDGE_TOKEN",
+          "type": "string"
+        },
+        "virtual_start": {
+          "type": "null"
+        },
+        "disclosure": {
+          "type": "object",
+          "const": {
+            "source": "platform_controller",
+            "interval": "[start,stop)",
+            "release": "cumulative_committed_segments",
+            "strategy_clock": "current_event",
+            "out_of_range": "reject_entire_request",
+            "error_code": "TIME_RANGE_EXCEEDED",
+            "audit": "platform_private_sqlite"
+          }
+        },
+        "virtual_stop": {
+          "type": "null"
+        },
+        "minimum_years": {
+          "type": "number",
+          "minimum": 2
+        },
+        "symbols": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "string"
+          }
+        },
+        "endpoints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "api_name",
+              "fields",
+              "frequency",
+              "visibility"
+            ],
+            "properties": {
+              "api_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fields": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "frequency": {
+                "const": "daily",
+                "type": "string"
+              },
+              "visibility": {
+                "const": "available_at_lte_controller_clock",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "binding_status": {
+          "const": "not_bound",
+          "type": "string"
+        },
+        "dataset_id": {
+          "type": "null"
+        },
+        "required_checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "runtime_profile": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "engine",
+        "engine_version",
+        "strategy_api",
+        "asset_types",
+        "index_role",
+        "frequency",
+        "fill_policy",
+        "initial_cash",
+        "currency",
+        "formal_segments",
+        "multi_leg_execution",
+        "state_continuity",
+        "resources",
+        "resource_status",
+        "resource_recommendations",
+        "market_rules_status",
+        "instruments",
+        "benchmark"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "finlab.runtime.v2",
+          "type": "string"
+        },
+        "engine": {
+          "const": "akquant",
+          "type": "string"
+        },
+        "engine_version": {
+          "const": "0.3.76",
+          "type": "string"
+        },
+        "strategy_api": {
+          "const": "finlab.strategy.v2",
+          "type": "string"
+        },
+        "asset_types": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "STOCK",
+              "FUND",
+              "FUTURES"
+            ]
+          }
+        },
+        "index_role": {
+          "const": "query_and_benchmark_only",
+          "type": "string"
+        },
+        "frequency": {
+          "const": "daily",
+          "type": "string"
+        },
+        "fill_policy": {
+          "const": "NextOpen",
+          "type": "string"
+        },
+        "initial_cash": {
+          "const": 1000000,
+          "type": "integer"
+        },
+        "currency": {
+          "const": "CNY",
+          "type": "string"
+        },
+        "formal_segments": {
+          "const": 7,
+          "type": "integer"
+        },
+        "multi_leg_execution": {
+          "const": "per_leg_partial_fills_possible",
+          "type": "string"
+        },
+        "state_continuity": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "resources": {
+          "type": "null"
+        },
+        "resource_status": {
+          "const": "requires_human_setup",
+          "type": "string"
+        },
+        "resource_recommendations": {
+          "type": "object",
+          "required": [
+            "cpus",
+            "memory_mb"
+          ],
+          "properties": {
+            "cpus": {
+              "const": 2,
+              "type": "integer"
+            },
+            "memory_mb": {
+              "const": 4096,
+              "type": "integer"
+            }
+          }
+        },
+        "market_rules_status": {
+          "const": "requires_binding",
+          "type": "string"
+        },
+        "instruments": {
+          "type": "null"
+        },
+        "benchmark": {
+          "type": "null"
+        }
+      }
+    },
+    "submission_contract": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "required_files",
+        "strategy_api",
+        "dependencies",
+        "results_generated_by"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "finlab.submission.v2",
+          "type": "string"
+        },
+        "required_files": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "strategy_api": {
+          "const": "finlab.strategy.v2",
+          "type": "string"
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "results_generated_by": {
+          "const": "platform",
+          "type": "string"
+        }
+      }
+    },
+    "protocol": {
+      "type": "object",
+      "required": [
+        "research_fraction",
+        "formal_segments",
+        "release_rule",
+        "maintenance",
+        "boundaries"
+      ],
+      "properties": {
+        "research_fraction": {
+          "const": 0.3,
+          "type": "number"
+        },
+        "formal_segments": {
+          "const": 7,
+          "type": "integer"
+        },
+        "release_rule": {
+          "const": "completed_segment_only_after_commit",
+          "type": "string"
+        },
+        "maintenance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "boundaries": {
+          "type": "null"
+        }
+      }
+    }
+  }
+}

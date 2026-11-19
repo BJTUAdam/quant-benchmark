@@ -1,0 +1,79 @@
+{
+  "fingerprint": "5c0f17c41aa60b523e57f4b779ddf9701ac63ee7f4e84b411d8fbaa1844cf23c",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "TG-20261029-185132-5120cb",
+      "score": 0.4444,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "相对强弱排名下的流动性筛选、留存门槛与现金预算联动"
+    },
+    {
+      "task_id": "TG-20261029-185310-93eea1",
+      "score": 0.4444,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "横截面相对强弱下的可交易性前置筛选、留存门槛与现金预算闭环"
+    },
+    {
+      "task_id": "TG-20261029-185451-316d9a",
+      "score": 0.4444,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "可交易性守门后的相对强弱换仓：候选池边界随分配结果回缩与再评分"
+    },
+    {
+      "task_id": "TASK12-20261110-05",
+      "score": 0.4211,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "多窗口相对强弱分歧下的排名裁决、换仓队列与部分执行维护"
+    },
+    {
+      "task_id": "TG-20261105-041728-6227b7",
+      "score": 0.3889,
+      "exact_structure": false,
+      "status": "variant_candidate",
+      "title": "相对强弱排名中的候选池资格回溯：流动性集合边界与留存门槛的反向协商"
+    },
+    {
+      "task_id": "TG-20261105-041955-cc1583",
+      "score": 0.3889,
+      "exact_structure": false,
+      "status": "spec_accepted",
+      "title": "横截面相对强弱排名中候选池资格的反向协商：流动性集合边界、留存门槛与现金预算的联合维护"
+    },
+    {
+      "task_id": "TG-20261105-042228-c84215",
+      "score": 0.3889,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "相对强弱排名的候选池边界协商：流动性资格集合、留存门槛与换仓预算的联合维护"
+    },
+    {
+      "task_id": "TG-20261029-172300-d78026",
+      "score": 0.3333,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "相对强弱排名、继续持有门槛与换仓缓冲"
+    },
+    {
+      "task_id": "TG-20261029-184930-be6167",
+      "score": 0.3333,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "相对强弱排名下的继续持有门槛与换仓成本联动"
+    },
+    {
+      "task_id": "HT06",
+      "score": 0.3,
+      "exact_structure": false,
+      "status": "draft_data_missing",
+      "title": "中证500动态成分多因子组合草稿"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

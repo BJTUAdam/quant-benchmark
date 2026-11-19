@@ -1,0 +1,25 @@
+{
+  "schema_version": "finlab.skills_browser_qa.v1",
+  "checked_at": "2026-11-04T20:41:10.876Z",
+  "passed": true,
+  "url": "http://127.0.0.1:8765/system_v2.html#skills",
+  "checked_pages": [
+    "system_v2.html#skills",
+    "tushare_api_offline.html#stk_mins",
+    "tushare_api_offline.html#daily",
+    "tushare_api_offline.html#doc-109"
+  ],
+  "api_search": true,
+  "category_filter": true,
+  "internal_doc_link": true,
+  "api_title_matches_body": true,
+  "copy_lookup_command": "python skills/finlab-strategy/scripts/api_docs.py --api stk_mins",
+  "system_test_count_displayed": 163,
+  "layout": {
+    "scroll_width": 500,
+    "viewport_width": 515
+  },
+  "console_errors": [],
+  "offline_assets": "validated separately by distribution audit",
+  "screenshot": "skills_preview_v2.png"
+}

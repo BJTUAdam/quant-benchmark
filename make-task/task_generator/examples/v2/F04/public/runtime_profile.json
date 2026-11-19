@@ -1,0 +1,32 @@
+{
+  "schema_version": "finlab.runtime.v2",
+  "engine": "akquant",
+  "engine_version": "0.3.76",
+  "strategy_api": "finlab.strategy.v2",
+  "asset_types": [
+    "STOCK",
+    "FUND"
+  ],
+  "index_role": "query_and_benchmark_only",
+  "frequency": "daily",
+  "fill_policy": "NextOpen",
+  "initial_cash": 1000000,
+  "currency": "CNY",
+  "formal_segments": 7,
+  "multi_leg_execution": "per_leg_partial_fills_possible",
+  "state_continuity": [
+    "cash",
+    "positions",
+    "open_orders",
+    "memory"
+  ],
+  "resources": null,
+  "resource_status": "requires_human_setup",
+  "resource_recommendations": {
+    "cpus": 2,
+    "memory_mb": 4096
+  },
+  "market_rules_status": "requires_binding",
+  "instruments": null,
+  "benchmark": null
+}

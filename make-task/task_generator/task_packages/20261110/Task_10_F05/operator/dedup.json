@@ -1,0 +1,79 @@
+{
+  "fingerprint": "b76c97771c54f8186fc69a0ad76863694610cff22663c6cef69a08291b062b3c",
+  "exact_structure_matches": [],
+  "nearest": [
+    {
+      "task_id": "HT04",
+      "score": 0.6111,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "国内SC/FU/LU原油燃料油相对价值"
+    },
+    {
+      "task_id": "TASK12-20261110-11",
+      "score": 0.5,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "跨期库存的撤退可行性：流动性枯竭、分腿减仓与到期接续"
+    },
+    {
+      "task_id": "HT03",
+      "score": 0.4737,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "国内B/M/Y大豆压榨价差"
+    },
+    {
+      "task_id": "TG-20261105-042048-66d9a5",
+      "score": 0.4211,
+      "exact_structure": false,
+      "status": "pending_automatic_review",
+      "title": "B/M/Y加工链条的分项信号冲突裁决与真实腿库存交接"
+    },
+    {
+      "task_id": "TASK12-20261110-12",
+      "score": 0.4091,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "同品种双价差共享中间月份：曲线意图归属、净头寸与滚动交接"
+    },
+    {
+      "task_id": "HT05",
+      "score": 0.4,
+      "exact_structure": false,
+      "status": "historical_package_quality_pending",
+      "title": "FG/SA玻璃纯碱统计价差"
+    },
+    {
+      "task_id": "TG-20261029-172301-36425d",
+      "score": 0.35,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "FU/LU相对关系的滚动对冲和暂停重估"
+    },
+    {
+      "task_id": "TG-20261029-185356-d4e28b",
+      "score": 0.35,
+      "exact_structure": false,
+      "status": "historical_read_only",
+      "title": "同品种两个到期月份之间的配对选择：剩余期限可比、流动性与到期换腿"
+    },
+    {
+      "task_id": "TG-20261105-041820-c67182",
+      "score": 0.35,
+      "exact_structure": false,
+      "status": "spec_accepted",
+      "title": "跨品种加工链条的关系重估与残差腿组合：月份选择、对冲比例、分项信号汇总与保证金预算的联合维护"
+    },
+    {
+      "task_id": "TASK12-20261110-09",
+      "score": 0.3043,
+      "exact_structure": false,
+      "status": "spec_checked",
+      "title": "跨品种对冲关系的分歧仲裁：可信区间、冻结估计与逐级恢复"
+    }
+  ],
+  "semantic_status": "conversation_peer_review_only_not_external_api",
+  "independent_new_question_registered": false,
+  "note": "不同结构不等于语义独立；近邻和差异保留供后续模型复核，不把改参数计成新题。"
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": "finlab.integrated_release.v1",
+  "release": "v2-integrated-task12-20261110",
+  "checked_at": "2026-11-10T11:23:47.398946+00:00",
+  "fixes_merged": true,
+  "patch_application_required": false,
+  "expanded_task_packages": 12,
+  "individual_task_archives": 12,
+  "task_package_directory": "task_packages/20261110",
+  "task_packages_verified": true,
+  "source_fixes": [
+    "public entry relative to JSON directory",
+    "embedded SDK/reference per public task",
+    "futures product pool constrained real-contract resolution",
+    "legacy export entry normalization without modifying stored review"
+  ],
+  "historical_generated_files_unchanged": 301,
+  "historical_accepted_library_files_unchanged": 7,
+  "historical_machine_acceptances": 6,
+  "new_twelve_external_api_reviews": 0,
+  "new_twelve_automatic_acceptances": 0,
+  "new_twelve_real_data_bound": false,
+  "new_twelve_real_backtests": 0,
+  "human_approval_required": false,
+  "engine_and_sdk_source_hashes_match_pinned_images_release": true,
+  "fixed_image_ids": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  },
+  "image_format": "OCI linux/amd64 index; root digests verified",
+  "image_tar_sha256": "1a0db71c99073ba04f13fa1408ec07528bb18eea7355885c1dba8bd5826d22e7",
+  "source_full_suite_report": "unit_tests_v2.json",
+  "clean_extraction_report": "release_smoke_v2.json",
+  "template_docker_evidence": "task12_usability_v2.json",
+  "credentials_or_private_market_cache_included": false,
+  "personal_resource_confirmation_included": false,
+  "source_full_suite_tests": 308,
+  "source_full_suite_passed": true,
+  "source_full_suite_failures": 0,
+  "source_full_suite_errors": 0,
+  "offline_html_check": {
+    "local_links": 91,
+    "missing_local_links": [],
+    "external_assets": 0,
+    "duplicate_ids": []
+  },
+  "clean_archive_tests": 147,
+  "clean_archive_passed": true,
+  "clean_archive_docker": "passed_synthetic_research_and_segment1_no_personal_settings",
+  "legacy_public_exports_checked": 6,
+  "offline_html_browser_verified": true,
+  "remaining_real_task_prerequisites": [
+    "external model review and automatic admission of the new twelve specs",
+    "real frozen market data and point-in-time evidence",
+    "bound trading rules and stage disclosures",
+    "operator-selected resources",
+    "strategy implementation and actual research acceptance"
+  ]
+}

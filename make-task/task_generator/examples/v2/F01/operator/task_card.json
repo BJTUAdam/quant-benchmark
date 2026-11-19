@@ -1,0 +1,292 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "整理区间突破后的跟踪、失败退出与再入场",
+  "family_id": "F01",
+  "source_ids": [
+    "SRC_STOCK_TRENDS",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "consolidation_breakout",
+  "decision_object": "breakout_position_state",
+  "required_decisions": [
+    "range_detection",
+    "entry_confirmation",
+    "failure_exit",
+    "reentry_policy",
+    "capital_allocation"
+  ],
+  "decision_dependencies": [
+    [
+      "range_detection",
+      "entry_confirmation"
+    ],
+    [
+      "entry_confirmation",
+      "failure_exit"
+    ],
+    [
+      "failure_exit",
+      "reentry_policy"
+    ],
+    [
+      "reentry_policy",
+      "capital_allocation"
+    ]
+  ],
+  "maintenance_targets": [
+    "structure_validity",
+    "signal_execution_gap",
+    "state_compatibility"
+  ],
+  "research_question": "如何使区间识别、突破确认、失败处置与再次参与形成可维护的状态流程？",
+  "research_modules": [
+    {
+      "decision_id": "range_detection",
+      "description": "研究只使用已完成K线的整理区间、边界更新和失效状态。",
+      "interaction": "边界更新改变确认门槛及失败判断，不可事后重画区间。"
+    },
+    {
+      "decision_id": "entry_confirmation",
+      "description": "比较突破后的等待、量价确认与可成交时点。",
+      "interaction": "等待会改变持有期、T+1库存和机会排序。"
+    },
+    {
+      "decision_id": "failure_exit",
+      "description": "研究突破失败与正常回踩的区别及已有仓位退出。",
+      "interaction": "退出时刻约束再次参与，不能用未来最低价标记假突破。"
+    },
+    {
+      "decision_id": "reentry_policy",
+      "description": "设计失败后冷却与结构重建后的再次参与。",
+      "interaction": "memory保留旧失败状态，与新区间编号和旧持仓兼容。"
+    },
+    {
+      "decision_id": "capital_allocation",
+      "description": "在同时触发的候选间分配现金和权重。",
+      "interaction": "资金竞争与T+1不可卖仓位影响信号实际实现。"
+    }
+  ],
+  "maintenance_rationale": "后续数据可能使区间结构和失败模式变化，需要判断调整结构、确认还是退出；每次维护必须接住已持仓和旧失败状态。这是可维护性假设，尚无轨迹证明长程难度。",
+  "environment_id": "akquant_stock_etf_v2",
+  "data_requirements": {
+    "profile_id": "stock_etf_daily",
+    "symbols": [
+      "000001.SZ",
+      "000002.SZ",
+      "600000.SH",
+      "600036.SH",
+      "600519.SH",
+      "601318.SH"
+    ],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "2022—2025为申请整理范围，尚未确认已持有；若不足需报告实际覆盖，不能编造补齐。",
+      "至少2年只是数据需求底线；有效交易日/多月份重叠和足够研发、逐段维护样本均待盘点。",
+      "分段边界需数据盘点后冻结；未完成数据或执行器验收。"
+    ]
+  },
+  "parameter_space": [
+    {
+      "name": "range_construction",
+      "type": "choice",
+      "options": [
+        "rolling_boundary",
+        "causal_pivot_zone",
+        "adaptive_consolidation"
+      ],
+      "description": "可替换结构定义，不指定唯一指标。"
+    },
+    {
+      "name": "confirmation_and_reentry",
+      "type": "structured",
+      "description": "确认、失败、冷却及重入规则相互作用；由Agent研究，不给最佳阈值。"
+    }
+  ],
+  "novelty_claim": "从宽泛趋势题聚焦到区间→确认→失败→重入生命周期，但HT01已允许这些方向，不能声称已证实独立；待人工语义审，可能归并为HT01扩展。",
+  "lineage": {
+    "derived_from": [
+      "S01",
+      "HT01"
+    ],
+    "kind": "focused_adaptation_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "000001.SZ",
+      "000002.SZ",
+      "600000.SH",
+      "600036.SH",
+      "600519.SH",
+      "601318.SH"
+    ],
+    "endpoints": [
+      {
+        "api_name": "daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "vol",
+          "amount"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "adj_factor",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "adj_factor"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "stk_limit",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "up_limit",
+          "down_limit"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "trade_cal",
+        "fields": [
+          "exchange",
+          "cal_date",
+          "is_open",
+          "pretrade_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "index_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "close"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "STOCK",
+      "FUND"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "CHANGELOG.md",
+      "RESEARCH.md",
+      "backtest.py",
+      "params.json",
+      "strategy.py"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  },
+  "sample_id": "EX01",
+  "seed_id": "S01",
+  "status": "pending_human_review",
+  "provenance": {
+    "authoring": "assistant_curated_example",
+    "api_called": false,
+    "data_supplied": false,
+    "runtime_verified": false,
+    "human_approved": false
+  },
+  "validation_notes": [
+    "内置示例，由当前助手整理，未调用配置的模型API，未获得人工批准。",
+    "六个方向候选不等于六个独立任务；相似项可能合并或退回。",
+    "原生v2接口规格，尚未绑定真实数据、交易规则、本人资源预算或正式分段。"
+  ],
+  "production_state": {
+    "id": "TG-20261104-210715-14b6f5",
+    "batch_id": "B-20261104-210715-33960d",
+    "status": "pending_automatic_review",
+    "data_status": "not_bound",
+    "pipeline_status": "not_connected",
+    "version": 0,
+    "provenance": "curated_example",
+    "model_review_status": "not_run",
+    "created_at": "2026-11-04T21:07:15+00:00",
+    "historical_state": "pending_human_review"
+  }
+}

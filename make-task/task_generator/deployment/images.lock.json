@@ -1,0 +1,7 @@
+{
+  "schema_version": "finlab.images.v2",
+  "images": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  }
+}

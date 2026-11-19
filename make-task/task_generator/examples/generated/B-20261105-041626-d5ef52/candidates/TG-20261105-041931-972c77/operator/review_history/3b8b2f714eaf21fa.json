@@ -1,0 +1,131 @@
+{
+  "validation_errors": [],
+  "closest_task_id": "TG-20261105-042202-a4ef6a",
+  "spec_hash": "55767b14f3b381797a5d75cc3c71df0310ba245d0d5546ba5f281c78e2ea89e8",
+  "reviewed_at": "2026-11-05T04:25:45+00:00",
+  "public_information_safe": true,
+  "mode": "model_api",
+  "classification": "duplicate",
+  "status": "needs_attention",
+  "issues": [],
+  "long_horizon_valid": true,
+  "context_hash": "2afcde52a4fce0b2937bd88fd88f648e29a0ddea63aee88ace1ae56400a6d81d",
+  "content_hash": "5dd585f682a8db2d5675e47ef8322eaec8b661ead7b6fb91e1c64ff64d3f88d4",
+  "rationale": "候选与TG-20261105-042202-a4ef6a在机制、决策对象、必需决策集合、决策依赖结构、研究问题主线（区间背景→冲击识别→回摆/延续/未决→确认→T+1隔夜库存→失效停用冷却→跨段连续）上几乎逐项对应，唯一实质差异是持仓标的从单品种商品期货真实分合约改为股票与ETF日线，以及相应执行配置（多腿逐腿撮合→NextOpen long_only）。按判定标准，核心决策语义等价、仅标的与执行配置变化属于variant而非distinct；但因标的类别与执行语义改变只是配置层面，核心研究取舍不变，故归为duplicate而非独立新题，closest指向a4ef6a。候选与a288f9相比确实新增了range_detection与failure_exit回写，但a4ef6a已完整包含这些要素且与候选更近；候选novelty_claim中自认若退化为在a288f9上仅换冲击指标或阈值即为变体，其所述新增区间背景与失效回写在a4ef6a中已存在，因此novelty_claim不足以支撑独立新题。与其余区间回归、突破、趋势、超跌题在机制或决策对象上不同。",
+  "pending_bindings": [
+    "真实股票与ETF代码池待人工绑定后填入symbols，当前为空",
+    "市场规则（停牌、涨跌停、T+1交易单位、费用、公司行为）market_rules_status=requires_binding待绑定确认",
+    "资源预算由本人运行finlab setup配置，resources=null/resource_status=requires_human_setup",
+    "数据授权、冻结版本、可见性与分段边界在绑定时确认",
+    "评分配置待正式开始前由管线绑定"
+  ],
+  "comparisons": [
+    {
+      "similarities": [
+        "同为F02、core_mechanism=shock_path_reversion、decision_object=shock_event_inventory",
+        "必需决策集合完全相同（range_detection/shock_detection/recovery_path/entry_confirmation/overnight_inventory/failure_exit）",
+        "研究问题结构一致：区间界定→区间边缘异常冲击识别→回摆/延续/未决路径判别→确认后入场→T+1隔夜库存处置→失效停用与冷却恢复→跨段连续",
+        "failure_exit回写shock_detection与range_detection的闭环相同",
+        "维护目标相同（reference_drift/reversion_failure/signal_execution_gap/state_compatibility）"
+      ],
+      "task_id": "TG-20261105-042202-a4ef6a",
+      "differences": [
+        "持仓标的从单个商品期货真实分合约（有符号手数、逐腿部分成交、残余敞口、移仓）改为股票与ETF日线（long_only、T+1）",
+        "执行配置变化（期货多腿撮合 vs 股票NextOpen）"
+      ]
+    },
+    {
+      "similarities": [
+        "同core_mechanism=shock_path_reversion、同decision_object=shock_event_inventory",
+        "冲击识别、恢复路径判别、入场确认、T+1隔夜库存、失效回写识别的核心链一致",
+        "均以放量冲击后的回摆与延续辨识为中心"
+      ],
+      "task_id": "TG-20261029-184905-a288f9",
+      "differences": [
+        "候选增加了range_detection作为必需决策并把exit_policy改为failure_exit",
+        "候选增加了区间背景限定与失效回写区间检测",
+        "这些是否构成实质新决策需判断；候选自身也承认若仅换指标/阈值则为a288f9变体"
+      ]
+    },
+    {
+      "similarities": [
+        "都包含range_detection、entry_confirmation、failure_exit决策"
+      ],
+      "task_id": "TG-20261029-172300-ca5a47",
+      "differences": [
+        "该题为F01 consolidation_breakout、decision_object=breakout_position_state，核心是整理区间突破后的跟踪与再入场",
+        "候选核心是冲击事件恢复路径与隔夜库存，决策对象和机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "都涉及区间失效与失败退出的处置"
+      ],
+      "task_id": "TG-20261105-041643-7e6569",
+      "differences": [
+        "该题为F01突破确认缺失、区间失效与突破未确认的区分及预算回压",
+        "候选为冲击事件路径判别与隔夜库存，机制与决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同F02、都含range_detection与reference_drift维护"
+      ],
+      "task_id": "TG-20261029-184707-5e00a9",
+      "differences": [
+        "该题core_mechanism=range_boundary_reversion、decision_object=range_position_lifecycle，核心是区间边缘回归与趋势否决、再入场",
+        "候选为冲击事件路径与隔夜库存，区间仅作背景，机制和决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "都涉及区间识别与入场确认"
+      ],
+      "task_id": "HT01",
+      "differences": [
+        "HT01为宽泛短周期趋势股票组合，decision_object=stock_trend_portfolio",
+        "候选以冲击事件恢复路径为核心，机制不同"
+      ]
+    },
+    {
+      "similarities": [
+        "同F02、都涉及reference_drift与反转失效维护"
+      ],
+      "task_id": "HT02",
+      "differences": [
+        "HT02为oversold_rebound横截面超跌股票组合",
+        "候选以冲击事件与隔夜库存为核心，不选横截面组合"
+      ]
+    },
+    {
+      "similarities": [
+        "同F02、都含区间边缘与回归维护"
+      ],
+      "task_id": "TG-20261029-172300-7af535",
+      "differences": [
+        "该题core_mechanism=range_boundary_reversion、decision_object=range_position_lifecycle，含trend_veto与reentry_policy",
+        "候选为shock_path_reversion，核心取舍为冲击识别与路径判别，不含趋势否决与再入场"
+      ]
+    },
+    {
+      "similarities": [
+        "同F02、都含range_detection与reference_drift"
+      ],
+      "task_id": "TG-20261105-041705-dcbca2",
+      "differences": [
+        "该题为单品种分合约range_boundary_reversion区间生命周期与趋势否决",
+        "候选为冲击事件恢复路径与隔夜库存，机制与决策对象不同"
+      ]
+    },
+    {
+      "similarities": [
+        "都含range_detection、failure_exit与状态维护"
+      ],
+      "task_id": "TG-20261029-184839-b184fc",
+      "differences": [
+        "该题为F01突破参与控制、state_identification与switch_hysteresis",
+        "候选为冲击事件路径判别与隔夜库存，机制不同"
+      ]
+    }
+  ]
+}

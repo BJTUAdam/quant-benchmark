@@ -1,0 +1,250 @@
+{
+  "schema_version": "finance_task_spec.v2",
+  "title": "跨品种加工链条的关系重估与残差腿组合：月份选择、对冲比例、分项信号汇总与保证金预算的联合维护",
+  "family_id": "F05",
+  "source_ids": [
+    "SRC_CHAN",
+    "SRC_PROJECT_PLAN"
+  ],
+  "core_mechanism": "cross_product_residual",
+  "decision_object": "cross_product_leg_portfolio",
+  "required_decisions": [
+    "month_selection",
+    "hedge_estimation",
+    "entry_exit",
+    "relationship_monitoring",
+    "margin_budget",
+    "state_migration"
+  ],
+  "decision_dependencies": [
+    [
+      "month_selection",
+      "hedge_estimation"
+    ],
+    [
+      "hedge_estimation",
+      "entry_exit"
+    ],
+    [
+      "entry_exit",
+      "relationship_monitoring"
+    ],
+    [
+      "relationship_monitoring",
+      "margin_budget"
+    ],
+    [
+      "margin_budget",
+      "state_migration"
+    ],
+    [
+      "state_migration",
+      "month_selection"
+    ],
+    [
+      "relationship_monitoring",
+      "hedge_estimation"
+    ]
+  ],
+  "maintenance_targets": [
+    "hedge_drift",
+    "margin_exposure",
+    "expiry_roll",
+    "state_compatibility"
+  ],
+  "research_question": "在国内期货真实分合约日线环境中，仅使用已完成交易日收盘后可见的字段：如何在两个不同品种之间估计当时可见的滚动对冲关系（含合约乘数与整数手数约束），并根据当时已知的剩余期限和流动性选出实际参与的两条合约腿；当残差偏离达到参与条件时，如何以真实有符号手数建仓并逐腿撮合、容许部分成交与残余敞口；当关系残差尺度或对冲比例发生变化时，如何判定关系失效、暂停参与并重新估计，而不是把普通波动当作关系断裂；双腿保证金占用与费用随价格、保证金率和手数变化时，如何在预算约束下决定配对手数、缩减或退出；版本更新或重新估计后，如何迁移旧腿、未成交换腿与已确认的对冲比例版本，使分段研发中头寸与状态连续可核？",
+  "research_modules": [
+    {
+      "decision_id": "month_selection",
+      "description": "在两个已支持品种的可交易合约集合中，仅用当时已收盘且已发布的剩余期限、成交活跃度与价格刻度，决定本期实际参与的两条合约腿；须处理某腿临近到期或流动性迁移时的候选更替，并把候选集合与选择依据作为可核状态保存，不交易合成价差或连续拼接价。",
+      "interaction": "选出的两腿直接决定hedge_estimation可比的价格序列与合约乘数口径；state_migration回指本模块，要求迁移时重新评估旧腿是否仍在候选集合内，从而让上月确认的配对不自动沿用。"
+    },
+    {
+      "decision_id": "hedge_estimation",
+      "description": "在选定两腿的已完成日线序列上估计当时可见的滚动对冲比例，处理两品种计价单位、合约乘数差异与整数手数取整规则；输出对冲比例及其可信区间、取整后的残余敞口估计，并按固定节奏或事件触发重估，不引用未来数据。",
+      "interaction": "接收month_selection的腿集合后产出残差定义，供entry_exit判定参与；relationship_monitoring判定关系失效时回指本模块触发重估并改变残差口径，重估结果又改变entry_exit的参与阈值含义。"
+    },
+    {
+      "decision_id": "entry_exit",
+      "description": "依据当前残差水平与波动标准化后的偏离尺度，决定是否参与、方向与真实有符号手数；逐腿下单并记录逐腿成交、部分成交与残余敞口，退出条件考虑价差收敛、持有时限与关系状态，未成交残余须在后续可执行时点处置。",
+      "interaction": "依赖hedge_estimation给出的比例与残差口径确定参与规模；退出与残余敞口的处置结果进入relationship_monitoring作为关系变化的证据来源，并影响margin_budget占用的释放节奏。"
+    },
+    {
+      "decision_id": "relationship_monitoring",
+      "description": "持续监控残差尺度、对冲比例稳定性与两腿流动性是否偏离估计窗口所描述的关系；区分残差扩大属于正常波动还是关系断裂，据此输出暂停参与、维持参数或触发重估的状态，并记录判定依据与生效时点。",
+      "interaction": "接收entry_exit退出证据与本模块自身的偏离度量，输出暂停或重估决定；重估回指hedge_estimation，暂停则约束margin_budget只在处置旧腿范围内使用预算。"
+    },
+    {
+      "decision_id": "margin_budget",
+      "description": "按真实腿的价格、合约乘数、保证金率候选与费用估计，将可用资金映射为每腿可下单手数与预算上限；缩减时按可成交约束分步处理，优先释放流动性较好一腿并记录残余敞口，禁止在预算不足时新开双腿。",
+      "interaction": "接收relationship_monitoring的暂停或恢复状态决定预算是否可用于新开仓；预算与手数结果进入state_migration作为迁移时必须保留的占用基线。"
+    },
+    {
+      "decision_id": "state_migration",
+      "description": "在重新估计、合约更替或版本更新时迁移两腿持仓、未完成订单、残余敞口、对冲比例版本与预算占用基线；迁移规则须与已确认的腿选择兼容，处置无法对应的旧腿并把处置结果写入持久化状态。",
+      "interaction": "回指month_selection，要求迁移后旧配对重新通过候选筛选；承接margin_budget的占用基线，使下一段预算计算不会重复占用或遗漏已挂未成交单。"
+    }
+  ],
+  "maintenance_rationale": "后续揭晓的已完成交易日数据可能显示对冲比例漂移、残差尺度变化或某腿流动性迁移。若对冲比例在重估窗口内仍稳定且残余敞口可控，应保持参数与逻辑；若残差尺度持续超出估计区间，应调整关系失效判定与暂停条件；若某腿频繁因流动性或到期被迫更替，则需修改month_selection与state_migration的衔接逻辑。核心维护对象是关系漂移与保证金暴露：真实腿敞口、费用与保证金变化会改变可承受手数，旧题的固定比例或固定手数做法可能不再适用。本任务不承诺每次维护提升收益，也不要求实盘盈利。",
+  "environment_id": "akquant_futures_v2",
+  "data_requirements": {
+    "profile_id": "futures_daily",
+    "symbols": [
+      "B",
+      "M",
+      "Y",
+      "SC",
+      "FU",
+      "LU",
+      "FG",
+      "SA"
+    ],
+    "date_start": "2022-01-01",
+    "date_end": "2025-12-31",
+    "minimum_years": 2,
+    "extra_fields": [],
+    "notes": [
+      "仅运营方采集需求；公开任务正文不含真实起止与虚拟日期映射。",
+      "需确认B/M/Y/SC/FU/LU/FG/SA各自可交易分合约的同时月份覆盖；缺失月份只记录缺口，不假设可用。",
+      "对冲关系参与的具体两品种与合约对由研究模块在当时可见数据下决定，此处仅列可用品种池。",
+      "计价单位仅限CNY/吨与CNY/桶；其他单位需另行扩展，本轮不生成。"
+    ]
+  },
+  "parameter_space": [
+    "滚动估计窗口长度（辅助参数，不替代关系估计设计）",
+    "残差偏离的波动标准化方式与参与阈值档位",
+    "整数手数取整规则与残余敞口容忍上限",
+    "关系失效判定的连续确认次数与暂停时长",
+    "预算占用的安全边际与逐腿缩仓顺序规则",
+    "对冲比例重估的固定节奏与事件触发条件"
+  ],
+  "novelty_claim": "与existing_tasks对照：HT04为multi_product_oil_relative_value/oil_leg_portfolio，覆盖SC/FU/LU多腿油品相对价值并已含month_selection与hedge_estimation，本任务不复用其油品三腿框架，也不以油品品种组合为研究对象。HT05为glass_soda_residual/glass_soda_leg_portfolio，指定FG/SA统计对冲；本任务不预先绑定某一产业配对，而是要求当时可见条件下选择两腿并让关系监控回指对冲估计，形成重估闭环。HT03为crush_component_aggregation/crush_leg_portfolio，依赖固定加工关系与分项信号汇总；本任务不使用加工系数，也不以分项信号汇总为必需决策。已登记的TG-20261029-172301-36425d与本任务机制和决策对象相同，但其必需决策与依赖链未包含state_migration回指month_selection与relationship_monitoring回指hedge_estimation两条闭环边；本任务的实质取舍是对冲比例版本与候选腿集合在迁移时互不自动沿用，且关系失效触发的重估会直接改变残差口径与参与阈值含义。若实现退化为仅更换品种组合或调整窗口阈值，应视为TG-20261029-172301-36425d或HT04的变体而非独立新题。书目仅提供方向，未引用章节、页码、最优参数或实证结果。",
+  "lineage": {
+    "derived_from": [
+      "S09",
+      "HT04",
+      "TG-20261029-172301-36425d"
+    ],
+    "kind": "residual_relationship_reestimation_pending_review"
+  },
+  "bridge_contract": {
+    "schema_version": "finlab.bridge_contract.v2",
+    "identity_policy": "real_names_and_codes",
+    "date_domain": "virtual",
+    "calendar_semantics": "virtual_sequence_only_not_historical_years",
+    "virtual_date_notice": "全部日期为虚拟日期，仅标识数据顺序与可见时点；年份不对应真实历史年份，不得据此预设股灾、政策、节假日或未来事件。",
+    "url_env": "MARKET_BRIDGE_URL",
+    "token_env": "MARKET_BRIDGE_TOKEN",
+    "virtual_start": null,
+    "virtual_stop": null,
+    "minimum_years": 2,
+    "symbols": [
+      "B",
+      "M",
+      "Y",
+      "SC",
+      "FU",
+      "LU",
+      "FG",
+      "SA"
+    ],
+    "endpoints": [
+      {
+        "api_name": "fut_daily",
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "settle",
+          "vol",
+          "oi"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      },
+      {
+        "api_name": "fut_basic",
+        "fields": [
+          "ts_code",
+          "name",
+          "list_date",
+          "delist_date"
+        ],
+        "frequency": "daily",
+        "visibility": "available_at_lte_controller_clock"
+      }
+    ],
+    "binding_status": "not_bound",
+    "dataset_id": null,
+    "required_checks": [
+      "point_in_time",
+      "coverage",
+      "calendar",
+      "units",
+      "corporate_actions_or_settlement",
+      "trading_rules"
+    ]
+  },
+  "runtime_profile": {
+    "schema_version": "finlab.runtime.v2",
+    "engine": "akquant",
+    "engine_version": "0.3.76",
+    "strategy_api": "finlab.strategy.v2",
+    "asset_types": [
+      "FUTURES"
+    ],
+    "index_role": "query_and_benchmark_only",
+    "frequency": "daily",
+    "fill_policy": "NextOpen",
+    "initial_cash": 1000000,
+    "currency": "CNY",
+    "formal_segments": 7,
+    "multi_leg_execution": "per_leg_partial_fills_possible",
+    "state_continuity": [
+      "cash",
+      "positions",
+      "open_orders",
+      "memory"
+    ],
+    "resources": null,
+    "resource_status": "requires_human_setup",
+    "resource_recommendations": {
+      "cpus": 2,
+      "memory_mb": 4096
+    },
+    "market_rules_status": "requires_binding",
+    "instruments": null,
+    "benchmark": null
+  },
+  "submission_contract": {
+    "schema_version": "finlab.submission.v2",
+    "required_files": [
+      "strategy.py",
+      "backtest.py",
+      "params.json",
+      "RESEARCH.md",
+      "CHANGELOG.md"
+    ],
+    "strategy_api": "finlab.strategy.v2",
+    "dependencies": [
+      "finlab",
+      "pandas",
+      "numpy"
+    ],
+    "results_generated_by": "platform"
+  },
+  "protocol": {
+    "research_fraction": 0.3,
+    "formal_segments": 7,
+    "release_rule": "completed_segment_only_after_commit",
+    "maintenance": [
+      "hold",
+      "parameters",
+      "logic"
+    ],
+    "boundaries": null
+  }
+}

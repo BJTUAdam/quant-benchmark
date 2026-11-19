@@ -1,0 +1,77 @@
+{
+  "schema_version": "finlab.upstream_probe.v1",
+  "checked_at": "2026-11-10T09:58:14.406709+00:00",
+  "passed": true,
+  "results": [
+    {
+      "api_name": "daily",
+      "status": "nonempty",
+      "rows": 485,
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "open",
+        "high",
+        "low",
+        "close",
+        "vol",
+        "amount"
+      ],
+      "connection_tested": true,
+      "coverage_proven": false
+    },
+    {
+      "api_name": "adj_factor",
+      "status": "nonempty",
+      "rows": 485,
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "adj_factor"
+      ],
+      "connection_tested": true,
+      "coverage_proven": false
+    },
+    {
+      "api_name": "stk_limit",
+      "status": "nonempty",
+      "rows": 485,
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "up_limit",
+        "down_limit"
+      ],
+      "connection_tested": true,
+      "coverage_proven": false
+    },
+    {
+      "api_name": "trade_cal",
+      "status": "nonempty",
+      "rows": 731,
+      "fields": [
+        "exchange",
+        "cal_date",
+        "is_open",
+        "pretrade_date"
+      ],
+      "connection_tested": true,
+      "coverage_proven": false
+    },
+    {
+      "api_name": "index_daily",
+      "status": "nonempty",
+      "rows": 485,
+      "fields": [
+        "ts_code",
+        "trade_date",
+        "close"
+      ],
+      "connection_tested": true,
+      "coverage_proven": false
+    }
+  ],
+  "scope": "bounded_automatic_acceptance_retry_capability_only_no_freeze_or_PIT_assertion",
+  "source_fallback": false,
+  "credentials_included": false
+}

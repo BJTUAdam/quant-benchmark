@@ -1,0 +1,25 @@
+{
+  "schema_version": "taskgen.automatic_snapshot.v1",
+  "created_at": "2026-11-10T10:06:40+00:00",
+  "approval_method": "automated",
+  "human_approved": false,
+  "records": 6,
+  "files": {
+    "1663d0b796b010a3.json": "f3d96dae3ce3800d74682824aefcb8a4c0e49ba1021a0de546622d83cfe28e44",
+    "02d7bd8f6895f294.json": "f5b8ea98161e0a08ff2284a89f412be9b756087fb6cd76e5b9ce36d927a0247f",
+    "d0375d09b818083f.json": "1713edb650b8ed771699b9bfe87e1345813cc5f1b688c9989e3fbe39345b7fcc",
+    "b7ab427bc3e396da.json": "7766cd50e30d814f0fea684b3541d9bdea1bac3d6514695409e6b6f1309a057d",
+    "04eb717ac3b696a2.json": "61a5b98b8247cbf47bfa32c35f67d91089214a8a783723c68d9c614b4169701d",
+    "e0db00cfa4f5f7a7.json": "0ff7e1abc50a120e4ef5360b449faad0a95b2c421aad54135af0c497d3376749"
+  },
+  "candidate_ids": [
+    "TG-20261105-041820-c67182",
+    "TG-20261105-041906-253472",
+    "TG-20261105-041955-cc1583",
+    "TG-20261105-042021-e6bb50",
+    "TG-20261105-042135-678759",
+    "TG-20261105-042202-a4ef6a"
+  ],
+  "data_status": "binding_not_included",
+  "contains_credentials": false
+}

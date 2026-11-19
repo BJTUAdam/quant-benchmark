@@ -1,0 +1,16 @@
+[
+  {
+    "id": "SRC_CHAN",
+    "title": "Ernest P. Chan: Algorithmic Trading: Winning Strategies and Their Rationale",
+    "status": "official_catalog_verified",
+    "url": "https://www.wiley.com/en-us/Algorithmic+Trading%3A+Winning+Strategies+and+Their+Rationale-p-9781118460146",
+    "verified_scope": "仅核验Wiley书页与官方目录，覆盖均值回归、日内/日间动量、执行与风险管理。具体国内规则、多腿/跨期种子为人工设计，不宣称书中原样给出。"
+  },
+  {
+    "id": "SRC_PROJECT_PLAN",
+    "title": "持续Task生产方案，人工讨论稿v1，2026-10-30",
+    "status": "internal_human_design",
+    "url": "",
+    "verified_scope": "内部方案第3—4节的六方向与12种子。来源路径output/持续Task生产方案_20261030.md；具体任务关系、状态控制和验收规则为本项目人工设计，不归因于外部书籍。"
+  }
+]

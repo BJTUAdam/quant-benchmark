@@ -1,0 +1,119 @@
+{
+  "schema_version": "finlab.acceptance.v2",
+  "checked_at": "2026-11-10T05:33:26.763319+00:00",
+  "status": "passed",
+  "synthetic_only": true,
+  "release": "v2-delivery-20261110",
+  "image_ids": {
+    "engine": "sha256:fbd4496dabb0e6338edadd9ed6a390f95c9c9add142d72a2148957144d833c61",
+    "worker": "sha256:7d4849425d771ff0d4ae274243d0663252108bb445cbf0932eca7077a1805554"
+  },
+  "tushare_live_tested": false,
+  "results": [
+    {
+      "asset": "STOCK",
+      "research": "passed",
+      "formal_segments": 7,
+      "memory_bars": 28,
+      "continuous_position": 100,
+      "equity_points": 28,
+      "code_change": "passed",
+      "container_recreation": "passed",
+      "frozen_index_benchmark": "passed",
+      "fees_deducted": "passed",
+      "synthetic": true,
+      "virtual_year": 2400,
+      "future_virtual_dates": "passed"
+    },
+    {
+      "asset": "FUND",
+      "research": "passed",
+      "formal_segments": 7,
+      "memory_bars": 28,
+      "continuous_position": 100,
+      "equity_points": 28,
+      "code_change": "passed",
+      "container_recreation": "passed",
+      "frozen_index_benchmark": "passed",
+      "fees_deducted": "passed",
+      "synthetic": true,
+      "virtual_year": 2400,
+      "future_virtual_dates": "passed"
+    },
+    {
+      "asset": "FUTURES",
+      "research": "passed",
+      "formal_segments": 7,
+      "memory_bars": 28,
+      "continuous_position": 1,
+      "equity_points": 56,
+      "code_change": "passed",
+      "container_recreation": "passed",
+      "frozen_index_benchmark": "passed",
+      "fees_deducted": "passed",
+      "synthetic": true,
+      "virtual_year": 2400,
+      "future_virtual_dates": "passed"
+    },
+    {
+      "partial_fills": "passed",
+      "limit_boundary_wait": "passed",
+      "open_order_cross_container": "passed",
+      "position_after_segments": [
+        200,
+        600
+      ]
+    },
+    {
+      "synchronous_multi_symbol_slice": "passed",
+      "per_leg_non_atomic_fills": "passed"
+    },
+    {
+      "intraday_asset": "STOCK",
+      "sellable_rule": "T+1",
+      "actual_docker_test": "passed"
+    },
+    {
+      "intraday_asset": "FUND",
+      "sellable_rule": "T+0",
+      "actual_docker_test": "passed"
+    },
+    {
+      "isolation": {
+        "dns_egress_blocked": true,
+        "egress_blocked": true,
+        "future_blocked": true,
+        "future_error_code": "TIME_RANGE_EXCEEDED",
+        "future_error_message": "查询时间超出本阶段允许披露范围，本次请求未返回数据。",
+        "future_request_id": "e248e754fd73432cbbbe2446dcf9bf17",
+        "omitted_dates_clock_scoped": true,
+        "private_paths_absent": true
+      },
+      "callback_failure_no_commit": "passed",
+      "retry_segment": 2,
+      "checkpoint_tamper_blocked": "passed",
+      "public_archive": "passed",
+      "disclosure_403_sdk_details": "passed",
+      "container_audit_persisted": "passed",
+      "audit_request_id_correlated": "passed",
+      "current_event_clock": "passed",
+      "uncommitted_segment_blocked": "passed",
+      "committed_segment_released": "passed",
+      "private_audit_not_exported": "passed"
+    }
+  ],
+  "private_evidence": "retained_on_operator_host_not_distributed",
+  "resource_budget": {
+    "cpus": 2.0,
+    "memory_mb": 4096,
+    "timeout_seconds": 120
+  },
+  "resource_scope": "explicit_synthetic_acceptance_only_not_operator_setup",
+  "limits": [
+    "本次Docker合成验收未使用真实Tushare；自建服务样本见upstream_probe_v2.json",
+    "未声明所有接口账号权限或所有返回格式均已实测",
+    "当前支持按成交额费率；非零按手费用、平今差异费率与动态保证金需扩展，不能静默按0处理",
+    "期货结算价用于逐日估值；AKQuant保证金账户仍保留现金/浮盈结构，不模拟交易所逐日现金划转",
+    "交易规则为绑定的实验规则；真实历史规则缺口须补齐后才能启动正式任务"
+  ]
+}
