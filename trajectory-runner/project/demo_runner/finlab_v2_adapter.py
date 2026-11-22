@@ -56,6 +56,13 @@ def snapshot_submission(source, dest):
     return fingerprint(dest, SUBMISSION)
 
 
+class BackendError(RuntimeError):
+    def __init__(self, code, strategy_code=None):
+        self.code = code
+        self.strategy_code = strategy_code
+        super().__init__("FINLAB_" + code + (f" ({strategy_code})" if strategy_code else ""))
+
+
 class Backend:
     def __init__(self, cfg, root):
         self.cfg, self.root = cfg, root
@@ -75,7 +82,7 @@ class Backend:
         except ValueError:
             raise RuntimeError("FINLAB_RESPONSE_INVALID；请核对 v2 Python 环境") from None
         if result.returncode or not reply.get("ok"):
-            raise RuntimeError("FINLAB_" + reply.get("code", "PROCESS_FAILED"))
+            raise BackendError(reply.get("code", "PROCESS_FAILED"), reply.get("strategy_code"))
         return reply["result"]
 
 

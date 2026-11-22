@@ -31,7 +31,8 @@ platform_private/
 /trajectory-runner/benchmark/packages/
 /trajectory-runner/benchmark/matrices/
 /trajectory-runner/benchmark/batches/
-/trajectory-runner/benchmark/results/
+/trajectory-runner/benchmark/results/*
+!/trajectory-runner/benchmark/results/.gitkeep
 /trajectory-runner/project/demo_runner/runs/
 /trajectory-runner/project/demo_runner/runtime_setup.*
 /trajectory-runner/project/autonomous_runs/

@@ -202,7 +202,7 @@ class UserAgent:
         model = self.settings.get("model_config")
         if model:
             # Do not inherit provider-specific settings or the actor's credential file.
-            for key in MODEL_FIELDS | {"api_key_file"}:
+            for key in MODEL_FIELDS | {"api_key_file", "temperature"}:
                 cfg.pop(key, None)
             cfg.update(model)
             cfg["_ledger_owner"] = self.cfg

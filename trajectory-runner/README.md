@@ -27,14 +27,12 @@ FinLab v2 运行时。研发 Agent 交付 `strategy.py`、`backtest.py`、`param
 
 ```sh
 uv sync --locked --extra mcp
-cp benchmark/deepseek.env.example benchmark/deepseek.private.env
 cp benchmark/finlab.v2.skills.example.json benchmark/finlab.v2.skills.local.json
 ```
 
-在私有 env 文件填写 `DEEPSEEK_API_KEY`。启用记忆时，把本地 JSON 里的 `mcp` Skill 设为
-`enabled: true`，填写服务 URL，并将同一个服务或测试轮次的 Token 写入
-`MEM_PLUGIN_MCP_TOKEN`。启用示例中的 `load_mem_plugin_skill` 会加载子模块的
-记忆使用规范和参考文件。用插件生成的独立测试轮次运行各个实验时，每轮使用对应的 URL 和 Token。
+在仓库根目录 `.env` 填写评测模型配置。要启用记忆，在本地 JSON 中启用 `mcp` Skill
+并设置 `"isolated_memory": true`。单题脚本为每个 `run_id` 签发独立 Token，连接常驻
+`mem-plugin`。启用 `load_mem_plugin_skill` 会加载子模块的记忆使用规范。
 
 在 `make-task/task_generator` 安装 FinLab v2 到独立环境，以匹配示例的 `finlab_python`。
 
@@ -48,8 +46,7 @@ uv pip install -e .
 核对本地配置的研究镜像 ID 后，回到运行器目录执行。
 
 ```sh
-uv run --locked --extra mcp --env-file benchmark/deepseek.private.env \
-  python -I -B benchmark/finlab_v2.py prepare --config benchmark/finlab.v2.skills.local.json
+./start.sh prepare benchmark/finlab.v2.skills.local.json
 ```
 
 `prepare` 准备合成联调，`start` 会实际调用模型并启动 Docker 作业。启用记忆时先启动
@@ -65,8 +62,8 @@ uv run --project trajectory-runner --locked --extra mcp \
 ```
 
 批跑使用配置中的 Agent 解释器。创建自己的批次时，将示例另存为 `batch.local.json`，
-将 `template` 指向所需轨迹配置，并使用新的 `batch_id`。启用 MCP 时可用
-`uv run --env-file` 将私有 env 文件加载到批跑进程，子进程会继承该环境。
+将 `template` 指向所需轨迹配置，并使用新的 `batch_id`。逐题签发的隔离记忆凭证
+通过单题入口使用。
 
 ## 目录
 
@@ -138,7 +135,7 @@ User Agent 会从上一检查点的 `RESEARCH.md`、`CHANGELOG.md` 获取结构�
 两种单价使用同一台账和同一预算上限，不会分成两份预算；独立模型不继承主模型密钥文件。
 
 已完成运行可用 `python project/demo_runner/export_trajectory_html.py <运行目录>`
-导出单文件 `trajectory.html`。v2 运行目录传 `benchmark/v2_runs/<run_id>`，页面按 `stages/` 展开完整对话、工具参数与结果。
+导出单文件 `trajectory.html`。从仓库根目录提供 v2 运行路径 `trajectory-runner/benchmark/results/<run_id>`，页面按 `stages/` 展开完整对话、工具参数与结果。
 旧版运行目录仍按 `events/` 导出，并保留用户侧事件及回退来源。
 导出不调用模型，也不修改原始轨迹。
 

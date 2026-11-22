@@ -10,19 +10,18 @@
 
 ## 配置
 
-- 按 `task_generator/.env.example` 导出所选模型服务的密钥。默认从 `config/default.json` 读取模型设置，产题配额见 `config/batch.json`。
+- 将 `task_generator/.env.example` 另存为同目录的 `.env`。启动脚本从仓库根目录 `.env` 读取聊天模型、温度和 `OPENAI_API_KEY`，出题和复核使用同一模型。产题配额见 `config/batch.json`。
 - 采集真实行情时设置 `TUSHARE_TOKEN` 和所需的 `TUSHARE_UPSTREAM_URL`。做回测或绑定真实题前，完成 `finlab setup` 并加载 FinLab Docker 镜像。[部署说明](../make-task/task_generator/docs/v2/OPERATIONS.md)
 
 ## 启动
 
-从仓库根目录进入产题项目。安装依赖并完成环境变量配置后，运行产题命令。
+从仓库根目录运行。脚本准备 Python 3.12 环境，默认开始产题。运行合成评测可以直接使用已有题型，首次使用 FinLab 时先设置资源并导入交付镜像。
 
 ```bash
-cd make-task/task_generator
-uv venv --python 3.12
-source .venv/bin/activate
-uv pip install -e .
-finlab task generate --batch-config config/batch.json
+./make-task/start.sh setup
+./make-task/start.sh backtest load-images ../images/finlab_images_v2.tar
+./make-task/start.sh task doctor
+./make-task/start.sh task generate
 ```
 
 ## 产物

@@ -171,7 +171,11 @@ def main():
         code = getattr(exc, "code", type(exc).__name__)
         if not isinstance(code, str) or not re.fullmatch(r"[A-Za-z0-9_]{1,80}", code):
             code = "BACKEND_ERROR"
-        print(json.dumps({"ok": False, "code": code}))
+        failure = {"ok": False, "code": code}
+        strategy_code = getattr(exc, "strategy_code", None)
+        if code == "BACKTEST_FAILED" and isinstance(strategy_code, str) and re.fullmatch(r"[A-Z_]{1,80}", strategy_code):
+            failure["strategy_code"] = strategy_code
+        print(json.dumps(failure))
         return 1
     return 0
 

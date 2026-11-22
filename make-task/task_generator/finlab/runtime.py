@@ -323,6 +323,24 @@ def episode_images(binding, state):
     return read(path)["images"] if path.is_file() else {}
 
 
+STRATEGY_FAILURES = {
+    "INVALID_ORDER", "INVALID_LIMIT_PRICE", "ORDER_NOT_ACTIVE", "ORDER_LOT_SIZE",
+    "SHORT_OR_T_PLUS_ONE_VIOLATION", "ORDERS_OUTSIDE_BAR_CALLBACK",
+    "STRATEGY_PROTOCOL_ERROR", "STRATEGY_REPLY_TOO_LARGE", "STRATEGY_RPC_FAILED",
+}
+
+
+class BacktestFailed(LabError):
+    def __init__(self, engine_log):
+        super().__init__("BACKTEST_FAILED", "运行未提交，查看该job的运营日志")
+        prefix = "TRUSTED_ENGINE_FAILED LabError "
+        self.strategy_code = next(
+            (line.removeprefix(prefix) for line in reversed(engine_log.splitlines())
+             if line.startswith(prefix) and line.removeprefix(prefix) in STRATEGY_FAILURES),
+            None,
+        )
+
+
 def run(folder, submission, *, research=False):
     folder = Path(folder).resolve()
     with lock(folder):
@@ -360,7 +378,18 @@ def run(folder, submission, *, research=False):
         images = episode_images(binding,state)
         if not {"engine", "worker"} <= images.keys(): raise LabError("IMAGES_NOT_BUILT")
         rpc_token, bridge_token = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
-        config = {"binding": binding, "window": window, "resume": bool(previous), "segment": segment,
+        profile = binding["runtime"]
+        job_binding = binding
+        calendar = profile["calendar"]
+        if (not research and segment == 7 and profile["frequency"] == "daily"
+                and calendar[-1] < window["stop"]
+                and all(i["asset_type"] in {"STOCK", "FUND"} for i in profile["instruments"])):
+            # AKQuant can resolve the day after the final daily bar during
+            # checkpoint resume. Supply an engine-only boundary date while
+            # keeping the frozen calendar and the exclusive data window intact.
+            next_day = (parse_time(calendar[-1]).date() + timedelta(days=1)).isoformat()
+            job_binding = {**binding, "runtime": {**profile, "calendar": [*calendar, next_day]}}
+        config = {"binding": job_binding, "window": window, "resume": bool(previous), "segment": segment,
                   "research": research, "submission_hash": report["submission_hash"], "job_id": job_id,
                   "worker_url": "http://worker:8080", "callback_timeout": 20,
                   "disclosure_policy": load_disclosure(folder, binding, state, frozen),
@@ -374,7 +403,10 @@ def run(folder, submission, *, research=False):
                   "--dns", "127.0.0.1", "-e", "RES_OPTIONS=attempts:1 timeout:1",
                   "--pids-limit", "128", "--cpus", str(resources["cpus"] / 2),
                   "--memory", str(int(resources["memory_mb"] / 2)) + "m", "--tmpfs", "/tmp:rw,noexec,nosuid,size=128m",
-                  "--log-opt", "max-size=10m", "--log-opt", "max-file=1"]
+                  "--log-opt", "max-size=10m", "--log-opt", "max-file=1", "--log-opt", "compress=false"]
+        # The job files are private to the host operator and artifacts must remain writable.
+        if os.name == "posix" and os.getuid() != 0:
+            common.extend(["--user", f"{os.getuid()}:{os.getgid()}"])
         try:
             docker(["network", "create", "--internal", network])
             docker(["run", "-d", "--name", worker_name, "--network-alias", "worker", *common,
@@ -391,7 +423,7 @@ def run(folder, submission, *, research=False):
                 logs = docker(["logs", name], check_exit=False)
                 (job / (kind + ".private.log")).write_text(logs.stdout + logs.stderr, encoding="utf-8")
             if result.stdout.strip() != "0" or not (job / "artifacts" / "success.private.json").is_file():
-                raise LabError("BACKTEST_FAILED", "运行未提交，查看该job的运营日志")
+                raise BacktestFailed((job / "engine.private.log").read_text(encoding="utf-8"))
             success = read(job / "artifacts" / "success.private.json")
             for name, expected in success["hashes"].items():
                 target = (job / "artifacts" / name).resolve()
@@ -413,7 +445,10 @@ def run(folder, submission, *, research=False):
             return {"status": "research_completed" if research else "segment_committed", "job_id": job_id,
                     "segment": segment, "public_results": str(job / "artifacts" / "public"), "synthetic": binding["synthetic"]}
         except Exception as exc:
-            write(job / "failure.private.json", {"status": "not_committed", "error_code": exc.code if isinstance(exc, LabError) else "RUN_FAILED"})
+            failure = {"status": "not_committed", "error_code": exc.code if isinstance(exc, LabError) else "RUN_FAILED"}
+            if isinstance(exc, BacktestFailed) and exc.strategy_code:
+                failure["strategy_code"] = exc.strategy_code
+            write(job / "failure.private.json", failure)
             raise
         finally:
             for kind, name in (("engine", engine_name), ("worker", worker_name)):
