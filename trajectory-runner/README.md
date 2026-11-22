@@ -1,9 +1,10 @@
-# 金融长轨迹：当前跑轨迹源码快照
+# 金融长轨迹运行器
 
 源码源自 2026-11-05 的 `benchmark/docker_batch_lab` 快照。历史轨迹保留登记时的源码和配置哈希，修改代码后使用新的 `run_id` 或 `matrix_id` 登记实验。
 
 ## 主要调用链
 
+FinLab v2 单题从 `start.sh` 进入 `benchmark/finlab_v2.py`。旧 Matrix 的调用链为
 `benchmark/matrix.py` → `batch.py` → `worker.py` →
 `project/demo_runner/environment_controller.py` →
 `autonomous_harness.py`。`agent_view.py` 构造被测 Agent 可见内容，
@@ -13,8 +14,8 @@
 
 ## FinLab v2 单题适配
 
-`benchmark/finlab_v2.py` 是新增的单条轨迹入口；`project/demo_runner/finlab_v2_adapter.py`
-提供公开数据查询、Agent 自写的本地研究回测、交付校验，`finlab_v2_worker.py` 调用随题目系统提供的
+`project/demo_runner/finlab_v2_adapter.py` 提供公开数据查询、Agent 自写的本地研究回测和交付校验。
+`finlab_v2_worker.py` 调用随题目系统提供的
 FinLab v2 运行时。研发 Agent 交付 `strategy.py`、`backtest.py`、`params.json`、
 `RESEARCH.md` 和 `CHANGELOG.md`；平台只向 Agent 返回提交是否可执行，
 独立完成七段正式运行并返回六次复盘反馈。
@@ -22,7 +23,7 @@ FinLab v2 运行时。研发 Agent 交付 `strategy.py`、`backtest.py`、`param
 
 `benchmark/finlab.v2.demo.example.json` 配置合成股票联调；
 `benchmark/finlab.v2.bound.example.json` 需要产题系统交付的真实
-`binding.private.json`。本次 12 题包只有未绑定草案，尚不能作为正式七段运行输入。
+`binding.private.json`。仓库随附的 12 份题包是未绑定草案。已有正式题评测使用的绑定交付物和行情放在本地 `make-task/task_generator/work_v2/`，需另行取得。
 在 `trajectory-runner` 目录安装 Agent 的 Python 3.12 环境并准备本地配置。
 
 ```sh
@@ -30,9 +31,10 @@ uv sync --locked --extra mcp
 cp benchmark/finlab.v2.skills.example.json benchmark/finlab.v2.skills.local.json
 ```
 
-在仓库根目录 `.env` 填写评测模型配置。要启用记忆，在本地 JSON 中启用 `mcp` Skill
-并设置 `"isolated_memory": true`。单题脚本为每个 `run_id` 签发独立 Token，连接常驻
-`mem-plugin`。启用 `load_mem_plugin_skill` 会加载子模块的记忆使用规范。
+在仓库根目录 `.env` 填写评测模型配置。单题和批跑同时加载 `trajectory-runner/.env`（如存在），
+本地文件会覆盖根目录文件中的同名变量。终端已导出的变量优先级最高。启用逐题隔离记忆时，
+设置 `"isolated_memory": true` 并启用 `mcp` Skill。做无记忆对照时，将两项都设为 `false`。
+启用 `load_mem_plugin_skill` 会加载子模块的记忆使用规范。[单题配置说明](../docs/trajectory-runner.md#配置)
 
 在 `make-task/task_generator` 安装 FinLab v2 到独立环境，以匹配示例的 `finlab_python`。
 
@@ -47,18 +49,17 @@ uv pip install -e .
 
 ```sh
 ./start.sh prepare benchmark/finlab.v2.skills.local.json
+./start.sh start benchmark/finlab.v2.skills.local.json
 ```
 
 `prepare` 准备合成联调，`start` 会实际调用模型并启动 Docker 作业。启用记忆时先启动
 `mem-plugin`，等 MCP 服务就绪后再执行 `start`。
-正式题须先完成系统自动接纳、真实数据冻结与绑定，再把交付包的
-`platform_private/binding.private.json` 路径填入 bound 配置。
+评测正式题时，将交付包的 `binding.private.json` 路径填入 `task.binding`，并显式将该题配置传给 `start.sh`。从草案接入新题时，先完成自动接纳、真实数据冻结与绑定。
 
 从外层 `quant-benchmark` 根目录预检批跑示例。
 
 ```sh
-uv run --project trajectory-runner --locked --extra mcp \
-  python batch-runner/batchctl.py check batch-runner/batch.example.json
+./batch-runner/start.sh check batch.example.json
 ```
 
 批跑使用配置中的 Agent 解释器。创建自己的批次时，将示例另存为 `batch.local.json`，
@@ -75,7 +76,7 @@ uv run --project trajectory-runner --locked --extra mcp \
   但已把本机路径替换为占位路径；这些模板不能直接启动。
 - 本开源包已移除私有配置和运行产物。
 
-## 使用前准备
+## 旧 Matrix 使用前准备
 
 1. 在 WSL/Linux 环境准备 Docker，按上面的 `uv sync` 命令建立 Python 3.12 环境。旧 Matrix 若使用 bubblewrap，沙箱内的系统 Python 必须与挂载依赖的 Python 小版本一致。
 2. 取得**另行授权提供**的原题 ZIP；本包不含题目、隐藏行情、评分器、
@@ -96,7 +97,7 @@ uv run --locked --extra mcp python -I benchmark/matrix.py start --config example
 `uv run --locked --extra mcp python -I benchmark/matrix.py status --matrix benchmark/matrices/<matrix_id>`。
 矩阵登记后，配置和源码受哈希锁定；变更代码或额度须建立新 `matrix_id`。
 
-## 当前模板的阶段额度
+## 旧 Matrix 模板的阶段额度
 
 每轮研发 Agent 正常 80 次模型回复，最多再给 16 次收尾；`run_research`
 最多 65 次，每次最长 180 秒；策略评估共 40 组，其中 2 组保留给最终验证；
@@ -134,10 +135,16 @@ User Agent 会从上一检查点的 `RESEARCH.md`、`CHANGELOG.md` 获取结构�
 其 `budget_cny` 与主模型相同，并使用 `max_completion_tokens` 输出参数。
 两种单价使用同一台账和同一预算上限，不会分成两份预算；独立模型不继承主模型密钥文件。
 
-已完成运行可用 `python project/demo_runner/export_trajectory_html.py <运行目录>`
-导出单文件 `trajectory.html`。从仓库根目录提供 v2 运行路径 `trajectory-runner/benchmark/results/<run_id>`，页面按 `stages/` 展开完整对话、工具参数与结果。
-旧版运行目录仍按 `events/` 导出，并保留用户侧事件及回退来源。
-导出不调用模型，也不修改原始轨迹。
+## 导出轨迹
+
+从仓库根目录执行，将 `RUN_ID` 替换为实际运行标识。
+
+```sh
+python3 trajectory-runner/project/demo_runner/export_trajectory_html.py \
+  trajectory-runner/benchmark/results/RUN_ID
+```
+
+导出器在运行目录内生成单文件 `trajectory.html`，从 v2 的 `stages/` 或旧版的 `events/` 读取对话和工具调用。导出可离线完成。
 
 ## 分享边界
 

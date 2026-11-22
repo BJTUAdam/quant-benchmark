@@ -10,15 +10,16 @@
 
 ## 配置
 
-将 `batch.example.json` 另存为同目录下的 `batch.local.json`，设置 `batch_id`、`concurrency` 和 `jobs`。批跑使用根目录的模型配置。逐题签发的隔离记忆凭证通过单题入口使用。更换实验配置时使用新的 `batch_id`。[单条轨迹配置](trajectory-runner.md)
+- 将 `batch.example.json` 另存为同目录下的 `batch.local.json`，设置 `batch_id`、`concurrency` 和 `jobs`。`template` 指向轨迹配置，`python` 指向轨迹运行环境的解释器。更换实验配置时使用新的 `batch_id`。
+- 模型配置与单题入口一致。优先级从高到低为终端已导出的变量、`trajectory-runner/.env`（如存在）、根目录 `.env`。启用了 `isolated_memory` 的配置需要通过单题入口运行。[单条轨迹配置](trajectory-runner.md)
 
 ## 启动
 
-从仓库根目录执行。`check` 校验批次，`run` 启动或续跑。
+从仓库根目录执行。先在 `trajectory-runner/` 中运行 `uv sync --locked --extra mcp`，准备批次配置所用的解释器。`check` 校验批次，`run` 启动或续跑。省略配置路径时使用 `batch.local.json`。
 
 ```bash
-./batch-runner/start.sh check
-./batch-runner/start.sh
+./batch-runner/start.sh check batch.local.json
+./batch-runner/start.sh run batch.local.json
 ```
 
 ## 产物
