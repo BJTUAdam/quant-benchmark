@@ -9,6 +9,7 @@ import json
 import http.client
 import os
 import re
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -18,7 +19,13 @@ from typing import Any
 
 
 class ModelError(RuntimeError):
-    pass
+    def __init__(self, message, *, code=None):
+        super().__init__(message)
+        self.code = code
+
+
+MAX_REQUEST_ATTEMPTS = 3
+RETRYABLE_HTTP = {408, 429, 500, 502, 503, 504}
 
 
 def load_config(path: str | Path) -> dict[str, Any]:
@@ -31,12 +38,18 @@ def load_config(path: str | Path) -> dict[str, Any]:
     if cfg["provider"] not in {"openai_compatible", "anthropic"}:
         raise ModelError("provider 只支持 openai_compatible 或 anthropic")
     url = urllib.parse.urlparse(cfg["base_url"])
-    if url.scheme != "https" and not (url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1"}):
-        raise ModelError("base_url 必须是 HTTPS（仅本机服务允许 HTTP）")
+    selected_http = (cfg["provider"] == "openai_compatible" and cfg["api_key_env"] == "OPENAI_API_KEY"
+                     and cfg["base_url"] == os.environ.get("OPENAI_BASE_URL"))
+    if url.scheme != "https" and not (url.scheme == "http" and
+            (url.hostname in {"localhost", "127.0.0.1"} or selected_http)):
+        raise ModelError("远程 HTTP 地址须与操作者显式配置的 OPENAI_BASE_URL 一致")
     if not url.netloc or url.username or url.password or url.query or url.fragment:
         raise ModelError("base_url 不能含账号、密码、查询参数或片段")
     if "api_key" in cfg:
         raise ModelError("不要将明文 api_key 写入配置；请使用 api_key_env 或 api_key_file")
+    if "temperature" in cfg and (cfg["provider"] != "openai_compatible"
+            or type(cfg["temperature"]) not in (int, float) or not 0 <= cfg["temperature"] <= 2):
+        raise ModelError("OpenAI 兼容接口的 temperature 须为 0 到 2 的数值")
     if cfg.get("api_key_file"):
         cfg["api_key_file"] = str((p.parent / cfg["api_key_file"]).resolve())
     if "mcp_servers" in cfg or "skills" in cfg:
@@ -214,6 +227,8 @@ def prepare_request(cfg: dict[str, Any], messages: list[dict[str, Any]],
         if not tools:
             payload.pop("tools")
             payload.pop("tool_choice")
+        if "temperature" in cfg:
+            payload["temperature"] = cfg["temperature"]
         if cfg.get("thinking"):
             payload["thinking"] = {"type": cfg["thinking"]}
         if cfg.get("reasoning_effort"):
@@ -305,8 +320,8 @@ class ModelClient:
                 return None  # Do not forward authorization to another host.
 
         opener = urllib.request.build_opener(NoRedirect)
-        attempts = self.cfg.get("_request_attempts", 3)
-        if type(attempts) is not int or not 1 <= attempts <= 3:
+        attempts = self.cfg.get("_request_attempts", MAX_REQUEST_ATTEMPTS)
+        if type(attempts) is not int or not 1 <= attempts <= MAX_REQUEST_ATTEMPTS:
             raise ModelError("模型请求重试设置无效")
         for attempt in range(attempts):
             reservation = ledger.reserve(self.cfg.get('_usage_turn', 'unknown'), attempt+1) if ledger else None
@@ -317,15 +332,23 @@ class ModelClient:
                     ledger.settle(reservation, raw.get('usage'))
                 break
             except urllib.error.HTTPError as exc:
+                code = f"HTTP_{exc.code}"
                 if ledger:
-                    ledger.failed(reservation, 'HTTP_'+str(exc.code))
-                # Never show a provider response body: it may echo parts of the request.
-                raise ModelError(f"模型 API 返回 HTTP {exc.code}；请检查地址、模型名、密钥与额度") from None
+                    ledger.failed(reservation, code)
+                exc.close()
+                if attempt == attempts - 1 or not self.cfg.get("_retry_http") or exc.code not in RETRYABLE_HTTP:
+                    raise ModelError(f"模型 API 返回 HTTP {exc.code}", code="MODEL_" + code) from None
             except (urllib.error.URLError, TimeoutError, http.client.HTTPException,
                     ConnectionError, json.JSONDecodeError) as exc:
+                code = type(exc).__name__
                 if ledger:
-                    ledger.failed(reservation, type(exc).__name__)
+                    ledger.failed(reservation, code)
                 if attempt == attempts - 1:
-                    raise ModelError(f"模型 API 连接失败（{attempts} 次尝试，不显示凭据）：{type(exc).__name__}") from None
-                time.sleep((2, 5)[attempt])
+                    raise ModelError(f"模型 API 连接失败（{attempts} 次尝试，不显示凭据）：{code}",
+                                     code="MODEL_CONNECTION_FAILED") from None
+            delay = 2 ** (attempt + 1)
+            if self.cfg.get("_retry_http"):
+                print(f"模型请求 {code}，{delay} 秒后重试（{attempt + 1}/{attempts - 1}）",
+                      file=sys.stderr, flush=True)
+            time.sleep(delay)
         return parse_response(self.cfg["provider"], raw)

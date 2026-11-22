@@ -3,7 +3,7 @@
   "runner_root": "../trajectory-runner",
   "python": "../trajectory-runner/.venv/bin/python",
   "template": "../trajectory-runner/benchmark/finlab.v2.demo.example.json",
-  "out_dir": "out",
+  "out_dir": "../trajectory-runner/benchmark/results/batches",
   "concurrency": 1,
   "max_attempts": 2,
   "retry_backoff_seconds": 60,

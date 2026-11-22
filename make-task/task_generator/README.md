@@ -1,6 +1,8 @@
 # 金融长程任务系统 v2
 
-当前完整发行：`v2-integrated-task12-20261110`。入口、离线SDK说明和期货合约范围匹配修复已合并，无需另行应用补丁。十二个修订题包位于[task_packages/20261110](task_packages/20261110/题包索引.md)，每题有展开目录及单独ZIP。先读[完整系统与题包说明](docs/v2/TASK_PACKAGES.md)。
+从 `quant-benchmark` 使用本目录时，按[产题与数据准备](../../docs/make-task.md)运行 `./make-task/start.sh`。首次需要导入的镜像归档由原始交付包提供。
+
+原始 FinLab 交付版本为 `v2-integrated-task12-20261110`。入口、离线SDK说明和期货合约范围匹配修复已合并，无需另行应用补丁。十二个修订题包位于[task_packages/20261110](task_packages/20261110/题包索引.md)，每题有展开目录及单独ZIP。先读[完整系统与题包说明](docs/v2/TASK_PACKAGES.md)。
 
 Task生产、Tushare桥接与AKQuant Docker回测共用`finlab`入口。公开任务包只提供数据接口契约和提交模板，数据、真实时间映射和账户检查点留在平台侧。
 

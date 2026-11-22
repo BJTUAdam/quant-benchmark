@@ -5,7 +5,8 @@ import pathlib
 import sys
 import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
+from urllib.error import HTTPError
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from model_client import ModelClient, ModelError, _key, load_config, parse_response, prepare_request
@@ -21,6 +22,20 @@ HISTORY = [
 
 
 class AdapterTests(unittest.TestCase):
+    def test_remote_http_requires_operator_url_and_sends_zero_temperature(self):
+        url = "http://model.example.test:3425/v1"
+        with tempfile.TemporaryDirectory() as temp, patch.dict(os.environ, {}, clear=True):
+            path = pathlib.Path(temp) / "cfg.json"
+            path.write_text(json.dumps({"provider": "openai_compatible", "base_url": url,
+                                        "model": "example", "api_key_env": "OPENAI_API_KEY",
+                                        "temperature": 0}))
+            with self.assertRaises(ModelError):
+                load_config(path)
+            with patch.dict(os.environ, {"OPENAI_BASE_URL": url}):
+                endpoint, _, body = prepare_request(load_config(path), HISTORY, TOOLS)
+                self.assertEqual(endpoint, url + "/chat/completions")
+                self.assertEqual(body["temperature"], 0)
+
     def test_openai_roundtrip(self):
         cfg = {"provider": "openai_compatible", "base_url": "https://api.deepseek.com", "model": "deepseek-chat", "max_tokens": 1024}
         url, headers, data = prepare_request(cfg, HISTORY, TOOLS)
@@ -142,6 +157,23 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(opener.open.call_count, 2)
         self.assertIs(opener.open.call_args_list[0].args[0], opener.open.call_args_list[1].args[0])
         self.assertEqual(opener.open.call_args_list[0].args[0].data, opener.open.call_args_list[1].args[0].data)
+
+    def test_trajectory_http_retries_with_exponential_backoff(self):
+        cfg = {"provider": "openai_compatible", "base_url": "https://example.test", "model": "fake",
+               "max_tokens": 1024, "timeout_seconds": 30, "_retry_http": True}
+        for codes, expected in [([502, 429, 503], [call(2), call(4)]), ([401], [])]:
+            with self.subTest(codes=codes):
+                opener = MagicMock()
+                opener.open.side_effect = [HTTPError(None, code, "private", {}, None) for code in codes]
+                with patch("model_client._key", return_value="placeholder"), \
+                     patch("model_client.urllib.request.build_opener", return_value=opener), \
+                     patch("model_client.time.sleep") as sleep, \
+                     self.assertRaises(ModelError) as caught:
+                    ModelClient(cfg).complete(HISTORY, TOOLS)
+                self.assertEqual(sleep.call_args_list, expected)
+                self.assertEqual(opener.open.call_count, len(codes))
+                self.assertEqual(caught.exception.code, f"MODEL_HTTP_{codes[-1]}")
+                self.assertNotIn("private", str(caught.exception))
 
     def test_repeated_http_disconnect_becomes_safe_model_error(self):
         cfg = {"provider": "openai_compatible", "base_url": "https://example.test", "model": "fake",

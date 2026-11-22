@@ -1,7 +1,7 @@
 {
   "schema_version": "trajectory.finlab.v2",
   "run_id": "v2-bound-task-1",
-  "runs_root": "v2_runs",
+  "runs_root": "results",
   "finlab_root": "../../make-task/task_generator",
   "finlab_python": "../../make-task/task_generator/.venv/bin/python3",
   "task": {

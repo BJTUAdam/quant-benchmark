@@ -481,7 +481,7 @@ def main():
     parser.add_argument("--run-id")
     parser.add_argument("--audit-dir", type=pathlib.Path)
     parser.add_argument("--track", default="maintenance_shared_v1")
-    parser.add_argument("--output", type=pathlib.Path, default=HERE / "results")
+    parser.add_argument("--output", type=pathlib.Path, default=HERE / "results" / "matrix")
     parser.add_argument("--report-dir", type=pathlib.Path, default=HERE / "reports")
     args = parser.parse_args()
     try:

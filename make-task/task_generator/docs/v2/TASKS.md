@@ -47,7 +47,15 @@ finlab task export CANDIDATE_ID
 
 ## 配置模型并持续生产
 
-先复制或编辑config/oneapi.example.json、deepseek.example.json或glm.example.json，设置base_url、generation_model、review_model和api_key_env。generation_model与review_model可不同；调用失败、格式修复和单批调用总数均受配置上限限制。不要把密钥填进JSON。
+在 `quant-benchmark` 中，默认从仓库根目录通过启动脚本产题。脚本读取 OpenAI 兼容模型配置，产题和复核共用 `OPENAI_MODEL`。环境变量和首次准备见[产题与数据准备](../../../../docs/make-task.md)。
+
+```bash
+./make-task/start.sh task doctor
+./make-task/start.sh task generate
+./make-task/start.sh task review --batch BATCH_ID --api
+```
+
+直接使用原始 FinLab CLI 时，可在 `task_generator/` 中复制或编辑 `config/oneapi.example.json`、`config/deepseek.example.json` 或 `config/glm.example.json`，设置 `base_url`、`generation_model`、`review_model` 和 `api_key_env`。这种方式支持为产题和复核分别设置模型。调用失败、格式修复和单批调用总数均受配置上限限制。密钥放在环境变量中。
 
 ```powershell
 $env:DEEPSEEK_API_KEY = "在本机环境设置有效密钥"

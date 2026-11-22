@@ -14,6 +14,7 @@ import math
 import os
 import pathlib
 import re
+import subprocess
 import sys
 import time
 import zipfile
@@ -23,11 +24,20 @@ RUNNER = HERE.parent / "project" / "demo_runner"
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(RUNNER))
 from batch import exclusive
-from model_client import load_config, ModelClient
+from model_client import load_config, ModelClient, MAX_REQUEST_ATTEMPTS
 from skill_registry import SkillRegistry
 from skills.mcp import configured_docs
 from user_agent import UserAgent, context as user_context, render as render_user
-from finlab_v2_adapter import Backend, Tools, TOOLS, SUBMISSION, PUBLIC, read, save, digest, fingerprint, snapshot_submission
+from finlab_v2_adapter import Backend, BackendError, Tools, TOOLS, SUBMISSION, PUBLIC, read, save, digest, fingerprint, snapshot_submission
+
+ROOT = HERE.parents[1]
+PROFILE_SCRIPT = ROOT / "scripts/openai_profile.py"
+MAX_FORMAL_RETRIES = 2
+REPAIR_HINTS = {
+    "ORDER_NOT_ACTIVE": "撤单前用当前 ctx.portfolio['open_orders'] 核对订单 ID。",
+    "ORDER_LOT_SIZE": "按 runtime_profile.json 中标的的交易单位校验下单数量。",
+    "STRATEGY_RPC_FAILED": "检查策略入口和回调在跨段恢复时能否处理已有账户、订单和 memory。",
+}
 
 SYSTEM = """你是金融长轨迹任务的研发 Agent。以工作区 TASK.md、DATA_API.md、SUBMISSION.md、
 bridge_contract.json 和 runtime_profile.json 为准；先读取这些文件。
@@ -60,7 +70,7 @@ def config(path):
         "stage_warning_seconds", "stage_urgent_seconds", "stage_hard_seconds", "max_research_calls",
         "max_strategy_evaluations", "max_sweep_evaluations", "reserved_final_evaluations",
         "research_timeout_seconds", "max_data_queries", "user_agent", "output_token_parameter",
-        "thinking", "reasoning_effort", "cost_control", "evidence_driven", "mcp_servers", "skills"}
+        "thinking", "reasoning_effort", "temperature", "cost_control", "evidence_driven", "mcp_servers", "skills"}
     if set(raw) - allowed:
         raise ValueError("v2 配置存在未知字段")
     if raw.get("schema_version") != "trajectory.finlab.v2" or "api_key" in raw:
@@ -100,6 +110,8 @@ def config(path):
 
 def source_lock(cfg):
     own = [pathlib.Path(__file__), HERE / "batch.py", HERE / "bench.py"]
+    if PROFILE_SCRIPT.is_file():
+        own.append(PROFILE_SCRIPT)
     own += [RUNNER / name for name in ("finlab_v2_adapter.py", "finlab_v2_worker.py", "model_client.py",
         "user_agent.py", "agent_view.py", "usage_ledger.py", "agent_tools.py", "research_runner.py",
         "runtime_environment.py", "docker_sandbox.py", "mcp_client.py", "skill_registry.py", "mcp_requirements.txt")]
@@ -157,6 +169,32 @@ def verify_public(root):
             raise RuntimeError("公开任务或 SDK 参考被更改")
 
 
+def initialize_test_memory(cfg, root):
+    scoped = any(server.get("token_env") == "FINLAB_ISOLATED_MEMORY_TOKEN"
+                 for skill in cfg.get("skills", []) if skill["name"] == "mcp" and skill.get("enabled", True)
+                 for server in skill["config"]["servers"])
+    marker = root / "private/memory-start.json"
+    if not scoped or marker.exists() or (root / "stages").exists():
+        return
+    token = os.environ.get("FINLAB_ISOLATED_MEMORY_TOKEN")
+    if not token:
+        raise RuntimeError("缺少测试专用记忆凭证，请通过 trajectory-runner/start.sh 启动")
+    plugin = ROOT / "mem-plugin"
+    env = {key: os.environ[key] for key in ("PATH", "HOME", "USER", "LOGNAME", "LANG", "TMPDIR")
+           if key in os.environ}
+    try:
+        result = subprocess.run(
+            [str(plugin / ".venv/bin/python"), "-I", "-B", str(PROFILE_SCRIPT),
+             "reset-trajectory-memory", str(root.resolve())],
+            input=token, cwd=plugin, env=env, capture_output=True, text=True, timeout=90, check=True,
+        )
+        deleted = int(result.stdout.strip())
+    except (OSError, subprocess.SubprocessError, ValueError):
+        raise RuntimeError("无法确认测试记忆已清空") from None
+    save(marker, {"deleted": deleted})
+    print(f"本次测试从空记忆开始，已清理 {deleted} 条旧记录", flush=True)
+
+
 def public_prompt(root, index, backend):
     workspace = root / "workspace"
     prompt = (workspace / "TASK.md").read_text(encoding="utf-8")
@@ -187,13 +225,50 @@ def model_history(messages):
 
 
 def stage_request_config(cfg, remaining_seconds, *, final_only):
-    if final_only:
+    if final_only and remaining_seconds <= 0:
         return {**cfg, "_request_attempts": 1}
     timeout = min(cfg["timeout_seconds"], max(1, math.floor(remaining_seconds)))
-    # ModelClient waits two seconds before its first retry. Leave an extra
-    # second for request setup and bookkeeping.
-    attempts = 2 if remaining_seconds >= 2 * timeout + 3 else 1
+    # Reserve 2 + 4 seconds for backoff and one second for bookkeeping.
+    attempts = MAX_REQUEST_ATTEMPTS
+    while attempts > 1 and remaining_seconds < attempts * timeout + 2 ** attempts - 1:
+        attempts -= 1
     return {**cfg, "timeout_seconds": timeout, "_request_attempts": attempts}
+
+
+def delivery_path(root, index, retries):
+    name = f"{index:02d}-retry-{retries}" if retries else f"{index:02d}"
+    return root / "deliveries" / name
+
+
+def repair_feedback(code):
+    hint = REPAIR_HINTS.get(code, "检查策略是否符合 SUBMISSION.md 和运行配置中的约束。")
+    return (f"本段正式回测未提交，错误码为 {code}。{hint}"
+            "请使用当前已披露的数据修正策略，追加 CHANGELOG.md，执行 run_backtest 并重新交付。")
+
+
+def queue_formal_retry(cfg, root, stage, code):
+    retries = stage.setdefault("formal_retries", [])
+    delay = 2 ** (len(retries) + 1)
+    # Recovery must still fit in the experiment's existing tool and time budgets.
+    if len(retries) >= MAX_FORMAL_RETRIES or (not cfg.get("evidence_driven") and (
+            stage["calls"] + 2 > cfg["max_model_calls"] + 16
+            or stage["evaluations"] >= cfg["max_strategy_evaluations"]
+            or time.time() + delay >= stage["started"] + cfg["stage_hard_seconds"])):
+        return False
+    workspace = root / "workspace"
+    if fingerprint(workspace, SUBMISSION) != stage["submission"]:
+        raise RuntimeError("待修复的工作区与失败交付不一致")
+    retries.append({"code": code, "submission": stage.pop("submission"),
+                    "message_index": len(stage["messages"]), "not_before": time.time() + delay})
+    stage["messages"].append({"role": "user", "content": repair_feedback(code)})
+    stage.update(status="running", verified=None, verification_job=None,
+                 before_log=(workspace / "CHANGELOG.md").read_text(encoding="utf-8"))
+    for key in ("delivery", "completed", "local_backtest_evidence", "recent_actions"):
+        stage.pop(key, None)
+    save(root / "stages" / f"{stage['index']:02d}.json", stage)
+    print(f"第 {stage['index'] + 1} 段回测失败（{code}），{delay} 秒后交给 Agent 修复"
+          f"（{len(retries)}/{MAX_FORMAL_RETRIES}）", file=sys.stderr, flush=True)
+    return True
 
 
 def run_stage(cfg, root, index):
@@ -203,7 +278,7 @@ def run_stage(cfg, root, index):
     if path.exists():
         stage = read(path)
         if stage["status"] == "delivered":
-            dest = root / "deliveries" / f"{index:02d}"
+            dest = delivery_path(root, index, len(stage.get("formal_retries", [])))
             if fingerprint(dest, SUBMISSION) != stage["submission"]:
                 raise RuntimeError("已交付文件改变")
             return stage
@@ -238,12 +313,15 @@ def run_stage(cfg, root, index):
         save(path, stage)
     if stage.get("workspace_submission") != fingerprint(workspace, SUBMISSION):
         raise RuntimeError("研发工作文件与最近已保存状态不符，拒绝静默覆盖或恢复")
+    retries = stage.get("formal_retries", [])
+    if retries and (delay := retries[-1]["not_before"] - time.time()) > 0:
+        time.sleep(delay)
     def persist():
         stage["workspace_submission"] = fingerprint(workspace, SUBMISSION)
         save(path, stage)
     tools = Tools(backend, workspace, cfg, stage, persist)
     skills.bind_core(tools.execute, {tool["name"] for tool in TOOLS})
-    mc = {**cfg, "_request_attempts": 1, "_usage_turn": f"v2_stage_{index}",
+    mc = {**cfg, "_retry_http": True, "_usage_turn": f"v2_stage_{index}",
           "_usage_ledger_path": str(root / "private" / "usage.json")}
     user = UserAgent(mc, ModelClient)
     user.state = stage["user_agent"]
@@ -340,7 +418,9 @@ def run_stage(cfg, root, index):
             absent = []
             if not calls:
                 absent = missing()
-                reviewed = any(e["context"]["event"] == "candidate" for e in user.state["events"])
+                review_after = retries[-1]["message_index"] if retries else -1
+                reviewed = any(e["context"]["event"] == "candidate" and e.get("message_index", 0) > review_after
+                               for e in user.state["events"])
                 if not absent and exploring and not reviewed:
                     user_event("candidate", [])
                     continue
@@ -350,7 +430,7 @@ def run_stage(cfg, root, index):
                     checked = backend.call("check", submission=str(workspace))
                     absent = checked["errors"] if not checked["passed"] else []
                 if not absent:
-                    dest = root / "deliveries" / f"{index:02d}"
+                    dest = delivery_path(root, index, len(retries))
                     stage["submission"] = snapshot_submission(workspace, dest)
                     stage.update(status="delivered", delivery="agent", completed=time.time())
                     persist()
@@ -375,18 +455,16 @@ def run_stage(cfg, root, index):
     except Exception as exc:
         stage.update(status="failed", error_type=type(exc).__name__)
         # Fixed local reasons are safe; model/provider bodies are never persisted.
-        stage["failure_reason"] = str(exc) if re.fullmatch(r"[A-Z_]{1,80}", str(exc)) else "STAGE_FAILED"
+        reason = getattr(exc, "code", None) or str(exc)
+        stage["failure_reason"] = (
+            reason if isinstance(reason, str) and re.fullmatch(r"[A-Z_0-9]{1,80}", reason) else "STAGE_FAILED"
+        )
         persist()
         raise
 
 
-def start(cfg, root):
-    backend = Backend(cfg, root)
-    state = read(root / "state.json")
-    if state["status"] == "completed":
-        return state
-    verify_public(root)
-    for index in range(7):
+def complete_segment(cfg, root, backend, state, index):
+    while True:
         before = backend.call("status")
         if before["binding_hash"] != state["binding_hash"] or before["images"] != state["images"]:
             raise RuntimeError("绑定或镜像改变")
@@ -395,19 +473,44 @@ def start(cfg, root):
         if not delivered and before["completed_segment"] != index:
             raise RuntimeError("平台段号与待研发阶段不一致，拒绝使用错误可见范围")
         stage = run_stage(cfg, root, index)
-        dest = root / "deliveries" / f"{index:02d}"
+        dest = delivery_path(root, index, len(stage.get("formal_retries", [])))
         checked = backend.call("check", submission=str(dest))
         if not checked["passed"]:
             raise RuntimeError("交付校验失败")
         current = backend.call("status")
         if current["binding_hash"] != state["binding_hash"] or current["images"] != state["images"]:
             raise RuntimeError("绑定或镜像改变")
-        segment = index + 1
         if current["completed_segment"] < index:
             raise RuntimeError("平台状态落后于轨迹")
         if current["completed_segment"] == index:
-            backend.call("run", submission=str(dest), research=False)
+            if stage.get("formal_failure"):
+                raise RuntimeError(f"第 {index + 1} 段策略修复已停止（{stage['formal_failure']}）")
+            try:
+                backend.call("run", submission=str(dest), research=False)
+            except BackendError as exc:
+                if exc.code != "BACKTEST_FAILED" or not exc.strategy_code:
+                    raise
+                if backend.call("status")["completed_segment"] != index:
+                    raise RuntimeError("正式回测提交状态改变，拒绝重试") from None
+                if queue_formal_retry(cfg, root, stage, exc.strategy_code):
+                    continue
+                stage["formal_failure"] = exc.strategy_code
+                save(stage_path, stage)
+                raise RuntimeError(f"第 {index + 1} 段策略修复额度已用尽（{exc.strategy_code}）") from None
             current = backend.call("status")
+        return stage, checked, current
+
+
+def start(cfg, root):
+    backend = Backend(cfg, root)
+    state = read(root / "state.json")
+    if state["status"] == "completed":
+        return state
+    verify_public(root)
+    initialize_test_memory(cfg, root)
+    for index in range(7):
+        stage, checked, current = complete_segment(cfg, root, backend, state, index)
+        segment = index + 1
         # Resume reconciles committed platform work, never blindly runs next segment.
         commit = current["commits"][index]
         if commit["segment"] != segment or commit["submission_hash"] != checked["submission_hash"]:
@@ -421,6 +524,7 @@ def start(cfg, root):
             state["deliveries"].append(stage["submission"])
         elif state["results"][index] != row:
             raise RuntimeError("已登记结果改变")
+        state.pop("last_error", None)
         state.update(status="running", segments=max(state["segments"], segment))
         save(root / "state.json", state)
         print(json.dumps({"stage": "segment_completed", "segment": segment}), flush=True)
@@ -460,6 +564,7 @@ def audit(cfg, root):
         raise RuntimeError("七段提交不完整")
     verify_public(root)
     exploring = cfg.get("evidence_driven", False)
+    retry_counts = {}
     for index in range(7):
         stage = read(root / "stages" / f"{index:02d}.json")
         if stage["status"] != "delivered" or stage["delivery"] != "agent" or (
@@ -472,20 +577,32 @@ def audit(cfg, root):
         for event in stage["user_agent"]["events"]:
             if event["status"] != "sent" or stage["messages"][event["message_index"]] != {"role": "user", "content": render_user(event)}:
                 raise RuntimeError("User Agent 消息记录不一致")
+        retries = stage.get("formal_retries", [])
+        if len(retries) > MAX_FORMAL_RETRIES:
+            raise RuntimeError("策略修复次数记录无效")
+        for attempt, retry in enumerate(retries):
+            feedback = {"role": "user", "content": repair_feedback(retry["code"])}
+            if (fingerprint(delivery_path(root, index, attempt), SUBMISSION) != retry["submission"]
+                    or stage["messages"][retry["message_index"]] != feedback):
+                raise RuntimeError("策略修复反馈或历史交付记录不符")
+        if retries:
+            retry_counts[str(index + 1)] = len(retries)
         events = stage["user_agent"]["events"]
+        review_after = retries[-1]["message_index"] if retries else -1
         if exploring and (not stage.get("local_backtest_evidence")
-                or not any(e["context"]["event"] == "candidate" for e in events)
+                or not any(e["context"]["event"] == "candidate" and e["message_index"] > review_after for e in events)
                 or stage["user_agent"]["model_calls"] != sum(e["attempted"] for e in events)):
             raise RuntimeError("缺少本轮研究回测、用户复核或调用记录")
         if not exploring and stage["user_agent"]["model_calls"] > cfg["user_agent"]["max_model_calls"]:
             raise RuntimeError("User Agent 超过预算")
-        if fingerprint(root / "deliveries" / f"{index:02d}", SUBMISSION) != stage["submission"]:
+        dest = delivery_path(root, index, len(retries))
+        if fingerprint(dest, SUBMISSION) != stage["submission"]:
             raise RuntimeError("交付文件改变")
-        if stage["verified"] != fingerprint(root / "deliveries" / f"{index:02d}"):
+        if stage["verified"] != fingerprint(dest):
             raise RuntimeError("交付执行文件与验证记录不匹配")
         if stage["calls"] != sum(m["role"] == "assistant" for m in stage["messages"]):
             raise RuntimeError("模型回复计数不一致")
-    save(root / "audit.json", {"status": "passed", "synthetic": state["synthetic"],
+    save(root / "audit.json", {"status": "passed", "synthetic": state["synthetic"], "formal_retries": retry_counts,
         "checks": ["seven_platform_commits", "seven_agent_deliveries", "six_reviews",
                    "research_evidence_and_review" if exploring else "tool_budgets",
                    "user_agent_message_provenance", "submission_hashes", "public_task_unchanged"],
