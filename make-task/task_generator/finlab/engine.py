@@ -354,6 +354,8 @@ def main():
         if config["resume"]:
             result = aq.run_from_checkpoint("/input/checkpoint.pkl", data=data, **kwargs)
         else:
+            if profile["frequency"] == "daily":
+                kwargs["freq"] = "1d"
             result = aq.run_backtest(data=data, strategy=RemoteStrategy, **kwargs)
     finally:
         engine_module.Engine, checkpoint_module.load_checkpoint = original_engine, original_load

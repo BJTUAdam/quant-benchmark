@@ -43,8 +43,7 @@ uv venv --python 3.12
 uv pip install -e .
 ```
 
-按 FinLab 的[部署说明](../make-task/task_generator/docs/v2/OPERATIONS.md)加载镜像并完成
-`finlab setup`。镜像归档 `make-task/images/finlab_images_v2.tar` 可从原始 FinLab 交付包取得。
+按[产题与数据准备](../docs/make-task.md#启动)导入当前 FinLab 镜像归档并完成 `finlab setup`。
 核对本地配置的研究镜像 ID 后，回到运行器目录执行。
 
 ```sh
