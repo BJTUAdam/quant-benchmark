@@ -15,11 +15,11 @@
 
 ## 启动
 
-从仓库根目录运行。脚本用 `uv` 准备 Python 3.12 环境，默认开始产题。首次运行回测时，先在交互终端设置资源，再从原始 FinLab 交付包取得镜像归档并放到 `make-task/images/finlab_images_v2.tar`。
+从仓库根目录运行。脚本用 `uv` 准备 Python 3.12 环境，默认开始产题。首次运行回测时，先在交互终端设置资源，再导入当前镜像锁对应的 `make-task/images/finlab_images_v2_daily_freq.tar`。原始交付归档保存在同目录的 `finlab_images_v2.tar`。
 
 ```bash
 ./make-task/start.sh setup
-./make-task/start.sh backtest load-images ../images/finlab_images_v2.tar
+./make-task/start.sh backtest load-images ../images/finlab_images_v2_daily_freq.tar
 ./make-task/start.sh task doctor
 ./make-task/start.sh task generate
 ```
